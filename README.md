@@ -1,2 +1,2 @@
-# cli
+# Kubevious Cli
 Kubevious CLI
