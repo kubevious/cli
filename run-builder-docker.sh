@@ -5,11 +5,12 @@ cd $MY_DIR
 
 source configuration.sh
 
-./build.sh
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-  echo "Build failed"
-  exit 1;
-fi
+docker run \
+    -it \
+    --rm \
+    --name "kubevious-cli" \
+    -h "kubevious-cli" \
+    -v ${MY_DIR}:/repo \
+    kubevious/node-builder:14 bash
 
-./package-only.sh
+    
