@@ -1,0 +1,23 @@
+{
+    "apiVersion": "my-api-version",
+    "kind": "unknown",
+    "metadata": {},
+    "spec": {
+        "containers": [
+            {
+                "name": "abcd",
+                "ports": [
+                    {
+                        "name": "xxx",
+                        "targetPort": 1234
+                    },
+                    {
+                        "name": "xxx"
+                    }
+                ]
+
+            
+            }
+        ]
+    }
+}

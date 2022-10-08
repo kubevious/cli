@@ -22,7 +22,12 @@
   },
   "homepage": "https://github.com/kubevious/kubevious",
   "dependencies": {
+    "ajv": "^8.11.0",
+    "ajv-formats": "^2.1.1",
+    "express-openapi-validate": "^0.6.1",
     "k8s-super-client": "^2.0.29",
+    "lodash": "^4.17.21",
+    "openapi-schema-validator": "^12.0.2",
     "the-lodash": "^2.0.9",
     "the-logger": "^2.0.14",
     "the-promise": "^2.0.15",

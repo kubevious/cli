@@ -1,0 +1,21 @@
+{
+    "apiVersion": "my-api-version",
+    "kind": "unknown",
+    "metadata": {},
+    "spec": {
+        "ports": [
+            {
+                "name": "xxx",
+                "targetPort": "true"
+            },
+            {
+                "name": "yyy",
+                "targetPort": 123
+            },
+            {
+                "name": "yyy",
+                "targetPort": "true"
+            }
+        ]
+    }
+}
