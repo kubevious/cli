@@ -1,46 +1,30 @@
-import _ from 'lodash';
+import _ from 'the-lodash';
 import { logger } from './logger';
-// import OpenAPISchemaValidator from 'openapi-schema-validator';
-import * as Path from 'path'
 import * as fs from 'fs'
-import { OpenApiValidator } from 'express-openapi-validate';
 
-import Ajv, { Options as AjvOptions, ErrorObject } from "ajv";
-import addFormats from "ajv-formats";
+import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
 
-
-import { OpenAPIV3Parser } from './OpenAPIV3Parser';
+import { K8sManifestValidator } from './k8s-manifest-validator';
 
 // https://www.npmjs.com/package/openapi-types
 
 logger.info("Starting Up...")
 
-const OPEN_API_DOCUMENT_JSON = JSON.parse(fs.readFileSync('./data/my-schema.json').toString('utf8'));
-const PAYLOAD_JSON = JSON.parse(fs.readFileSync('./data/payload.json').toString('utf8'));
+const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
+k8sApiRegistry.init();
 
-const parser = new OpenAPIV3Parser(logger);
-parser.load(OPEN_API_DOCUMENT_JSON);
+const k8sJsonSchema = k8sApiRegistry.getVersionSchema('v1.25.2');
 
-const schema = parser.getSchema('io.k8s.api.core.v1.Service'); // Pod
-if (!schema) {
-    logger.error("COULD NOT GENERATE SCHEMA");
-    throw new Error();
+
+{
+    const PAYLOAD_JSON = JSON.parse(fs.readFileSync('./data/payload-pod.json').toString('utf8'));
+    const validator = new K8sManifestValidator(logger, k8sJsonSchema);
+    validator.validate(PAYLOAD_JSON);
 }
-console.log("************************************************************************************************")
-logger.info("schema: ", schema);
-console.log("************************************************************************************************")
-fs.writeFileSync('./data/json-schema.json', JSON.stringify(schema, null, 4));
 
-// const schema = JSON.parse(fs.readFileSync('./data/sample-schema.json').toString('utf8'));
 
-const ajvOptions: AjvOptions = {
-    discriminator: true,
-    formats: {
-    }
-};
-const ajv = new Ajv(ajvOptions); 
-addFormats(ajv);
-const validator = ajv.compile(schema);
-const result = validator(PAYLOAD_JSON);
-logger.info("RESULT: ", result);
-logger.info("ERRORS: ", validator.errors);
+{
+    const PAYLOAD_JSON = JSON.parse(fs.readFileSync('./data/payload-service.json').toString('utf8'));
+    const validator = new K8sManifestValidator(logger, k8sJsonSchema);
+    validator.validate(PAYLOAD_JSON);
+}

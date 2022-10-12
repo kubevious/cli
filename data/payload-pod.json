@@ -1,6 +1,6 @@
 {
-    "apiVersion": "my-api-version",
-    "kind": "unknown",
+    "apiVersion": "v1",
+    "kind": "Pod",
     "metadata": {},
     "spec": {
         "containers": [
@@ -9,7 +9,8 @@
                 "ports": [
                     {
                         "name": "xxx",
-                        "targetPort": 1234
+                        "containerPort": 1234,
+                        "protocol": "xxxxx"
                     },
                     {
                         "name": "xxx"

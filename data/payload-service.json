@@ -1,6 +1,6 @@
 {
-    "apiVersion": "my-api-version",
-    "kind": "unknown",
+    "apiVersion": "v1",
+    "kind": "Service",
     "metadata": {},
     "spec": {
         "ports": [

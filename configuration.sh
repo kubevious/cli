@@ -2,7 +2,8 @@
 MY_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 MY_DIR="$(dirname $MY_PATH)"
 
-BINARY_DIR=${MY_DIR}/binary
+export BINARY_DIR=${MY_DIR}/binary
+export K8S_API_SCHEMA_DIR=${MY_DIR}/../mock-data.git/k8s-api-json-schema/
 
 ## PLATFORM TARGETS
 NODE_VERSION=node14
