@@ -5,6 +5,7 @@ import VERSION from './version'
 import { program } from 'commander';
 import setupSplitTest from './commands/split-test';
 import setupScanManifests from './commands/scan-manifests';
+import setupLintManifests from './commands/lint-manifests';
 
 program
   .name('kubevious')
@@ -13,5 +14,6 @@ program
 
 setupSplitTest(program);
 setupScanManifests(program);
+setupLintManifests(program);
 
 program.parse();

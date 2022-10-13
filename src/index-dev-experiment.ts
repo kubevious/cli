@@ -30,13 +30,11 @@ renderer.renderPackageManifests(loader.package);
 
 // const k8sJsonSchema = k8sApiRegistry.getVersionSchema('v1.25.2');
 
-
 // {
 //     const PAYLOAD_JSON = JSON.parse(fs.readFileSync('./data/payload-pod.json').toString('utf8'));
 //     const validator = new K8sManifestValidator(logger, k8sJsonSchema);
 //     validator.validate(PAYLOAD_JSON);
 // }
-
 
 // {
 //     const PAYLOAD_JSON = JSON.parse(fs.readFileSync('./data/payload-service.json').toString('utf8'));

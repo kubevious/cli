@@ -19,7 +19,7 @@ export class K8sManifestValidator
         this._k8sJsonSchema = k8sJsonSchema;
     }
 
-    validate(k8sManifest : K8sObject)
+    validate(k8sManifest : K8sObject) : K8sManifestValidationResult
     {
         const apiResource = this._getApiResource(k8sManifest);
         this._logger.info("apiResource: ", apiResource);
@@ -43,6 +43,21 @@ export class K8sManifestValidator
         const result = validator(k8sManifest);
         this._logger.info("RESULT: ", result);
         this._logger.info("ERRORS: ", validator.errors);
+        if (result) {
+            return {
+                success: true
+            }
+        } else {
+            return {
+                success: false,
+                errors: (validator.errors ?? []).map(x => this._mapError(x))
+            }
+        }
+    }
+
+    private _mapError(error: ErrorObject)
+    {
+        return error.message ?? 'unknown error';
     }
 
     private _getApiResource(k8sManifest : K8sObject) : K8sOpenApiResource
@@ -65,4 +80,10 @@ export class K8sManifestValidator
 
         throw new Error("Invalid Manifest");
     }
+}
+
+export interface K8sManifestValidationResult
+{
+    success: boolean;
+    errors?: string[];
 }

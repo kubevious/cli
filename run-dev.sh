@@ -14,5 +14,6 @@ fi
 
 export LOG_TO_FILE=true
 export NODE_ENV=development
+export LOG_LEVEL=info
 
 node . $@

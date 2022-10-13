@@ -6,7 +6,7 @@ export class ManifestPackage
 {
     private _logger: ILogger;
     private _files: { [path: string] : ManifestFile } = {}
-    private _objects:  K8sObjectInfo[] = [];
+    private _objects: K8sObjectInfo[] = [];
 
     constructor(logger: ILogger)
     {
@@ -15,6 +15,10 @@ export class ManifestPackage
 
     get files() {
         return _.values(this._files);
+    }
+
+    get manifests() {
+        return this._objects;
     }
 
     getFile(path: string)
