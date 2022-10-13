@@ -6,7 +6,7 @@ const loggerOptions = new LoggerOptions();
 
 loggerOptions.pretty(true);
 
-let logLevel = LogLevel.info;
+let logLevel = LogLevel.warn;
 if (process.env.LOG_LEVEL) {
     logLevel = <LogLevel>process.env.LOG_LEVEL;
 }

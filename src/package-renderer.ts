@@ -54,4 +54,22 @@ export class PackageRenderer
         console.log(table.toString());
     }
 
+    renderPackageManifests(manifestPackage : ManifestPackage)
+    {
+        const rows =
+            _.chain(manifestPackage.files)
+             .map(x => x.contents)
+             .flatten()
+             .orderBy([x => x.file.path, x => x.namespace, x => x.apiVersion, x => x.kind, x => x.name ])
+             .map(x => ([x.file.path, x.namespace ?? '', x.apiVersion, x.kind, x.name ?? '', x.file.isValid ? 'OK' : 'Has Errors']))
+             .value();
+
+        const table = new Table({
+            head: ['File', 'Namespace', 'ApiVersion', 'Kind', 'Name', 'Status'],
+            // colWidths: [100, 200]
+            rows: rows
+        });
+        console.log(table.toString());
+    }
+
 }

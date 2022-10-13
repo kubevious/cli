@@ -36,7 +36,7 @@ export class ManifetsLoader
         }
 
         const files = glob.sync(pattern, {  });
-        this._logger.silly("FILES: ", files);
+        this._logger.info("FILES: ", files);
 
         for(const file of files)
         {
@@ -54,18 +54,41 @@ export class ManifetsLoader
         if (extension === '.yaml' || extension === '.yml')
         {
             const contents = fs.readFileSync(path, { encoding: 'utf8' });
-            const manifests = yaml.loadAll(contents);
-            this._logger.info("[_loadFile]     count: %s", manifests.length);
-            for(const manifest of manifests)
+            let manifests : any[] = [];
+            try
             {
-                this._addManifest(file, manifest);
+                manifests = yaml.loadAll(contents);    
             }
+            catch(reason: any)
+            {
+                this._package.fileError(file, reason.message ?? 'error loading file');
+            }
+
+            if (manifests)
+            {
+                this._logger.info("[_loadFile]     count: %s", manifests.length);
+                for(const manifest of manifests)
+                {
+                    this._addManifest(file, manifest);
+                }
+            }            
         }
         else if (extension === '.json')
         {
             const contents = fs.readFileSync(path, { encoding: 'utf8' });
-            const manifest = JSON.parse(contents);
-            this._addManifest(file, manifest);
+            let manifest : any;
+            try
+            {
+                manifest = JSON.parse(contents);
+            }
+            catch(reason: any)
+            {
+                this._package.fileError(file, reason.message ?? 'error loading file');
+            }
+            if (manifest)
+            {
+                this._addManifest(file, manifest);
+            }
         }
 
         if (file.isValid)

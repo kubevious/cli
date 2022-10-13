@@ -25,6 +25,7 @@
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
     "cli-table": "^0.3.11",
+    "commander": "^9.4.1",
     "express-openapi-validate": "^0.6.1",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",

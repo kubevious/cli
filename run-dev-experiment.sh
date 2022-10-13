@@ -15,4 +15,4 @@ fi
 export LOG_TO_FILE=true
 export NODE_ENV=development
 
-node . $@
+node dist/index-dev-experiment
