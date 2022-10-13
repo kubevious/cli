@@ -7,6 +7,7 @@ import addFormats from "ajv-formats";
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 import { K8sOpenApiResource } from 'k8s-super-client';
 
+import { K8sObject } from './k8s-types';
 export class K8sManifestValidator
 {
     private _logger: ILogger;
@@ -64,11 +65,4 @@ export class K8sManifestValidator
 
         throw new Error("Invalid Manifest");
     }
-}
-
-export interface K8sObject
-{
-    apiVersion: string;
-    kind: string;
-    [key : string] : any;
 }
