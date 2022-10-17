@@ -21,9 +21,9 @@ export class K8sPackageValidator
     {
         for(const manifest of manifestPackage.manifests)
         {
-            if (manifest.file.isValid)
+            if (manifest.source.success)
             {
-                this._logger.error("FILE: %s", manifest.file.path);
+                this._logger.verbose("FILE: %s", manifest.source.source.path);
 
                 try
                 {
@@ -31,7 +31,7 @@ export class K8sPackageValidator
                     const result = validator.validate(manifest.config);
                     if (!result.success)
                     {
-                        this._logger.error("ERRORS: ", result.errors!);
+                        this._logger.verbose("ERRORS: ", result.errors!);
 
                         manifestPackage.manifestErrors(manifest, result.errors!);
                     }
@@ -40,7 +40,7 @@ export class K8sPackageValidator
                 {
                     this._logger.error("[validate] ERROR: ", reason);
 
-                    manifestPackage.fileError(manifest.file, `Unknown error occured. ${reason?.message}`);
+                    manifestPackage.sourceError(manifest.source, `Unknown error occured. ${reason?.message}`);
                 }
             }
         }

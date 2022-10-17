@@ -24,7 +24,6 @@ export default function (program: Command)
             renderer.renderPackageFiles(manifestPackage);
             renderer.renderPackageFileErrors(manifestPackage);
             renderer.renderPackageManifests(manifestPackage);
-            renderer.renderPackageManifestsErrors(manifestPackage);
 
         });
 }

@@ -24,13 +24,14 @@
   "dependencies": {
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
+    "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "commander": "^9.4.1",
     "express-openapi-validate": "^0.6.1",
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
-    "k8s-super-client": "^2.0.34",
-    "lodash": "^4.17.21",
+    "k8s-super-client": "^2.0.35",
+    "node-emoji": "^1.11.0",
     "openapi-schema-validator": "^12.0.2",
     "the-lodash": "^2.0.9",
     "the-logger": "^2.0.14",
@@ -38,6 +39,7 @@
     "uuid-parse": "^1.1.0"
   },
   "devDependencies": {
+    "@types/node-emoji": "^1.8.2",
     "@types/cli-table": "^0.3.1",
     "@types/glob": "^8.0.0",
     "@types/js-yaml": "^4.0.5",
@@ -50,12 +52,12 @@
     "prettier": "^2.1.0",
     "should": "^13.2.3",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.8.4"
   },
   "resolutions": {
     "the-lodash": "^2.0.9",
     "the-logger": "^2.0.14",
     "the-promise": "^2.0.15",
-    "k8s-super-client": "^2.0.34"
+    "k8s-super-client": "^2.0.35"
   }
 }

@@ -1,59 +1,66 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sObject } from '../types/k8s';
+import { K8sObject, K8sObjectId, makeId } from '../types/k8s';
+import { ErrorStatus, ManifestSourceId, ManifestSourceType } from '../types/manifest';
 
 export class ManifestPackage
 {
     private _logger: ILogger;
-    private _files: { [path: string] : ManifestFile } = {}
-    private _objects: K8sManifest[] = [];
+    private _sources: { [key: string] : ManifestSource } = {}
+    private _manifests: K8sManifest[] = [];
 
     constructor(logger: ILogger)
     {
         this._logger = logger.sublogger('ManifetPackage');
     }
 
-    get files() {
-        return _.values(this._files);
+    get sources() {
+        return _.values(this._sources);
     }
 
     get manifests() {
-        return this._objects;
+        return this._manifests;
     }
 
-    getFile(path: string)
+    getSource(kind: ManifestSourceType, path: string) : ManifestSource
     {
-        let file = this._files[path];
-        if (!file) {
-            file = {
-                path: path,
-                isValid: true,
+        const sourceId : ManifestSourceId = {
+            kind: kind,
+            path: path
+        };
+        const sourceKey = _.stableStringify(sourceId);
+
+        let source = this._sources[sourceKey];
+        if (!source) {
+            source = {
+                source: sourceId,
+                success: true,
                 errors: [],
                 contents: []
             }
-            this._files[path] = file;
+            this._sources[sourceKey] = source;
         }
-        return file;
+        return source;
     }
 
-    fileError(file: ManifestFile, error: string)
+    sourceError(source: ManifestSource, error: string)
     {
-        file.errors.push(error);
-        file.isValid = false;
+        source.errors.push(error);
+        source.success = false;
     }
 
-    fileErrors(file: ManifestFile, errors: string[])
+    sourceErrors(source: ManifestSource, errors: string[])
     {
         for(const error of errors)
         {
-            this.fileError(file, error);
+            this.sourceError(source, error);
         }
     }
 
     manifestError(manifest: K8sManifest, error: string)
     {
         manifest.errors.push(error);
-        manifest.isValid = false;
+        manifest.success = false;
     }
 
     manifestErrors(manifest: K8sManifest, errors: string[])
@@ -64,44 +71,36 @@ export class ManifestPackage
         }
     }
 
-    addManifest(file: ManifestFile, k8sManifest: K8sObject)
+    addManifest(source: ManifestSource, k8sManifest: K8sObject)
     {
         const objectInfo : K8sManifest = {
-            apiVersion: k8sManifest.apiVersion,
-            kind: k8sManifest.kind,
-            namespace: k8sManifest.metadata?.namespace,
-            name: k8sManifest.metadata?.name,
 
-            isValid: true,
+            id: makeId(k8sManifest),
+
+            success: true,
             errors: [],
 
-            file: file,
+            source: source,
             config: k8sManifest,
         }
 
-        file.contents.push(objectInfo);
-        this._objects.push(objectInfo);
+        source.contents.push(objectInfo);
+        this._manifests.push(objectInfo);
     }
 }
 
-export interface ManifestFile
+export interface ManifestSource extends Required<ErrorStatus>
 {
-    path: string;
-    isValid: boolean;
-    errors: string[];
+    source: ManifestSourceId;
+
     contents: K8sManifest[];
 }
 
-export interface K8sManifest
+
+export interface K8sManifest extends Required<ErrorStatus>
 {
-    apiVersion: string;
-    kind: string;
-    namespace?: string;
-    name?: string;
+    id: K8sObjectId;
 
-    isValid: boolean;
-    errors: string[];
-
-    file: ManifestFile;
+    source: ManifestSource;
     config: K8sObject;
 }

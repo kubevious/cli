@@ -6,7 +6,7 @@ import * as Path from 'path';
 import { K8sObject } from '../types/k8s';
 import * as yaml from 'js-yaml'
 
-import { ManifestFile, ManifestPackage } from './manifest-package';
+import { ManifestSource, ManifestPackage } from './manifest-package';
 
 export class ManifetsLoader
 {
@@ -48,7 +48,7 @@ export class ManifetsLoader
     {
         this._logger.info("[_loadFile] path: %s", path);
 
-        const file = this._package.getFile(path);
+        const file = this._package.getSource("file", path);
 
         const extension = Path.extname(path);
         if (extension === '.yaml' || extension === '.yml')
@@ -61,7 +61,7 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.fileError(file, reason.message ?? 'Error parsing YAML.');
+                this._package.sourceError(file, reason.message ?? 'Error parsing YAML.');
             }
 
             if (manifests)
@@ -83,7 +83,7 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.fileError(file, reason.message ?? 'Error parsing JSON');
+                this._package.sourceError(file, reason.message ?? 'Error parsing JSON');
             }
             if (manifest)
             {
@@ -91,24 +91,24 @@ export class ManifetsLoader
             }
         }
 
-        if (file.isValid)
+        if (file.success)
         {
             if (file.contents.length === 0)
             {
-                this._package.fileError(file, 'Contains no manifests');
+                this._package.sourceError(file, 'Contains no manifests');
             }
         }
     }
 
-    private _addManifest(file : ManifestFile, manifest: any)
+    private _addManifest(file : ManifestSource, manifest: any)
     {
-        this._logger.silly("[_addManifest] file: %s, manifest:", file.path, manifest);
+        this._logger.silly("[_addManifest] file: %s, manifest:", file.source.path, manifest);
 
         const k8sManifest = manifest as K8sObject;
         const errors = this._checkK8sManifest(k8sManifest);
         if (errors.length > 0)
         {
-            this._package.fileErrors(file, errors);
+            this._package.sourceErrors(file, errors);
             return;
         }
 

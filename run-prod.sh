@@ -12,9 +12,9 @@ if [ $RESULT -ne 0 ]; then
   exit 1;
 fi
 
-export LOG_TO_FILE=true
-export NODE_ENV=development
-export LOG_LEVEL=info
+export LOG_TO_FILE=false
+export LOG_LEVEL=warn
+# export NODE_ENV=development
 
 node . $@
 

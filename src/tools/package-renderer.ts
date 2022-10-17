@@ -15,9 +15,9 @@ export class PackageRenderer
     renderPackageFiles(manifestPackage : ManifestPackage)
     {
         const rows = 
-            _.chain(manifestPackage.files)
-             .orderBy(x => x.path)
-             .map(x => ([x.path, x.contents.length.toString(), x.isValid ? 'OK' : 'Has Errors' ]))
+            _.chain(manifestPackage.sources)
+             .orderBy(x => x.source.path)
+             .map(x => ([x.source.path, x.contents.length.toString(), x.success ? 'OK' : 'Has Errors' ]))
              .value();
 
         const table = new Table({
@@ -31,9 +31,9 @@ export class PackageRenderer
     renderPackageFileErrors(manifestPackage : ManifestPackage)
     {
         const filesWithErrors = 
-            _.chain(manifestPackage.files)
-            .filter(x => !x.isValid)
-            .orderBy(x => x.path)
+            _.chain(manifestPackage.sources)
+            .filter(x => !x.success)
+            .orderBy(x => x.source.path)
             .value();
 
         const rows : string[][] = [];
@@ -41,7 +41,7 @@ export class PackageRenderer
         {
             for(const error of file.errors)
             {
-                rows.push([file.path, error]);
+                rows.push([file.source.path, error]);
             }
         }
 
@@ -57,8 +57,8 @@ export class PackageRenderer
     {
         const rows =
             _.chain(manifestPackage.manifests)
-             .orderBy([x => x.file.path, x => x.namespace, x => x.apiVersion, x => x.kind, x => x.name ])
-             .map(x => ([x.file.path, x.namespace ?? '', x.apiVersion, x.kind, x.name ?? '', x.isValid ? 'OK' : 'Has Errors']))
+             .orderBy([x => x.source.source.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
+             .map(x => ([x.source.source.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', x.success ? 'OK' : 'Has Errors']))
              .value();
 
         const table = new Table({
@@ -73,8 +73,8 @@ export class PackageRenderer
     {
         const manifestsWithErrors =
             _.chain(manifestPackage.manifests)
-             .filter(x => !x.isValid) 
-             .orderBy([x => x.file.path, x => x.namespace, x => x.apiVersion, x => x.kind, x => x.name ])
+             .filter(x => !x.success) 
+             .orderBy([x => x.source.source.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
              .value();
 
         const rows : string[][] = [];
@@ -82,7 +82,7 @@ export class PackageRenderer
         {
             for(const error of x.errors)
             {
-                rows.push([x.file.path, x.namespace ?? '', x.apiVersion, x.kind, x.name ?? '', error])
+                rows.push([x.source.source.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', error])
             }
         }
    
