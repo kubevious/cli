@@ -2,11 +2,11 @@ import _ from 'the-lodash';
 import { logger } from './logger';
 import * as fs from 'fs'
 
-import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
+import { K8sApiSchemaRegistry } from './tools/k8s-api-schema-registry';
 
-import { K8sManifestValidator } from './k8s-manifest-validator';
-import { ManifetsLoader } from './manifests-loader'
-import { PackageRenderer } from './package-renderer';
+import { K8sManifestValidator } from './tools/k8s-manifest-validator';
+import { ManifetsLoader } from './tools/manifests-loader'
+import { PackageRenderer } from './tools/package-renderer';
 
 // https://www.npmjs.com/package/openapi-types
 

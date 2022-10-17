@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { logger } from '../logger';
 
-import { ManifetsLoader } from '../manifests-loader'
-import { PackageRenderer } from '../package-renderer';
+import { ManifetsLoader } from '../tools/manifests-loader'
+import { PackageRenderer } from '../tools/package-renderer';
 
 export default function (program: Command)
 {
@@ -18,10 +18,13 @@ export default function (program: Command)
             const loader = new ManifetsLoader(logger);
             loader.load(path);
 
+            const manifestPackage = loader.package;
+
             const renderer = new PackageRenderer(logger);
-            renderer.renderPackageFiles(loader.package);
-            renderer.renderPackageFileErrors(loader.package);
-            renderer.renderPackageManifests(loader.package);
+            renderer.renderPackageFiles(manifestPackage);
+            renderer.renderPackageFileErrors(manifestPackage);
+            renderer.renderPackageManifests(manifestPackage);
+            renderer.renderPackageManifestsErrors(manifestPackage);
 
         });
 }

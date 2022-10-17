@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import glob from 'glob';
 import * as fs from 'fs';
 import * as Path from 'path';
-import { K8sObject } from './k8s-types';
+import { K8sObject } from '../types/k8s';
 import * as yaml from 'js-yaml'
 
 import { ManifestFile, ManifestPackage } from './manifest-package';
@@ -61,7 +61,7 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.fileError(file, reason.message ?? 'error loading file');
+                this._package.fileError(file, reason.message ?? 'Error parsing YAML.');
             }
 
             if (manifests)
@@ -83,7 +83,7 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.fileError(file, reason.message ?? 'error loading file');
+                this._package.fileError(file, reason.message ?? 'Error parsing JSON');
             }
             if (manifest)
             {

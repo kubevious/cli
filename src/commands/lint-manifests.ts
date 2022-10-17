@@ -1,13 +1,10 @@
 import { Command } from 'commander';
 import { logger } from '../logger';
 
-import { ManifetsLoader } from '../manifests-loader'
-import { PackageRenderer } from '../package-renderer';
-
-
-import { K8sApiSchemaRegistry } from '../k8s-api-schema-registry';
-
-import { K8sManifestValidator } from '../k8s-manifest-validator';
+import { ManifetsLoader } from '../tools/manifests-loader'
+import { PackageRenderer } from '../tools/package-renderer';
+import { K8sApiSchemaRegistry } from '../tools/k8s-api-schema-registry';
+import { K8sPackageValidator } from '../tools/k8s-package-validator';
 
 export default function (program: Command)
 {
@@ -23,38 +20,19 @@ export default function (program: Command)
             const loader = new ManifetsLoader(logger);
             loader.load(path);
 
+            const manifestPackage = loader.package;
+
             const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
             k8sApiRegistry.init();
             const k8sJsonSchema = k8sApiRegistry.getVersionSchema('v1.25.2');
 
-            for(const manifest of loader.package.manifests)
-            {
-                if (manifest.file.isValid)
-                {
-                    logger.error("FILE: %s", manifest.file.path);
-
-                    try
-                    {
-                        const validator = new K8sManifestValidator(logger, k8sJsonSchema);
-                        const result = validator.validate(manifest.config);
-                        if (!result.success)
-                        {
-                            logger.error("ERRORS: ", result.errors!);
-
-                            loader.package.fileErrors(manifest.file, result.errors!);
-                        }
-                    }
-                    catch(reason: any)
-                    {
-                        logger.error("XXX: ", reason);
-                    }
-                }
-            }
+            const packageValidator = new K8sPackageValidator(logger, k8sJsonSchema);
+            packageValidator.validate(manifestPackage);
 
             const renderer = new PackageRenderer(logger);
-            renderer.renderPackageFiles(loader.package);
-            renderer.renderPackageFileErrors(loader.package);
-            renderer.renderPackageManifests(loader.package);
-
+            renderer.renderPackageFiles(manifestPackage);
+            renderer.renderPackageFileErrors(manifestPackage);
+            renderer.renderPackageManifests(manifestPackage);
+            renderer.renderPackageManifestsErrors(manifestPackage);
         });
 }
