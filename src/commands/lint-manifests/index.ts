@@ -13,7 +13,7 @@ export default function (program: Command)
 {
     program
         .command('lint')
-        .description('Lints Kubernetes manifests and')
+        .description('Lints Kubernetes manifests for API syntax validity')
         .argument('<path>', 'Path to file, directory or search pattern')
         .option('--json', 'Output in JSON')
         .action(async (path, options) => {
