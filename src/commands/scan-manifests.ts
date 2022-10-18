@@ -10,20 +10,19 @@ export default function (program: Command)
         .command('scan')
         .description('Scans for Kubernetes Manifests')
         .argument('<path>', 'Path to file, directory or search pattern')
-        .action((path, options) => {
+        .action(async (path, options) => {
 
             logger.info("OPTIONS: ", options);
             logger.info("path: ", path);
 
             const loader = new ManifetsLoader(logger);
-            loader.load(path);
-
-            const manifestPackage = loader.package;
+            const manifestPackage = await loader.load(path);
 
             const renderer = new PackageRenderer(logger);
             renderer.renderPackageFiles(manifestPackage);
             renderer.renderPackageFileErrors(manifestPackage);
             renderer.renderPackageManifests(manifestPackage);
 
-        });
+        })
+        ;
 }

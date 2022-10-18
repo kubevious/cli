@@ -7,6 +7,11 @@ export interface LintManifestsResult
 
     sources: (ManifestSourceId & ErrorStatus & {
         manifestCount: number,
+
+        manifests: (K8sObjectId & ErrorStatus & {
+            source: ManifestSourceId
+        })[]
+        
     })[];
 
     manifests: (K8sObjectId & ErrorStatus & {

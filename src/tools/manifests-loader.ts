@@ -1,5 +1,7 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
+import { Promise } from 'the-promise';
+import axios from 'axios';
 import glob from 'glob';
 import * as fs from 'fs';
 import * as Path from 'path';
@@ -23,37 +25,81 @@ export class ManifetsLoader
         return this._package;
     }
 
-    load(fileOrPattern: string)
+    load(fileOrPatternOrUrl: string) : Promise<ManifestPackage>
     {
-        this._logger.info("[load] FileOrPattern: %s", fileOrPattern);
+        this._logger.info("[load] fileOrPatternOrUrl: %s", fileOrPatternOrUrl);
 
+        return Promise.resolve()
+            .then(() => {
+
+                if (_.startsWith(fileOrPatternOrUrl, 'http://') || _.startsWith(fileOrPatternOrUrl, 'https://'))
+                {
+                    return this._loadUrl(fileOrPatternOrUrl);
+                }
+                else
+                {
+                    return this._loadFileOrPattern(fileOrPatternOrUrl);
+                }
+               
+            })
+            .then(() => this.package)
+            ;
+    }
+
+    private _loadFileOrPattern(fileOrPattern: string) : Promise<void>
+    {
         const pattern = this._makeSearchPattern(fileOrPattern);
-        this._logger.info("[load] pattern: %s", pattern);
-
-        if (!pattern)
-        {
-            return;
+        this._logger.info("[_loadFileOrPattern] pattern: %s", pattern);
+        if (!pattern) {
+            return Promise.resolve();
         }
 
-        const files = glob.sync(pattern, {  });
-        this._logger.info("FILES: ", files);
-
-        for(const file of files)
-        {
-            this._loadFile(file);
-        }
+        return Promise.construct<string[]>((resolve, reject) => {
+            return glob(pattern, (err, matches) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(matches);
+                }
+            })
+        })
+        .then(files => {
+            return Promise.serial(files, file => this._loadFile(file));
+        })
+        .then(() => {})
     }
 
     private _loadFile(path: string)
     {
-        this._logger.info("[_loadFile] path: %s", path);
+        const source = this._package.getSource("file", path);
 
-        const file = this._package.getSource("file", path);
+        this._logger.info("[_loadFile] path: %s", path);
+        const contents = fs.readFileSync(path, { encoding: 'utf8' });
+        this._parseSource(source, path, contents);
+    }
+
+    private _loadUrl(url: string)
+    {
+        const source = this._package.getSource("web", url);
+
+        this._logger.info("[_loadUrl] url: %s", url);
+        return axios.get(url)
+            .then(({ data }) => {
+                const contents = data.toString();
+                this._parseSource(source, url, contents);
+            })
+            .catch(reason => {
+                this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
+            })
+    }
+
+    private _parseSource(source: ManifestSource, path: string, contents: string)
+    {
+        this._logger.info("[_parseSource] path: %s", path);
 
         const extension = Path.extname(path);
         if (extension === '.yaml' || extension === '.yml')
         {
-            const contents = fs.readFileSync(path, { encoding: 'utf8' });
             let manifests : any[] = [];
             try
             {
@@ -61,7 +107,7 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.sourceError(file, reason.message ?? 'Error parsing YAML.');
+                this._package.sourceError(source, reason.message ?? 'Error parsing YAML.');
             }
 
             if (manifests)
@@ -69,13 +115,12 @@ export class ManifetsLoader
                 this._logger.info("[_loadFile]     count: %s", manifests.length);
                 for(const manifest of manifests)
                 {
-                    this._addManifest(file, manifest);
+                    this._addManifest(source, manifest);
                 }
             }            
         }
         else if (extension === '.json')
         {
-            const contents = fs.readFileSync(path, { encoding: 'utf8' });
             let manifest : any;
             try
             {
@@ -83,19 +128,21 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._package.sourceError(file, reason.message ?? 'Error parsing JSON');
+                this._package.sourceError(source, reason.message ?? 'Error parsing JSON');
             }
             if (manifest)
             {
-                this._addManifest(file, manifest);
+                this._addManifest(source, manifest);
             }
+        } else {
+            this._package.sourceError(source, 'Unknown extension. Should be one of: .yaml, .yml or .json');
         }
 
-        if (file.success)
+        if (source.success)
         {
-            if (file.contents.length === 0)
+            if (source.contents.length === 0)
             {
-                this._package.sourceError(file, 'Contains no manifests');
+                this._package.sourceError(source, 'Contains no manifests');
             }
         }
     }

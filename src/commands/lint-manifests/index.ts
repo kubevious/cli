@@ -16,15 +16,13 @@ export default function (program: Command)
         .command('lint')
         .description('Lints Kubernetes manifests and')
         .argument('<path>', 'Path to file, directory or search pattern')
-        .action((path, options) => {
+        .action(async (path, options) => {
 
             logger.info("OPTIONS: ", options);
             logger.info("path: ", path);
 
             const loader = new ManifetsLoader(logger);
-            loader.load(path);
-
-            const manifestPackage = loader.package;
+            const manifestPackage = await loader.load(path)
 
             const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
             k8sApiRegistry.init();
@@ -52,7 +50,8 @@ export default function (program: Command)
                     path: source.source.path,
                     manifestCount: source.contents.length,
                     success: source.success,
-                    errors: source.errors
+                    errors: source.errors,
+                    manifests: []
                 });
 
                 if (!source.success) {

@@ -37,15 +37,14 @@ export function output(result: LintManifestsResult)
         console.log(`  ${emoji.get('page_facing_up')} ${manifest.source.kind.toUpperCase()}: ${manifest.source.path}`);
 
         const parts: string[] = [];
-        parts.push(manifest.success ? emoji.get('white_check_mark') : emoji.get('x'));
         if (manifest.namespace) {
             parts.push(`Namespace: ${manifest.namespace}`);
         }
-        parts.push(`${manifest.apiVersion}`);
-        parts.push(`${manifest.kind}`);
+        parts.push(`API: ${manifest.apiVersion}`);
+        parts.push(`Kind: ${manifest.kind}`);
         parts.push(`Name: ${manifest.name}`);
         
-        console.log(`    `, parts.join(' '));
+        console.log(`    `, manifest.success ? emoji.get('white_check_mark') : emoji.get('x'), parts.join(', '));
 
         if (!manifest.success) {
             if (manifest.errors) {
