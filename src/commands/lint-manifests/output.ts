@@ -2,12 +2,20 @@ import chalk from 'chalk';
 import emoji from 'node-emoji';
 
 import { LintManifestResult, LintManifestsResult, LintSourceResult } from "./types";
-import { logger } from '../../logger';
 import { ErrorStatus } from '../../types/manifest';
 
 export function output(result: LintManifestsResult)
 {
-    // logger.error("RESULT: ", result);
+    if (!result.foundK8sVersion) {
+        console.log(`${emoji.get('x')}  Failed to find Kubernetes Version ${result.targetK8sVersion}`);
+    }
+    else {
+        if (!result.foundExactK8sVersion) {
+            console.log(`${emoji.get('warning')}  Could not find requested Kubernetes Version: ${result.targetK8sVersion}`);
+        }
+    }
+    console.log(`${emoji.get('information_source')}  Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
+    console.log();
 
     for(const source of result.sources)
     {

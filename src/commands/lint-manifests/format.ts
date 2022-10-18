@@ -3,12 +3,18 @@ import _ from 'the-lodash';
 import { LintManifestsResult, LintSourceResult } from "./types";
 import { logger } from '../../logger';
 import { ManifestPackage } from '../../tools/manifest-package';
+import { K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
 
-export function formatResult(manifestPackage: ManifestPackage) : LintManifestsResult
+export function formatResult(manifestPackage: ManifestPackage, schemaInfo: K8sApiSchemaFetcherResult) : LintManifestsResult
 {
     const result: LintManifestsResult = {
         success: true,
         sources: [],
+
+        targetK8sVersion: schemaInfo.targetVersion || undefined,
+        selectedK8sVersion: schemaInfo.selectedVersion || undefined,
+        foundK8sVersion: schemaInfo.found,
+        foundExactK8sVersion: schemaInfo.foundExact
     };
 
     for(const source of manifestPackage.sources)
