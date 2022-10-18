@@ -1,63 +1,29 @@
 import chalk from 'chalk';
 import emoji from 'node-emoji';
 
-import { LintManifestsResult } from "./types";
+import { LintManifestResult, LintManifestsResult, LintSourceResult } from "./types";
 import { logger } from '../../logger';
-
-const log = console.log;
+import { ErrorStatus } from '../../types/manifest';
 
 export function output(result: LintManifestsResult)
 {
     // logger.error("RESULT: ", result);
 
-    console.log(chalk.underline('Sources:'));
     for(const source of result.sources)
     {
-        if (source.success) {
-            console.log(`  ${emoji.get('white_check_mark')} ${source.kind.toUpperCase()}: ${source.path}`);
-        } else {
-            console.log(`  ${emoji.get('x')} ${source.kind.toUpperCase()} ${source.path}`);
+        outputSource(source);
+        outputErrors(source, 3);
 
-            if (source.errors) {
-                for(const error of source.errors)
-                {
-                    const msg = `${emoji.get('red_circle')} ${error}`;
-                    console.log(indentify(msg, 6));
-                }
-            }
+        for(const manifest of source.manifests)
+        {
+            outputManifest(manifest);
+            outputErrors(manifest, 6);
         }
+
         console.log();
     }
 
     console.log();
-
-    console.log(chalk.underline('Manifests:'));
-    for(const manifest of result.manifests)
-    {
-        console.log(`  ${emoji.get('page_facing_up')} ${manifest.source.kind.toUpperCase()}: ${manifest.source.path}`);
-
-        const parts: string[] = [];
-        if (manifest.namespace) {
-            parts.push(`Namespace: ${manifest.namespace}`);
-        }
-        parts.push(`API: ${manifest.apiVersion}`);
-        parts.push(`Kind: ${manifest.kind}`);
-        parts.push(`Name: ${manifest.name}`);
-        
-        console.log(`    `, manifest.success ? emoji.get('white_check_mark') : emoji.get('x'), parts.join(', '));
-
-        if (!manifest.success) {
-            if (manifest.errors) {
-                for(const error of manifest.errors)
-                {
-                    const msg = `${emoji.get('red_circle')} ${error}`;
-                    console.log(indentify(msg, 8));
-                }
-            }
-        }
-
-        console.log();
-    }
 
     if (result.success)
     {
@@ -69,6 +35,75 @@ export function output(result: LintManifestsResult)
     }
 
 }
+
+function outputSource(source: LintSourceResult)
+{
+    const parts : string[] = [];
+
+    if (source.success)
+    {
+        parts.push(emoji.get('white_check_mark'));
+    }
+    else
+    {
+        parts.push(emoji.get('x'));
+    }
+
+    if (source.kind === 'file')
+    {
+        parts.push(emoji.get('page_facing_up'));
+    }
+    else if (source.kind === 'web')
+    {
+        parts.push(emoji.get('globe_with_meridians'));
+    }
+
+    parts.push(`${source.kind.toUpperCase()}:`);
+
+    parts.push(source.path);
+
+    return console.log(parts.join(' '));
+}
+
+function outputManifest(manifest: LintManifestResult)
+{
+    const namingParts : string[] = [];
+
+    if (manifest.namespace) {
+        namingParts.push(`Namespace: ${manifest.namespace}`);
+    }
+    namingParts.push(`API: ${manifest.apiVersion}`);
+    namingParts.push(`Kind: ${manifest.kind}`);
+    namingParts.push(`Name: ${manifest.name}`);
+
+    const parts : string[] = [];
+    if (manifest.success)
+    {
+        parts.push(emoji.get('white_check_mark'));
+    }
+    else
+    {
+        parts.push(emoji.get('x'));
+    }
+
+    parts.push(namingParts.join(', '));
+
+    return console.log(indentify(parts.join(' '), 3));
+}
+
+function outputErrors(obj: ErrorStatus, indent: number)
+{
+    if (!obj.success) {
+        if (obj.errors) {
+            for(const error of obj.errors)
+            {
+                const msg = `${emoji.get('red_circle')} ${error}`;
+                console.log(indentify(msg, indent));
+            }
+        }
+    }
+}
+
 
 function indentify(str: string, count: number) : string
 {

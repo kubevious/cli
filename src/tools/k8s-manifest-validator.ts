@@ -8,6 +8,7 @@ import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types
 import { K8sOpenApiResource } from 'k8s-super-client';
 
 import { K8sObject } from '../types/k8s';
+import { parseApiVersion } from '../utils/k8s';
 export class K8sManifestValidator
 {
     private _logger: ILogger;
@@ -88,23 +89,16 @@ export class K8sManifestValidator
             return null;
         }
 
-        const parts = k8sManifest.apiVersion.split('/');
-        if (parts.length === 1) {
-            return {
-                group: '',
-                version: parts[0],
-                kind: k8sManifest.kind
-            }
-        }
-        if (parts.length === 2) {
-            return {
-                group: parts[0],
-                version: parts[1],
-                kind: k8sManifest.kind
-            }
+        const apiVersionParts = parseApiVersion(k8sManifest.apiVersion);
+        if (!apiVersionParts) {
+            return null;
         }
 
-        return null;
+        return {
+            group: apiVersionParts.group,
+            version: apiVersionParts.version,
+            kind: k8sManifest.kind
+        }
     }
 }
 

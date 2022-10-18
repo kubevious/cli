@@ -1,3 +1,4 @@
+import { parseApiVersion } from "../utils/k8s";
 
 export interface K8sObject
 {
@@ -16,6 +17,8 @@ export interface K8sMetadata
 export interface K8sObjectId
 {
     apiVersion: string;
+    api?: string;
+    version: string;
     kind: string;
     namespace?: string;
     name?: string;
@@ -23,8 +26,12 @@ export interface K8sObjectId
 
 export function makeId(k8sObject: K8sObject): K8sObjectId
 {
+    const apiVersionParts = parseApiVersion(k8sObject.apiVersion);
+    
     return { 
         apiVersion: k8sObject.apiVersion,
+        api: apiVersionParts!.group,
+        version: apiVersionParts!.version,
         kind: k8sObject.kind,
         namespace: k8sObject.metadata?.namespace,
         name: k8sObject.metadata?.name,

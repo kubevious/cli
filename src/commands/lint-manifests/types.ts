@@ -5,17 +5,13 @@ export interface LintManifestsResult
 {
     success: boolean;
 
-    sources: (ManifestSourceId & ErrorStatus & {
-        manifestCount: number,
-
-        manifests: (K8sObjectId & ErrorStatus & {
-            source: ManifestSourceId
-        })[]
-        
-    })[];
-
-    manifests: (K8sObjectId & ErrorStatus & {
-        source: ManifestSourceId
-    })[];
-
+    sources: LintSourceResult[];
 }
+
+export type LintSourceResult = ManifestSourceId & ErrorStatus & {
+    manifestCount: number;
+
+    manifests: LintManifestResult[];
+};
+
+export type LintManifestResult = K8sObjectId & ErrorStatus;
