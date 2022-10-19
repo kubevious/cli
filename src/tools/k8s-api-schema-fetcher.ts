@@ -17,7 +17,7 @@ export class K8sApiSchemaFetcher
 
     async fetchRemote() : Promise<K8sApiSchemaFetcherResult>
     {
-        let isConnected: boolean = false;
+        let isConnected = false;
         return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: true })
             .then(client => {
                 this._logger.info("Connected.");

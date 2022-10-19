@@ -42,8 +42,15 @@ export class K8sApiSchemaRegistry
     getVersionSchema(version: string) : K8sApiJsonSchema
     {
         const versionInfo = this._versions[version];
-        const contents = fs.readFileSync(versionInfo.path, 'utf8');
-        return JSON.parse(contents);
+        try
+        {
+            const contents = fs.readFileSync(versionInfo.path, 'utf8');
+            return JSON.parse(contents);
+        }
+        catch(reason)
+        {
+            throw new Error(`Failed to load JSON schema from ${versionInfo.path}`);
+        }
     }
 
     findLatestVersion()

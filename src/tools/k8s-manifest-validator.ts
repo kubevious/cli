@@ -64,6 +64,11 @@ export class K8sManifestValidator
         const ajvOptions: AjvOptions = {
             strict: true,
             discriminator: true,
+            strictSchema: true,
+            validateFormats: true,
+            strictRequired: true,
+            strictTypes: true,
+            strictNumbers: true,
             formats: {
             }
         };
@@ -87,6 +92,10 @@ export class K8sManifestValidator
 
     private _mapError(error: ErrorObject)
     {
+        if (error.keyword === 'type')
+        {
+            return `Invalid type under "${error.instancePath}". ${_.upperFirst(error.message)}.`;
+        }
         if (error.keyword === 'additionalProperties')
         {
             return `Unknown property "${error.params.additionalProperty}" under "${error.instancePath}"`;
@@ -94,6 +103,11 @@ export class K8sManifestValidator
         if (error.keyword === 'required')
         {
             return `Required property "${error.params.missingProperty}" missing under "${error.instancePath}"`;
+        }
+        if (error.keyword === 'enum')
+        {
+            const allowedValues = error.params?.allowedValues ?? [];
+            return `Unknown enum value provided in "${error.instancePath}". Allowed values are: ${allowedValues.join(', ')}.`;
         }
         
         return error.message ?? 'unknown error';
