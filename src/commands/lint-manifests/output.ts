@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import emoji from 'node-emoji';
 
-import { LintManifestResult, LintManifestsResult, LintSourceResult } from "./types";
+import { LintManifestResult, LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from "./types";
 import { ErrorStatus } from '../../types/manifest';
 
 export function output(result: LintManifestsResult)
@@ -48,14 +48,7 @@ function outputSource(source: LintSourceResult)
 {
     const parts : string[] = [];
 
-    if (source.success)
-    {
-        parts.push(emoji.get('white_check_mark'));
-    }
-    else
-    {
-        parts.push(emoji.get('x'));
-    }
+    parts.push(objectSeverityIcon(source));
 
     if (source.kind === 'file')
     {
@@ -85,14 +78,7 @@ function outputManifest(manifest: LintManifestResult)
     namingParts.push(`Name: ${manifest.name}`);
 
     const parts : string[] = [];
-    if (manifest.success)
-    {
-        parts.push(emoji.get('white_check_mark'));
-    }
-    else
-    {
-        parts.push(emoji.get('x'));
-    }
+    parts.push(objectSeverityIcon(manifest));
 
     parts.push(namingParts.join(', '));
 
@@ -103,13 +89,41 @@ function outputErrors(obj: ErrorStatus, indent: number)
 {
     if (!obj.success) {
         if (obj.errors) {
-            for(const error of obj.errors)
+            for(const msg of obj.errors)
             {
-                const msg = `${emoji.get('red_circle')} ${error}`;
-                console.log(indentify(msg, indent));
+                const line = `${severityStatusIcon('fail')} ${msg}`;
+                console.log(indentify(line, indent));
             }
         }
     }
+
+    if (obj.warnings) {
+        for(const msg of obj.warnings)
+        {
+            const line = `${severityStatusIcon('warning')} ${msg}`;
+            console.log(indentify(line, indent));
+        }
+    }
+}
+
+function objectSeverityIcon(obj: LintStatus)
+{
+    return severityStatusIcon(obj.severity);
+}
+
+function severityStatusIcon(severity: LintSeverity)
+{
+    let iconName = 'question';
+    if (severity === 'pass') {
+        iconName = 'white_check_mark';
+    }
+    else if (severity === 'fail') {
+        iconName = 'x';
+    }
+    else if (severity === 'warning') {
+        return `${emoji.get('warning')} `;
+    }
+    return `${emoji.get(iconName)}`;
 }
 
 

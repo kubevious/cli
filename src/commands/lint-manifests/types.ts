@@ -1,6 +1,14 @@
 import { K8sObjectId } from "../../types/k8s";
-import { ErrorStatus, ManifestSourceId } from "../../types/manifest";
+import { ManifestSourceId } from "../../types/manifest";
 
+export type LintSeverity = 'pass' | 'fail' | 'warning';
+export interface LintStatus
+{
+    success: boolean,
+    severity: LintSeverity,
+    errors?: string[],
+    warnings?: string[]
+}
 export interface LintManifestsResult
 {
     success: boolean;
@@ -13,10 +21,10 @@ export interface LintManifestsResult
     sources: LintSourceResult[];
 }
 
-export type LintSourceResult = ManifestSourceId & ErrorStatus & {
+export type LintSourceResult = ManifestSourceId & LintStatus & {
     manifestCount: number;
 
     manifests: LintManifestResult[];
 };
 
-export type LintManifestResult = K8sObjectId & ErrorStatus;
+export type LintManifestResult = K8sObjectId & LintStatus;

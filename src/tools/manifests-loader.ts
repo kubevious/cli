@@ -147,28 +147,28 @@ export class ManifetsLoader
         }
     }
 
-    private _addManifest(file : ManifestSource, manifest: any)
+    private _addManifest(source : ManifestSource, config: any)
     {
-        this._logger.silly("[_addManifest] file: %s, manifest:", file.source.path, manifest);
+        this._logger.silly("[_addManifest] file: %s, manifest:", source.source.path, config);
 
-        const k8sManifest = manifest as K8sObject;
-        const errors = this._checkK8sManifest(k8sManifest);
+        const k8sObject = config as K8sObject;
+        const errors = this._checkK8sManifest(k8sObject);
         if (errors.length > 0)
         {
-            this._package.sourceErrors(file, errors);
+            this._package.sourceErrors(source, errors);
             return;
         }
 
-        this._package.addManifest(file, k8sManifest);
+        this._package.addManifest(source, k8sObject);
     }
 
-    private _checkK8sManifest(k8sManifest: K8sObject)
+    private _checkK8sManifest(k8sObject: K8sObject)
     {
         const errors: string[] = [];
-        if (!k8sManifest.apiVersion) {
+        if (!k8sObject.apiVersion) {
             errors.push('Not a Kubernetes manifest. apiVersion is missing.');
         }
-        if (!k8sManifest.kind) {
+        if (!k8sObject.kind) {
             errors.push('Not a Kubernetes manifest. kind is missing.');
         }
         return errors;

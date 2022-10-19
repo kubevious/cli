@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 
 import { K8sApiSchemaRegistry } from '../../tools/k8s-api-schema-registry';
 
+import { CommandBuilder } from '../../infra/command-action';
+
 import { KnownK8sVersionsResult } from './types';
 import { output } from './output';
 
@@ -13,23 +15,23 @@ export default function (program: Command)
         .command('list-known-k8s-versions')
         .description('List of known K8s versions')
         .option('--json', 'Output in JSON')
-        .action(async (options) => {
+        .action(
+            new CommandBuilder<string[], KnownK8sVersionsResult>()
+                .perform(async () => {
 
-            const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
-            k8sApiRegistry.init();
-            
-            const result: KnownK8sVersionsResult = {
-                versions: k8sApiRegistry.getVersions()
-            }
+                    const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
+                    k8sApiRegistry.init();
 
-            if (options.json)
-            {
-                console.log(JSON.stringify(result, null, 4));
-            }
-            else
-            {
-                output(result);
-            }
-
-        });
+                    return k8sApiRegistry.getVersions();
+                })
+                .format(versions => {
+                    const result: KnownK8sVersionsResult = {
+                        versions: versions
+                    }
+                    return result;
+                })
+                .output(output)
+                .build()
+        
+        );
 }

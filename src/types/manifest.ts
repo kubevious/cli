@@ -3,7 +3,8 @@ export type ManifestSourceType = "file" | "web";
 export interface ErrorStatus
 {
     success: boolean,
-    errors?: string[]
+    errors?: string[],
+    warnings?: string[]
 }
 
 export interface ManifestSourceId

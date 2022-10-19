@@ -36,6 +36,7 @@ export class ManifestPackage
                 source: sourceId,
                 success: true,
                 errors: [],
+                warnings: [],
                 contents: []
             }
             this._sources[sourceKey] = source;
@@ -57,35 +58,53 @@ export class ManifestPackage
         }
     }
 
-    manifestError(manifest: K8sManifest, error: string)
+    manifestError(manifest: K8sManifest, msg: string)
     {
-        manifest.errors.push(error);
+        manifest.errors.push(msg);
         manifest.success = false;
     }
 
-    manifestErrors(manifest: K8sManifest, errors: string[])
+    manifestErrors(manifest: K8sManifest, msgs: string[])
     {
-        for(const error of errors)
+        for(const msg of msgs)
         {
-            this.manifestError(manifest, error);
+            this.manifestError(manifest, msg);
         }
     }
 
-    addManifest(source: ManifestSource, k8sManifest: K8sObject)
+    manifestWarning(manifest: K8sManifest, msg: string)
     {
-        const objectInfo : K8sManifest = {
+        manifest.warnings.push(msg);
+        // manifest.success = false;
+    }
 
-            id: makeId(k8sManifest),
+    manifestWarnings(manifest: K8sManifest, msgs?: string[])
+    {
+        if (msgs) {
+            for(const msg of msgs)
+            {
+                this.manifestWarning(manifest, msg);
+            }
+        }
+    }
+
+    addManifest(source: ManifestSource, k8sObject: K8sObject)
+    {
+        const k8sManifest : K8sManifest = {
+
+            id: makeId(k8sObject),
 
             success: true,
             errors: [],
+            warnings: [],
 
             source: source,
-            config: k8sManifest,
+            config: k8sObject,
         }
 
-        source.contents.push(objectInfo);
-        this._manifests.push(objectInfo);
+
+        source.contents.push(k8sManifest);
+        this._manifests.push(k8sManifest);
     }
 }
 

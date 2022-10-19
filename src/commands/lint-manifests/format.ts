@@ -1,9 +1,10 @@
 import _ from 'the-lodash';
 
-import { LintManifestsResult, LintSourceResult } from "./types";
+import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
 import { logger } from '../../logger';
 import { ManifestPackage } from '../../tools/manifest-package';
 import { K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
+import { ErrorStatus } from '../../types/manifest';
 
 export function formatResult(manifestPackage: ManifestPackage, schemaInfo: K8sApiSchemaFetcherResult) : LintManifestsResult
 {
@@ -24,7 +25,9 @@ export function formatResult(manifestPackage: ManifestPackage, schemaInfo: K8sAp
             path: source.source.path,
             manifestCount: source.contents.length,
             success: source.success,
+            severity: decideSeverity(source, source.contents),
             errors: source.errors,
+            warnings: source.warnings,
             manifests: []
         };
 
@@ -46,7 +49,9 @@ export function formatResult(manifestPackage: ManifestPackage, schemaInfo: K8sAp
                 name: manifest.id.name,
             
                 success: manifest.success,
+                severity: decideSeverity(manifest),
                 errors: manifest.errors,
+                warnings: manifest.warnings,
             });
 
             if (!manifest.success) {
@@ -67,4 +72,29 @@ export function formatResult(manifestPackage: ManifestPackage, schemaInfo: K8sAp
          .value();
     
     return result;
+}
+
+function decideSeverity(myStatus: ErrorStatus, children?: ErrorStatus[]) : LintSeverity
+{
+    children = children || [];
+
+    if (!myStatus.success) {
+        return 'fail';
+    }
+    for(const child of children) {
+        if (!child.success) {
+            return 'fail';
+        }
+    }
+
+    if (myStatus.warnings && myStatus.warnings.length > 0) {
+        return 'warning';
+    }
+    for(const child of children) {
+        if (child.warnings && child.warnings.length > 0) {
+            return 'warning';
+        }
+    }
+
+    return 'pass';
 }

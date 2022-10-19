@@ -9,15 +9,23 @@ import { K8sOpenApiResource } from 'k8s-super-client';
 
 import { K8sObject } from '../types/k8s';
 import { parseApiVersion } from '../utils/k8s';
+
+export interface K8sManifestValidatorParams
+{
+    ignoreUnknown? : boolean;
+}
+
 export class K8sManifestValidator
 {
     private _logger: ILogger;
     private _k8sJsonSchema : K8sApiJsonSchema;
+    private _params: K8sManifestValidatorParams;
 
-    constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema)
+    constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, params?: K8sManifestValidatorParams)
     {
         this._logger = logger;
         this._k8sJsonSchema = k8sJsonSchema;
+        this._params = params || {};
     }
 
     validate(k8sManifest : K8sObject) : K8sManifestValidationResult
@@ -34,9 +42,17 @@ export class K8sManifestValidator
         const resourceKey  = this._k8sJsonSchema.resources[_.stableStringify(apiResource)];
         this._logger.info("resourceKey: %s", resourceKey);
         if (!resourceKey) {
+            const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
+            if (this._params.ignoreUnknown) {
+                return {
+                    success: true,
+                    warnings: [ msg ]
+                }
+            }
+
             return {
                 success: false,
-                errors: [ `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`]
+                errors: [ msg ]
             }
         }
 
@@ -106,4 +122,5 @@ export interface K8sManifestValidationResult
 {
     success: boolean;
     errors?: string[];
+    warnings?: string[];
 }
