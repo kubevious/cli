@@ -11,4 +11,4 @@ docker run \
     --name "kubevious-cli" \
     -h "kubevious-cli" \
     -v ${MY_DIR}:/repo \
-    kubevious/node-executable-builder:v1 bash
+    kubevious/node-executable-builder:v2 bash

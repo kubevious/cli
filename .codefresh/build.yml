@@ -114,10 +114,11 @@ steps:
   build_executables:
     title: Build Executables
     stage: package
-    image: 'kubevious/node-executable-builder:v1'
+    image: 'kubevious/node-executable-builder:v2'
     working_directory: "${{MAIN_REPO_PATH}}"
     shell: bash
     commands:
+      - ls -la
       - pkg . --debug
       - ls -la
       - ls -la binary/
