@@ -210,6 +210,9 @@ export class ManifetsLoader
     private _addManifest(source : ManifestSource, config: any)
     {
         this._logger.silly("[_addManifest] file: %s, manifest:", source.source.path, config);
+        if (!config) {
+            return;
+        }
 
         const k8sObject = config as K8sObject;
         const errors = this._checkK8sManifest(k8sObject);

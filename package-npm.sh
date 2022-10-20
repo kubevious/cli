@@ -7,4 +7,4 @@ source configuration.sh
 
 npm pack 
 
-npm i kubevious-1.0.0.tgz -g
+# npm i kubevious-cli-1.0.0.tgz -g

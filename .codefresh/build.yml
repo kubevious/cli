@@ -1,0 +1,124 @@
+version: "1.0"
+
+stages:
+  - "clone"
+  - "build"
+  - "test"
+  - "publish"
+
+steps:
+
+  init:
+    title: Init
+    stage: clone
+    image: codefresh/cli
+    shell: bash
+    commands:
+      - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
+      - cf_export MAIN_REPO_PATH=/codefresh/volume/repo.git
+      - export MOCK_DATA_REPO_NAME=mock-data
+      - cf_export MOCK_DATA_REPO_NAME=${MOCK_DATA_REPO_NAME}
+      - cf_export MOCK_DATA_REPO_PATH=/codefresh/volume/${MOCK_DATA_REPO_NAME}.git
+      - export CICD_REPO_NAME=cicd
+      - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
+      - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
+      - 'echo "Repo: ${{CF_REPO_NAME}}"'
+      - 'echo "Branch: ${{CF_BRANCH}}"'
+      - 'echo "Revision: ${{CF_REVISION}}"'
+      - 'echo "Author: ${{CF_COMMIT_AUTHOR}}"'
+      - 'echo "Message: ${{CF_COMMIT_MESSAGE}}"'
+      
+  clone:
+    title: Clone Repo
+    stage: clone
+    image: 'alpine/git:latest'
+    working_directory: "/codefresh/volume"
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{MAIN_REPO_PATH}}
+      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git ${{MAIN_REPO_PATH}}'
+      - ls -la
+      - cd ${{MAIN_REPO_PATH}}
+      - git reset --hard ${{CF_REVISION}}
+      - ls -la
+
+  clone_cicd:
+    title: Clone CI/CD Repo
+    stage: clone
+    image: "alpine/git:latest"
+    working_directory: "/codefresh/volume"
+    when:
+      condition:
+        all:
+          isRelease: '"${{IS_RELEASE}}" == "true"'
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{CICD_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CICD_REPO_NAME}}.git ${{CICD_REPO_PATH}}"
+      - ls -la
+      - cd ${{CICD_REPO_PATH}}
+      - ls -la
+
+  clone_mock_data:
+    title: Clone Mock Data Repo
+    stage: clone
+    image: 'alpine/git:latest'
+    working_directory: "/codefresh/volume"
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{MOCK_DATA_REPO_PATH}}
+      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MOCK_DATA_REPO_NAME}}.git ${{MOCK_DATA_REPO_PATH}}'
+      - ls -la
+      - cd ${{MOCK_DATA_REPO_PATH}}
+      - ls -la      
+
+  prepare:
+    title: Prepare Dependencies
+    stage: build
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    commands:
+      - yarn install --frozen-lockfile
+
+  compile:
+    title: Compile
+    stage: build
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    commands:
+      - npm run build
+
+  # run_unit_test:
+  #   title: Run Unit Tests
+  #   stage: test
+  #   image: 'kubevious/node-builder:14'
+  #   working_directory: "${{MAIN_REPO_PATH}}"
+  #   commands:
+  #     - pwd
+  #     - ls -la
+  #     - npm test
+
+  # publish:
+  #   title: Publish
+  #   stage: publish
+  #   image: 'kubevious/node-builder:14'
+  #   working_directory: "${{MAIN_REPO_PATH}}"
+  #   when: 
+  #     condition: 
+  #       all: 
+  #         noCiCdAuthor: 'includes("${{CF_COMMIT_MESSAGE}}", "Version Release") == false' 
+  #         masterBranch: '"${{CF_BRANCH}}" == "main"'
+  #   commands:
+  #     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+  #     - git config --global user.email "cicd@kubevious.io"
+  #     - git config --global user.name "Kubevious CI/CD"
+  #     - 'npm version patch -m "Version Release v%s"'
+  #     - git status
+  #     - git pull
+  #     - git status
+  #     - git push 
+  #     - git push --tags
+  #     - npm publish

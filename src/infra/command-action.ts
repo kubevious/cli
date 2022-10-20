@@ -88,6 +88,7 @@ export class CommandBuilder<TData, TResult>
                 })
                 .catch(reason => {
                     console.log(`Error executing command. ${reason?.message}`);
+                    console.log(reason);
                     process.exit(111);
                 })
                 .then(() => {})

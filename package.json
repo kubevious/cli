@@ -1,7 +1,18 @@
 {
   "name": "kubevious",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "description": "Kubevious CLI",
+  "keywords": [
+    "kubernetes",
+    "k8s",
+    "validation",
+    "validate",
+    "lint",
+    "security",
+    "check",
+    "sanity",
+    "CRD"
+  ],
   "main": "dist/index.js",
   "bin": {
     "kubevious": "./bin/kubevious"
@@ -9,7 +20,8 @@
   "preferGlobal": true,
   "types": "dist",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "assets/**/*"
   ],
   "scripts": {
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
@@ -22,9 +34,13 @@
   "author": "Ruben Hakopian <ruben.hakopian@gmail.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/kubevious/kubevious/issues"
+    "url": "https://github.com/kubevious/cli/issues"
   },
-  "homepage": "https://github.com/kubevious/kubevious",
+  "homepage": "https://kubevious.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kubevious/cli"
+  },
   "dependencies": {
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
@@ -71,7 +87,18 @@
   "pkg": {
     "scripts": "dist/**/*.js",
     "assets": "assets/**/*",
-    "targets": [ "node14-alpine-x64", "node14-alpine-arm64", "node14-linux-x64", "node14-linux-arm64", "node14-linuxstatic-x64", "node14-linuxstatic-arm64", "node14-win-x64", "node14-win-arm64", "node14-macos-x64", "node14-macos-arm64"],
-    "outputPath": "binary/"    
+    "targets": [
+      "node14-alpine-x64",
+      "node14-alpine-arm64",
+      "node14-linux-x64",
+      "node14-linux-arm64",
+      "node14-linuxstatic-x64",
+      "node14-linuxstatic-arm64",
+      "node14-win-x64",
+      "node14-win-arm64",
+      "node14-macos-x64",
+      "node14-macos-arm64"
+    ],
+    "outputPath": "binary"
   }
 }
