@@ -1,7 +1,8 @@
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 import { ILogger } from 'the-logger';
 import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
-import { KubernetesClient, connectDefaultRemoteCluster, connectRemoteCluster, K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
+import { connectDefaultRemoteCluster, K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
+import { spinOperation } from '../utils/screen';
 
 export class K8sApiSchemaFetcher
 {
@@ -17,9 +18,12 @@ export class K8sApiSchemaFetcher
 
     async fetchRemote() : Promise<K8sApiSchemaFetcherResult>
     {
+        const spinner = spinOperation('Connecting to K8s Cluster...');
+
         let isConnected = false;
         return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: true })
             .then(client => {
+                spinner.update('Extracting K8s API Schema...')
                 this._logger.info("Connected.");
                 isConnected = true;
 
@@ -30,6 +34,8 @@ export class K8sApiSchemaFetcher
                         
                         return client.openAPI.queryApiSpecs()
                             .then(k8sOpenApiSpecs => {
+
+                                spinner.complete('K8s API Schema Fetched.');
             
                                 const converter = new K8sOpenApiSpecToJsonSchemaConverter(this._logger, k8sOpenApiSpecs);
                                 const k8sJsonSchema = converter.convert();
@@ -49,6 +55,8 @@ export class K8sApiSchemaFetcher
             })
             .catch(reason => {
                 const errorMsg = isConnected ? `Error fetching API Schema. ${reason?.message}` : `Could not connect to Kubernetes cluster. ${reason?.message}`;
+                spinner.fail(errorMsg);
+
                 const result : K8sApiSchemaFetcherResult = {
                     success: false,
                     error: errorMsg,
@@ -64,6 +72,8 @@ export class K8sApiSchemaFetcher
 
     async fetchLocal(targetVersion? : string) : Promise<K8sApiSchemaFetcherResult>
     {
+        const spinner = spinOperation('Loading K8s API Schema...');
+
         const result : K8sApiSchemaFetcherResult = {
             success: true,
             targetVersion: targetVersion ?? null,
@@ -100,6 +110,9 @@ export class K8sApiSchemaFetcher
             result.success = false;
             result.error = "Could not find Kubernetes API schema.";
             result.foundExact = false;
+            spinner.fail("Could not find Kubernetes API schema.");
+        } else {
+            spinner.complete("Fetched K8s API schema.");
         }
 
         return result;

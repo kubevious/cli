@@ -34,6 +34,7 @@
     "k8s-super-client": "^2.0.37",
     "node-emoji": "^1.11.0",
     "openapi-schema-validator": "^12.0.2",
+    "ora": "^5.4.1",
     "semver": "^7.3.8",
     "the-lodash": "^2.0.9",
     "the-logger": "^2.0.14",

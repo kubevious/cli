@@ -58,6 +58,10 @@ function outputSource(source: LintSourceResult)
     {
         parts.push(emoji.get('globe_with_meridians'));
     }
+    else if (source.kind === 'stream')
+    {
+        parts.push(emoji.get('aquarius'));
+    }
 
     parts.push(`${source.kind.toUpperCase()}:`);
 

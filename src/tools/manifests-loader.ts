@@ -9,6 +9,8 @@ import { K8sObject } from '../types/k8s';
 import * as yaml from 'js-yaml'
 
 import { ManifestSource, ManifestPackage } from './manifest-package';
+import { readFromInputStream } from '../utils/stream';
+import { spinOperation } from '../utils/screen';
 
 export class ManifetsLoader
 {
@@ -29,10 +31,15 @@ export class ManifetsLoader
     {
         this._logger.info("[load] fileOrPatternOrUrl: %s", fileOrPatternOrUrl);
 
+        const spinner = spinOperation('Loading manifests...');
+
         return Promise.resolve()
             .then(() => {
 
-                if (_.startsWith(fileOrPatternOrUrl, 'http://') || _.startsWith(fileOrPatternOrUrl, 'https://'))
+                if (!fileOrPatternOrUrl) {
+                    return this._loadFromStream();
+                }
+                else if (_.startsWith(fileOrPatternOrUrl, 'http://') || _.startsWith(fileOrPatternOrUrl, 'https://'))
                 {
                     return this._loadUrl(fileOrPatternOrUrl);
                 }
@@ -41,6 +48,9 @@ export class ManifetsLoader
                     return this._loadFileOrPattern(fileOrPatternOrUrl);
                 }
                
+            })
+            .then(() => {
+                spinner.complete('Manifests loaded.');
             })
             .then(() => this.package)
             ;
@@ -87,6 +97,56 @@ export class ManifetsLoader
             .then(({ data }) => {
                 const contents = data.toString();
                 this._parseSource(source, url, contents);
+            })
+            .catch(reason => {
+                this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
+            })
+    }
+
+    private _loadFromStream()
+    {
+        this._logger.info("[_loadFromStream] ");
+        const source = this._package.getSource("stream", 'stream');
+
+        return readFromInputStream()
+            .then((contents) => {
+
+                let manifests : any[] | null = null;
+            
+                if (!manifests) {
+                    try
+                    {
+                        manifests = yaml.loadAll(contents);    
+                    }
+                    catch(reason: any)
+                    {
+                        this._package.sourceError(source, reason.message ?? 'Error parsing YAML.');
+                    }
+                }
+    
+                if (!manifests) {
+                    try
+                    {
+                        manifests = [JSON.parse(contents)];
+                    }
+                    catch(reason: any)
+                    {
+                        manifests = null;
+                    }
+                }                
+
+                if (manifests)
+                {
+                    for(const manifest of manifests)
+                    {
+                        this._addManifest(source, manifest);
+                    }
+                }
+                else
+                {
+                    this._package.sourceError(source, 'Failed to parse manifests from stream.');
+                }
+
             })
             .catch(reason => {
                 this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);

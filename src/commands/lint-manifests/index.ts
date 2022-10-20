@@ -22,7 +22,7 @@ export default function (program: Command)
     program
         .command('lint')
         .description('Lints Kubernetes manifests for API syntax validity')
-        .argument('<path>', 'Path to file, directory, URL, or search pattern')
+        .argument('[path]', 'Path to file, directory, URL, or search pattern')
         .option('--ignore-unknown', 'Ignore unknown resources.')
         .option('--json', 'Output in JSON')
         .option('--k8s-version <version>', 'Target Kubernetes version')
@@ -31,6 +31,7 @@ export default function (program: Command)
         .action(
             new CommandBuilder<TData, LintManifestsResult>()
                 .perform(async (path, options) => {
+
                     const loader = new ManifetsLoader(logger);
                     const manifestPackage = await loader.load(path);
         
@@ -68,7 +69,7 @@ export default function (program: Command)
                     const packageValidator = new K8sPackageValidator(logger, k8sSchemaInfo.k8sJsonSchema, {
                         ignoreUnknown: options.ignoreUnknown ? true : false
                     });
-                    packageValidator.validate(manifestPackage);
+                    await packageValidator.validate(manifestPackage);
 
                     return {
                         manifestPackage,
