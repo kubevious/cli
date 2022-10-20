@@ -4,6 +4,7 @@ stages:
   - "clone"
   - "build"
   - "test"
+  - "package"
   - "publish"
 
 steps:
@@ -100,6 +101,26 @@ steps:
   #     - pwd
   #     - ls -la
   #     - npm test
+
+  package_npm:
+    title: Package NPM
+    stage: package
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    commands:
+      - npm pack
+      - ls -la
+
+  build_executables:
+    title: Build Executables
+    stage: package
+    image: 'kubevious/node-executable-builder:v1'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    shell: bash
+    commands:
+      - pkg . --debug
+      - ls -la
+      - ls -la binary/
 
   # publish:
   #   title: Publish
