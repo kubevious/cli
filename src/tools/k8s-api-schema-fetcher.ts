@@ -11,9 +11,6 @@ export class K8sApiSchemaFetcher
     constructor(logger: ILogger)
     {
         this._logger = logger.sublogger('K8sApiSchemaFetcher');
-        if(!process.env.K8S_API_SCHEMA_DIR) {
-            throw new Error(`K8S_API_SCHEMA_DIR not set`);
-        }
     }
 
     async fetchRemote() : Promise<K8sApiSchemaFetcherResult>

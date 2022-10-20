@@ -1,8 +1,12 @@
 {
-  "name": "kubevious-cli",
+  "name": "kubevious",
   "version": "1.0.0",
   "description": "Kubevious CLI",
   "main": "dist/index.js",
+  "bin": {
+    "kubevious": "./bin/kubevious"
+  },
+  "preferGlobal": true,
   "types": "dist",
   "files": [
     "dist/**/*"
@@ -24,7 +28,7 @@
   "dependencies": {
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
-    "axios": "^1.1.3",
+    "axios": "^0.21.4",
     "chalk": "^4.1.2",
     "cli-table": "^0.3.11",
     "commander": "^9.4.1",
@@ -63,5 +67,11 @@
     "the-logger": "^2.0.14",
     "the-promise": "^2.0.15",
     "k8s-super-client": "^2.0.37"
+  },
+  "pkg": {
+    "scripts": "dist/**/*.js",
+    "assets": "assets/**/*",
+    "targets": [ "node14-alpine-x64", "node14-alpine-arm64", "node14-linux-x64", "node14-linux-arm64", "node14-linuxstatic-x64", "node14-linuxstatic-arm64", "node14-win-x64", "node14-win-arm64", "node14-macos-x64", "node14-macos-arm64"],
+    "outputPath": "binary/"    
   }
 }

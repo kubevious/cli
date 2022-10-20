@@ -5,10 +5,6 @@ cd $MY_DIR
 
 source configuration.sh
 
-docker run \
-    -it \
-    --rm \
-    --name "kubevious-cli" \
-    -h "kubevious-cli" \
-    -v ${MY_DIR}:/repo \
-    kubevious/node-executable-builder:v1 bash
+npm pack 
+
+npm i kubevious-1.0.0.tgz -g

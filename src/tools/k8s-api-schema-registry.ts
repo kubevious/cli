@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as Path from 'path';
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 import semver, { SemVer } from 'semver';
+import { PathResolver } from '../path-resolver';
 
 export class K8sApiSchemaRegistry
 {
@@ -14,14 +15,12 @@ export class K8sApiSchemaRegistry
     constructor(logger: ILogger)
     {
         this._logger = logger.sublogger('K8sApiSchemaRegistry');
-        if(!process.env.K8S_API_SCHEMA_DIR) {
-            throw new Error(`K8S_API_SCHEMA_DIR not set`);
-        }
     }
 
     init()
     {
-        const files = glob.sync(`${process.env.K8S_API_SCHEMA_DIR}/*.json`);
+        const pathResolver = new PathResolver();
+        const files = glob.sync(`${pathResolver.k8sApiSchemaDir}/*.json`);
         // this._logger.info("Files: ", files);
         for(const file of files)
         {
