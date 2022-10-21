@@ -109,7 +109,6 @@ steps:
       - cf_export PRODUCT_VERSION=${PRODUCT_VERSION}
       - cf_export DOCKER_TAG=${PRODUCT_VERSION}
       - git status
-      - git diff
 
   prepare:
     title: Prepare Dependencies
