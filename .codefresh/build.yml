@@ -167,26 +167,17 @@ steps:
         all:
           isRelease: '"${{IS_RELEASE}}" == "true"'
     commands:
-      # - ${{CICD_REPO_PATH}}/cicd-commit-product-repo.sh
-      - git status
+      - ${{CICD_REPO_PATH}}/cicd-commit-product-repo.sh
 
-  # publish:
-  #   title: Publish
-  #   stage: publish
-  #   image: 'kubevious/node-builder:14'
-  #   working_directory: "${{MAIN_REPO_PATH}}"
-  #   when: 
-  #     condition: 
-  #       all: 
-  #         isRelease: '"${{IS_RELEASE}}" == "true"'
-  #   commands:
-  #     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
-  #     - git config --global user.email "cicd@kubevious.io"
-  #     - git config --global user.name "Kubevious CI/CD"
-  #     - 'npm version patch -m "Version Release v%s"'
-  #     - git status
-  #     - git pull
-  #     - git status
-  #     - git push 
-  #     - git push --tags
-  #     - npm publish
+  publish_npm:
+    title: Publish NPM
+    stage: release
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    when: 
+      condition: 
+        all: 
+          isRelease: '"${{IS_RELEASE}}" == "true"'
+    commands:
+      - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+      - npm publish
