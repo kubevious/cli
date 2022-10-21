@@ -124,6 +124,7 @@ steps:
     image: 'kubevious/node-builder:14'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
+      - ./scripts/prepare-package.sh
       - npm run build
 
   # run_unit_test:
