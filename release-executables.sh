@@ -12,16 +12,16 @@ if [ $RESULT -ne 0 ]; then
   exit 1;
 fi
 
-./prepare-packages.sh
+./scripts/prepare-packages.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
   echo "Prepare Package Failed"
   exit 1;
 fi
 
-./package-executables.sh
+./scripts/compile-executables.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-  echo "Package Executables Failed"
+  echo "Compile Executables Failed"
   exit 1;
 fi
