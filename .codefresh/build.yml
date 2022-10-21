@@ -11,7 +11,7 @@ steps:
 
   decide_release:
     title: Decide Release
-    stage: init
+    stage: clone
     image: codefresh/cli
     shell: bash
     when:
