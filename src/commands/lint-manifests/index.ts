@@ -22,7 +22,7 @@ export default function (program: Command)
     program
         .command('lint')
         .description('Lints Kubernetes manifests for API syntax validity')
-        .argument('[path]', 'Path to file, directory, URL, or search pattern')
+        .argument('[path...]', 'Path to file, directory, URL, or search pattern')
         .option('--ignore-unknown', 'Ignore unknown resources. Use when manifests include CRDs and not using --live-k8s option.')
         .option('--k8s-version <version>', 'Target Kubernetes version. Do not use with --live-k8s option.')
         .option('--live-k8s', 'Lint against live Kubernetes cluster. Allows validation of CRDs. Do not use with --k8s-version option.')
@@ -30,7 +30,9 @@ export default function (program: Command)
         .option('--json', 'Output lint result in JSON.')
         .action(
             new CommandBuilder<TData, LintManifestsResult>()
-                .perform(async (path, options) => {
+                .perform(async (path: string[], options) => {
+
+                    logger.info("[PATH] ", path);
 
                     const loader = new ManifetsLoader(logger);
                     const manifestPackage = await loader.load(path);

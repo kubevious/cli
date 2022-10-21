@@ -39,9 +39,10 @@ export class K8sManifestValidator
             }
         }
 
-        const resourceKey  = this._k8sJsonSchema.resources[_.stableStringify(apiResource)];
-        this._logger.info("resourceKey: %s", resourceKey);
-        if (!resourceKey) {
+        const resourceKey = _.stableStringify(apiResource);
+        const definitionKey  = this._k8sJsonSchema.resources[resourceKey];
+        this._logger.info("definitionKey: %s", definitionKey);
+        if (!definitionKey) {
             const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
             if (this._params.ignoreUnknown) {
                 return {
@@ -57,7 +58,7 @@ export class K8sManifestValidator
         }
 
         const schema = { // : SomeJTDSchemaType
-            ['$ref'] : `#/definitions/${resourceKey}`,
+            ['$ref'] : `#/definitions/${definitionKey}`,
             definitions: this._k8sJsonSchema.definitions
         }
 

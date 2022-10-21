@@ -1205,7 +1205,7 @@ k8s-super-client@^2.0.37:
     the-promise "^2.0.15"
     uuid "^8.2.0"
 
-kubernetes-types@^1.21.0-beta.1:
+kubernetes-types@^1.21.0-beta.1, kubernetes-types@^1.25.0:
   version "1.25.0"
   resolved "https://registry.yarnpkg.com/kubernetes-types/-/kubernetes-types-1.25.0.tgz#8e662627b75760e7d6ff449927509387b98ba2c3"
   integrity sha512-PVbOhw7Rd6yRLjvkaN/agqDLjEq9iwUPTvO+lrYVlcWyC2/Qm9grHL1O8oNTPFisuSamdYdTxtSpmmaKKO6VGg==

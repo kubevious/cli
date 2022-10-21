@@ -52,6 +52,7 @@
     "glob": "^8.0.3",
     "js-yaml": "^4.1.0",
     "k8s-super-client": "^2.0.37",
+    "kubernetes-types": "^1.25.0",
     "node-emoji": "^1.11.0",
     "openapi-schema-validator": "^12.0.2",
     "ora": "^5.4.1",

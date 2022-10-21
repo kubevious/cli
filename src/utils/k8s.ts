@@ -1,3 +1,5 @@
+import { K8sObjectId } from "../types/k8s";
+
 export function parseApiVersion(apiVersion : string) : { group: string, version: string } | null
 {
     const parts = apiVersion.split('/');
@@ -15,4 +17,9 @@ export function parseApiVersion(apiVersion : string) : { group: string, version:
     }
 
     return null;
+}
+
+export function isCRD(id: K8sObjectId)
+{
+    return (id.apiVersion === 'apiextensions.k8s.io/v1') && (id.kind === 'CustomResourceDefinition');
 }

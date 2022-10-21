@@ -27,27 +27,22 @@ export class ManifetsLoader
         return this._package;
     }
 
-    load(fileOrPatternOrUrl: string) : Promise<ManifestPackage>
+    load(fileOrPatternOrUrls: string[]) : Promise<ManifestPackage>
     {
-        this._logger.info("[load] fileOrPatternOrUrl: %s", fileOrPatternOrUrl);
+        this._logger.info("[load] fileOrPatternOrUrl: ", fileOrPatternOrUrls);
 
         const spinner = spinOperation('Loading manifests...');
 
         return Promise.resolve()
             .then(() => {
 
-                if (!fileOrPatternOrUrl) {
+                if (fileOrPatternOrUrls.length === 0) {
                     return this._loadFromStream();
                 }
-                else if (_.startsWith(fileOrPatternOrUrl, 'http://') || _.startsWith(fileOrPatternOrUrl, 'https://'))
+                else 
                 {
-                    return this._loadUrl(fileOrPatternOrUrl);
+                    return this._loadMany(fileOrPatternOrUrls);
                 }
-                else
-                {
-                    return this._loadFileOrPattern(fileOrPatternOrUrl);
-                }
-               
             })
             .then(() => {
                 spinner.complete('Manifests loaded.');
@@ -55,6 +50,25 @@ export class ManifetsLoader
             .then(() => this.package)
             ;
     }
+
+    private _loadMany(fileOrPatternOrUrls: string[]) : Promise<void>
+    {
+        return Promise.serial(fileOrPatternOrUrls, x => this._loadSingle(x))
+            .then(() => {});
+    }
+
+    private _loadSingle(fileOrPatternOrUrl: string) : Promise<void>
+    {
+        if (_.startsWith(fileOrPatternOrUrl, 'http://') || _.startsWith(fileOrPatternOrUrl, 'https://'))
+        {
+            return this._loadUrl(fileOrPatternOrUrl);
+        }
+        else
+        {
+            return this._loadFileOrPattern(fileOrPatternOrUrl);
+        }
+    }
+
 
     private _loadFileOrPattern(fileOrPattern: string) : Promise<void>
     {
@@ -88,12 +102,13 @@ export class ManifetsLoader
         this._parseSource(source, path, contents);
     }
 
-    private _loadUrl(url: string)
+    private _loadUrl(url: string) : Promise<void>
     {
         const source = this._package.getSource("web", url);
 
         this._logger.info("[_loadUrl] url: %s", url);
-        return axios.get(url)
+        return Promise.resolve()
+            .then(() => axios.get(url))
             .then(({ data }) => {
                 const contents = data.toString();
                 this._parseSource(source, url, contents);
