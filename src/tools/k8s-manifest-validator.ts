@@ -23,72 +23,85 @@ export class K8sManifestValidator
 
     constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, params?: K8sManifestValidatorParams)
     {
-        this._logger = logger;
+        this._logger = logger.sublogger('K8sManifestValidator');
         this._k8sJsonSchema = k8sJsonSchema;
         this._params = params || {};
     }
 
     validate(k8sManifest : K8sObject) : K8sManifestValidationResult
     {
-        const apiResource = this._getApiResource(k8sManifest);
-        this._logger.info("apiResource: ", apiResource);
-        if (!apiResource) {
-            return {
-                success: false,
-                errors: [ "Invalid manifest. Make sure that apiVersion and kind are set."]
-            }
-        }
-
-        const resourceKey = _.stableStringify(apiResource);
-        const definitionKey  = this._k8sJsonSchema.resources[resourceKey];
-        this._logger.info("definitionKey: %s", definitionKey);
-        if (!definitionKey) {
-            const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
-            if (this._params.ignoreUnknown) {
+        try
+        {
+            const apiResource = this._getApiResource(k8sManifest);
+            this._logger.info("apiResource: ", apiResource);
+            if (!apiResource) {
                 return {
-                    success: true,
-                    warnings: [ msg ]
+                    success: false,
+                    errors: [ "Invalid manifest. Make sure that apiVersion and kind are set."]
                 }
             }
+    
+            const resourceKey = _.stableStringify(apiResource);
+            const definitionKey  = this._k8sJsonSchema.resources[resourceKey];
+            this._logger.info("definitionKey: %s", definitionKey);
+            if (!definitionKey) {
+                const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
+                if (this._params.ignoreUnknown) {
+                    return {
+                        success: true,
+                        warnings: [ msg ]
+                    }
+                }
+    
+                return {
+                    success: false,
+                    errors: [ msg ]
+                }
+            }
+    
+            const schema = { // : SomeJTDSchemaType
+                ['$ref'] : `#/definitions/${definitionKey}`,
+                definitions: this._k8sJsonSchema.definitions
+            }
+    
+            const ajvOptions: AjvOptions = {
+                strict: true,
+                discriminator: true,
+                strictSchema: true,
+                validateFormats: true,
+                strictRequired: true,
+                strictTypes: true,
+                strictNumbers: true,
+                formats: {
+                }
+            };
+            const ajv = new Ajv(ajvOptions); 
+            addFormats(ajv);
+            const validator = ajv.compile(schema);
+            const result = validator(k8sManifest);
+            // this._logger.info("RESULT: ", result);
+            // this._logger.info("ERRORS: ", validator.errors);
+            if (result) {
+                return {
+                    success: true
+                }
+            } else {
+                return {
+                    success: false,
+                    errors: (validator.errors ?? []).map(x => this._mapError(x))
+                }
+            }
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[validate] Catch: ", reason);
 
             return {
                 success: false,
-                errors: [ msg ]
+                errors: [ reason?.message ?? 'Unkown Error.' ] 
             }
         }
 
-        const schema = { // : SomeJTDSchemaType
-            ['$ref'] : `#/definitions/${definitionKey}`,
-            definitions: this._k8sJsonSchema.definitions
-        }
-
-        const ajvOptions: AjvOptions = {
-            strict: true,
-            discriminator: true,
-            strictSchema: true,
-            validateFormats: true,
-            strictRequired: true,
-            strictTypes: true,
-            strictNumbers: true,
-            formats: {
-            }
-        };
-        const ajv = new Ajv(ajvOptions); 
-        addFormats(ajv);
-        const validator = ajv.compile(schema);
-        const result = validator(k8sManifest);
-        this._logger.info("RESULT: ", result);
-        this._logger.info("ERRORS: ", validator.errors);
-        if (result) {
-            return {
-                success: true
-            }
-        } else {
-            return {
-                success: false,
-                errors: (validator.errors ?? []).map(x => this._mapError(x))
-            }
-        }
     }
 
     private _mapError(error: ErrorObject)

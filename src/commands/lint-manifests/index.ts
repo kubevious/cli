@@ -24,6 +24,7 @@ export default function (program: Command)
         .description('Lints Kubernetes manifests for API syntax validity')
         .argument('[path...]', 'Path to file, directory, URL, or search pattern')
         .option('--ignore-unknown', 'Ignore unknown resources. Use when manifests include CRDs and not using --live-k8s option.')
+        .option('--skip-apply-crds', 'Skips CRD application.')
         .option('--k8s-version <version>', 'Target Kubernetes version. Do not use with --live-k8s option.')
         .option('--live-k8s', 'Lint against live Kubernetes cluster. Allows validation of CRDs. Do not use with --k8s-version option.')
         .option('--kubeconfig', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
@@ -68,10 +69,11 @@ export default function (program: Command)
                         process.exit(99);
                     }
         
-                    const packageValidator = new K8sPackageValidator(logger, k8sSchemaInfo.k8sJsonSchema, {
-                        ignoreUnknown: options.ignoreUnknown ? true : false
+                    const packageValidator = new K8sPackageValidator(logger, k8sSchemaInfo.k8sJsonSchema, manifestPackage, {
+                        ignoreUnknown: options.ignoreUnknown ? true : false,
+                        skipApplyCrds: options.skipApplyCrds ? true : false,
                     });
-                    await packageValidator.validate(manifestPackage);
+                    await packageValidator.validate();
 
                     return {
                         manifestPackage,

@@ -94,6 +94,8 @@ export class ManifestPackage
 
             id: makeId(k8sObject),
 
+            isProcessed: false,
+            
             success: true,
             errors: [],
             warnings: [],
@@ -119,6 +121,8 @@ export interface ManifestSource extends Required<ErrorStatus>
 export interface K8sManifest extends Required<ErrorStatus>
 {
     id: K8sObjectId;
+
+    isProcessed: boolean;
 
     source: ManifestSource;
     config: K8sObject;

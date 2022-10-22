@@ -14,47 +14,73 @@ import { K8sOpenApiResource } from 'k8s-super-client';
 
 export interface K8sPackageValidatorParams
 {
+    skipApplyCrds?: boolean
     ignoreUnknown? : boolean;
 }
 
 export class K8sPackageValidator
 {
     private _logger: ILogger;
+    private _origK8sJsonSchema : K8sApiJsonSchema;
     private _k8sJsonSchema : K8sApiJsonSchema;
+    private _manifestPackage : ManifestPackage;
     private _params: K8sPackageValidatorParams;
     private _spinner? : ISpinner;
 
-    constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, params?: K8sPackageValidatorParams)
+    constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, manifestPackage : ManifestPackage, params?: K8sPackageValidatorParams)
     {
         this._logger = logger.sublogger('K8sPackageValidator');
-        this._k8sJsonSchema = k8sJsonSchema;
+        this._origK8sJsonSchema = k8sJsonSchema;
+        this._manifestPackage = manifestPackage;
         this._params = params || {};
+        this._k8sJsonSchema = this._makeSchemaClone();
     }
 
-    validate(manifestPackage : ManifestPackage)
+    validate()
     {
         this._spinner = spinOperation('Validating manifests...');
 
-        this._applyCRDs(manifestPackage);
-
-        return Promise.serial(manifestPackage.manifests, x => this._validateManifest(manifestPackage, x))
+        return Promise.resolve()
             .then(() => {
-                this._spinner!.complete('Validation complete.')
-            });
+                if (!this._params!.skipApplyCrds) {
+                    this._logger.info("[validate] Running CRD Application...")
+                    return this._applyCRDs();
+                }
+            })
+            .then(() => {
+                this._logger.info("[validate] Running Manifest Validation...")
+
+                return Promise.serial(this._manifestPackage.manifests, x => this._validateManifest(x))
+                    .then(() => {
+                        this._spinner!.complete('Validation complete.')
+                    });
+            })
+
+
     }
 
-    private _applyCRDs(manifestPackage : ManifestPackage)
+    private _applyCRDs()
     {
-        const crds = manifestPackage.manifests.filter(x => isCRD(x.id));
-        for(const crd of crds)
-        {
-            this._applyCRD(crd);
-        }
+        const crds = this._manifestPackage.manifests.filter(x => isCRD(x.id));
+
+        return Promise.serial(crds, x => this._applyCRD(x))
     }
 
     private _applyCRD(crdManifest : K8sManifest)
     {
-        this._logger.info('[_applyCRDs] ', crdManifest.id);
+        this._logger.info('[_applyCRD] ', crdManifest.id);
+
+        this._validateManifest(crdManifest);
+
+        if (crdManifest.success)
+        {
+            this._applyCRDToSchema(crdManifest, this._k8sJsonSchema);
+        }
+    }
+
+    private _applyCRDToSchema(crdManifest : K8sManifest, jsonSchema : K8sApiJsonSchema)
+    {
+        this._logger.info('[_applyCRDToSchema] ', crdManifest.id);
 
         const crd = crdManifest.config as CustomResourceDefinition;
 
@@ -65,62 +91,126 @@ export class K8sPackageValidator
                 const spec = versionSpec.schema?.openAPIV3Schema;
                 if (spec)
                 {
-                    this._applyVersion(crd.spec.group, versionSpec.name, crd.spec.names.kind, spec);
+                    this._applyCRDVersion(crd.spec.group, versionSpec.name, crd.spec.names.kind, spec, jsonSchema);
                 }
             }
         }
     }
 
-    private _applyVersion(group: string, version: string, kind: string, schema : SchemaObject)
+    private _isValidCRD(crdManifest: K8sManifest)
     {
+        this._logger.info("[_isValidCRD] Begin...");
+
+        {
+            const validator = new K8sManifestValidator(this._logger, this._origK8sJsonSchema, this._params);
+            const result = validator.validate(crdManifest.config);
+            this._logger.info("[_isValidCRD] success: %s", result.success);
+
+            if (!result.success)
+            {
+                this._logger.verbose("[_isValidCRD] ERRORS: ", result.errors!);
+                this._manifestPackage.manifestErrors(crdManifest, result.errors!);
+                return false;
+            }
+        }
+
+        {
+            const newJsonSchema = this._makeSchemaClone();
+            this._applyCRDToSchema(crdManifest, newJsonSchema);
+
+            const validator = new K8sManifestValidator(this._logger, newJsonSchema, this._params);
+            const result = validator.validate(crdManifest.config);
+            this._logger.info("[_isValidCRD] STAGE 2 success: %s", result.success);
+
+            if (!result.success)
+            {
+                this._logger.verbose("[_isValidCRD] STAGE 2 ERRORS: ", result.errors!);
+                this._manifestPackage.manifestErrors(crdManifest, result.errors!);
+                return false;
+            }
+        }
+        
+
+        return true;
+    }
+
+    private _applyCRDVersion(group: string, version: string, kind: string, crdCchema : SchemaObject, jsonSchema : K8sApiJsonSchema)
+    {
+        const apiResource : K8sOpenApiResource = {
+            group: group,
+            kind: kind,
+            version: version,
+        }
+        this._logger.info('[_applyCRDToSchema] apiResource: ', apiResource);
+
         let parts = group.split('.');
         parts = _.reverse(parts);
         parts.push(version);
         parts.push(kind);
 
         const definitionKey = parts.join('.');
-        this._logger.info('[_applyVersion] definitionKey: %s', definitionKey);
+        this._logger.info('[_applyCRDToSchema] definitionKey: %s', definitionKey);
 
-        const apiResource : K8sOpenApiResource = {
-            group: group,
-            kind: kind,
-            version: version,
-        }
         const resourceKey = _.stableStringify(apiResource);
 
-        this._logger.info('[_applyVersion] apiResource: ', apiResource);
-        this._logger.info('[_applyVersion] resourceKey: %s', resourceKey);
+        this._logger.info('[_applyCRDToSchema] apiResource: ', apiResource);
+        this._logger.info('[_applyCRDToSchema] resourceKey: %s', resourceKey);
 
-        this._k8sJsonSchema.definitions[definitionKey] = schema;
-        this._k8sJsonSchema.resources[resourceKey] = definitionKey;
+        jsonSchema.definitions[definitionKey] = crdCchema;
+        jsonSchema.resources[resourceKey] = definitionKey;
     }
 
-    private _validateManifest(manifestPackage : ManifestPackage, manifest: K8sManifest)
+    private _validateManifest(manifest: K8sManifest)
     {
         if (!manifest.source.success)
         {
             return;
         }
 
+        if (manifest.isProcessed) {
+            return;
+        }
+
+        manifest.isProcessed = true;
+
         this._spinner!.update(`Validating ${manifest.source.source.path}...`);
 
-        try
         {
-            const validator = new K8sManifestValidator(this._logger, this._k8sJsonSchema, this._params);
+            const jsonSchema = isCRD(manifest.id) ? this._origK8sJsonSchema : this._k8sJsonSchema;
+            const validator = new K8sManifestValidator(this._logger, jsonSchema, this._params);
             const result = validator.validate(manifest.config);
             if (!result.success)
             {
                 this._logger.verbose("ERRORS: ", result.errors!);
-
-                manifestPackage.manifestErrors(manifest, result.errors!);
+                this._manifestPackage.manifestErrors(manifest, result.errors!);
             }
-            manifestPackage.manifestWarnings(manifest, result.warnings);
+            this._manifestPackage.manifestWarnings(manifest, result.warnings);
         }
-        catch(reason: any)
-        {
-            this._logger.error("[validate] ERROR: ", reason);
 
-            manifestPackage.sourceError(manifest.source, `Unknown error occured. ${reason?.message}`);
+        if (isCRD(manifest.id))
+        {
+            const newJsonSchema = this._makeSchemaClone();
+            this._applyCRDToSchema(manifest, newJsonSchema);
+
+            const validator = new K8sManifestValidator(this._logger, newJsonSchema, this._params);
+            const result = validator.validate(manifest.config);
+            this._logger.info("[_validateManifest] isCRD success: %s", result.success);
+
+            if (!result.success)
+            {
+                this._logger.verbose("[_validateManifest] isCRD ERRORS: ", result.errors!);
+                this._manifestPackage.manifestErrors(manifest, result.errors!);
+            }
+            this._manifestPackage.manifestWarnings(manifest, result.warnings);
         }
+    }
+
+    private _makeSchemaClone()
+    {
+        const newSchema : K8sApiJsonSchema = {
+            resources: _.clone(this._origK8sJsonSchema.resources),
+            definitions: _.clone(this._origK8sJsonSchema.definitions)
+        }
+        return newSchema;
     }
 }
