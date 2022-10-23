@@ -1,8 +1,9 @@
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 import { ILogger } from 'the-logger';
 import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
-import { connectDefaultRemoteCluster, K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
+import { connectDefaultRemoteCluster, connectRemoteCluster, K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
 import { spinOperation } from '../utils/screen';
+import { logger } from '../logger';
 
 export class K8sApiSchemaFetcher
 {
@@ -13,12 +14,20 @@ export class K8sApiSchemaFetcher
         this._logger = logger.sublogger('K8sApiSchemaFetcher');
     }
 
-    async fetchRemote() : Promise<K8sApiSchemaFetcherResult>
+    async fetchRemote(kubeconfigpath? : string) : Promise<K8sApiSchemaFetcherResult>
     {
         const spinner = spinOperation('Connecting to K8s Cluster...');
 
         let isConnected = false;
-        return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: true })
+        return Promise.resolve()
+            .then(() => {
+                if (kubeconfigpath) {
+                    this._logger.info("[fetchRemote] path: %s", kubeconfigpath);
+                    return connectRemoteCluster(this._logger.sublogger('k8s'), kubeconfigpath, undefined, { skipAPIFetch: true })
+                } else {
+                    return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: true })
+                }
+            })
             .then(client => {
                 spinner.update('Extracting K8s API Schema...')
                 this._logger.info("Connected.");

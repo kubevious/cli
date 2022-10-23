@@ -6,6 +6,7 @@ stages:
   - "test"
   - "package"
   - "publish"
+  - "release"
 
 steps:
 
@@ -20,6 +21,9 @@ steps:
       - export MOCK_DATA_REPO_NAME=mock-data
       - cf_export MOCK_DATA_REPO_NAME=${MOCK_DATA_REPO_NAME}
       - cf_export MOCK_DATA_REPO_PATH=/codefresh/volume/${MOCK_DATA_REPO_NAME}.git
+      - export CICD_REPO_NAME=cicd
+      - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
+      - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
       - 'echo "Repo: ${{CF_REPO_NAME}}"'
       - 'echo "Branch: ${{CF_BRANCH}}"'
       - 'echo "Revision: ${{CF_REVISION}}"'
@@ -41,6 +45,20 @@ steps:
       - git reset --hard ${{CF_REVISION}}
       - ls -la
 
+  clone_cicd:
+    title: Clone CI/CD Repo
+    stage: clone
+    image: "alpine/git:latest"
+    working_directory: "/codefresh/volume"
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{CICD_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CICD_REPO_NAME}}.git ${{CICD_REPO_PATH}}"
+      - ls -la
+      - cd ${{CICD_REPO_PATH}}
+      - ls -la
+
   clone_mock_data:
     title: Clone Mock Data Repo
     stage: clone
@@ -54,6 +72,22 @@ steps:
       - ls -la
       - cd ${{MOCK_DATA_REPO_PATH}}
       - ls -la      
+
+  inject_version:
+    title: Inject Version
+    stage: build
+    image: kubevious/cicd_deployer:v2
+    shell: bash
+    working_directory: "${{MAIN_REPO_PATH}}"
+    commands:
+      - pwd
+      - ls -la
+      - source ${{CICD_REPO_PATH}}/process-version-bump.sh
+      - echo "NEW VERSION=${PRODUCT_VERSION}"
+      - source version.sh
+      - cf_export PRODUCT_VERSION=${PRODUCT_VERSION}
+      - cf_export DOCKER_TAG=${PRODUCT_VERSION}
+      - git status
 
   prepare:
     title: Prepare Dependencies
@@ -90,3 +124,40 @@ steps:
     commands:
       - npm pack
       - ls -la
+
+  # build_executables:
+  #   title: Build Executables
+  #   stage: package
+  #   image: 'kubevious/node-executable-builder:v2'
+  #   working_directory: "${{MAIN_REPO_PATH}}"
+  #   shell: bash
+  #   commands:
+  #     - ls -la
+  #     - pkg . --debug
+  #     - ls -la
+  #     - ls -la binary/
+
+  commit_main_repo:
+    title: Commit Version Changes
+    stage: release
+    image: codefresh/cli
+    working_directory: "${{MAIN_REPO_PATH}}"
+    when:
+      condition:
+        all:
+          isRelease: '"${{IS_RELEASE}}" == "true"'
+    commands:
+      - ${{CICD_REPO_PATH}}/cicd-commit-product-repo.sh
+
+  publish_npm:
+    title: Publish NPM
+    stage: release
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    when: 
+      condition: 
+        all: 
+          isRelease: '"${{IS_RELEASE}}" == "true"'
+    commands:
+      - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+      - npm publish

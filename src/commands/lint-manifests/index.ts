@@ -27,7 +27,7 @@ export default function (program: Command)
         .option('--skip-apply-crds', 'Skips CRD application.')
         .option('--k8s-version <version>', 'Target Kubernetes version. Do not use with --live-k8s option.')
         .option('--live-k8s', 'Lint against live Kubernetes cluster. Allows validation of CRDs. Do not use with --k8s-version option.')
-        .option('--kubeconfig', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
+        .option('--kubeconfig <path>', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
         .option('--json', 'Output lint result in JSON.')
         .action(
             new CommandBuilder<TData, LintManifestsResult>()
@@ -42,7 +42,7 @@ export default function (program: Command)
         
                     const k8sApiSchemaFetcher = new K8sApiSchemaFetcher(logger);
                     if (options.liveK8s) {
-                        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote();
+                        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote(options.kubeconfig);
                     } else {
                         k8sSchemaInfo = await k8sApiSchemaFetcher.fetchLocal(options.k8sVersion);
                     }
