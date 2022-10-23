@@ -26,7 +26,6 @@ steps:
       - export CICD_REPO_NAME=cicd
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
-      - 'echo "Repo: ${{MAIN_REPO_NAME}}"'
       
   clone:
     title: Clone Repo
