@@ -139,10 +139,6 @@ steps:
     stage: release
     image: codefresh/cli
     working_directory: "${{MAIN_REPO_PATH}}"
-    when:
-      condition:
-        all:
-          isRelease: '"${{IS_RELEASE}}" == "true"'
     commands:
       - ${{CICD_REPO_PATH}}/cicd-commit-product-repo.sh
 
@@ -151,10 +147,6 @@ steps:
     stage: release
     image: 'kubevious/node-builder:14'
     working_directory: "${{MAIN_REPO_PATH}}"
-    when: 
-      condition: 
-        all: 
-          isRelease: '"${{IS_RELEASE}}" == "true"'
     commands:
       - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
       - npm publish
