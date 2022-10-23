@@ -17,18 +17,16 @@ steps:
     shell: bash
     commands:
       - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
-      - cf_export MAIN_REPO_PATH=/codefresh/volume/repo.git
+      - export MAIN_REPO_NAME=cli
+      - cf_export MAIN_REPO_NAME=${MAIN_REPO_NAME}
+      - cf_export MAIN_REPO_PATH=/codefresh/volume/${MAIN_REPO_NAME}.git
       - export MOCK_DATA_REPO_NAME=mock-data
       - cf_export MOCK_DATA_REPO_NAME=${MOCK_DATA_REPO_NAME}
       - cf_export MOCK_DATA_REPO_PATH=/codefresh/volume/${MOCK_DATA_REPO_NAME}.git
       - export CICD_REPO_NAME=cicd
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
-      - 'echo "Repo: ${{CF_REPO_NAME}}"'
-      - 'echo "Branch: ${{CF_BRANCH}}"'
-      - 'echo "Revision: ${{CF_REVISION}}"'
-      - 'echo "Author: ${{CF_COMMIT_AUTHOR}}"'
-      - 'echo "Message: ${{CF_COMMIT_MESSAGE}}"'
+      - 'echo "Repo: ${{MAIN_REPO_NAME}}"'
       
   clone:
     title: Clone Repo
@@ -39,10 +37,9 @@ steps:
       - pwd
       - ls -la
       - rm -rf ${{MAIN_REPO_PATH}}
-      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}.git ${{MAIN_REPO_PATH}}'
+      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MAIN_REPO_NAME}}.git ${{MAIN_REPO_PATH}}'
       - ls -la
       - cd ${{MAIN_REPO_PATH}}
-      - git reset --hard ${{CF_REVISION}}
       - ls -la
 
   clone_cicd:
