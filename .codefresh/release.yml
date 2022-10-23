@@ -26,6 +26,7 @@ steps:
       - export CICD_REPO_NAME=cicd
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
+      - cf_export CF_REPO_OWNER=kubevious
       
   clone:
     title: Clone Repo
