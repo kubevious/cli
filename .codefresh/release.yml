@@ -9,7 +9,6 @@ stages:
   - "release"
 
 steps:
-
   init:
     title: Init
     stage: clone
@@ -27,17 +26,17 @@ steps:
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
       - cf_export CF_REPO_OWNER=kubevious
-      
+
   clone:
     title: Clone Repo
     stage: clone
-    image: 'alpine/git:latest'
+    image: "alpine/git:latest"
     working_directory: "/codefresh/volume"
     commands:
       - pwd
       - ls -la
       - rm -rf ${{MAIN_REPO_PATH}}
-      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MAIN_REPO_NAME}}.git ${{MAIN_REPO_PATH}}'
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MAIN_REPO_NAME}}.git ${{MAIN_REPO_PATH}}"
       - ls -la
       - cd ${{MAIN_REPO_PATH}}
       - ls -la
@@ -59,16 +58,16 @@ steps:
   clone_mock_data:
     title: Clone Mock Data Repo
     stage: clone
-    image: 'alpine/git:latest'
+    image: "alpine/git:latest"
     working_directory: "/codefresh/volume"
     commands:
       - pwd
       - ls -la
       - rm -rf ${{MOCK_DATA_REPO_PATH}}
-      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MOCK_DATA_REPO_NAME}}.git ${{MOCK_DATA_REPO_PATH}}'
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MOCK_DATA_REPO_NAME}}.git ${{MOCK_DATA_REPO_PATH}}"
       - ls -la
       - cd ${{MOCK_DATA_REPO_PATH}}
-      - ls -la      
+      - ls -la
 
   inject_version:
     title: Inject Version
@@ -89,7 +88,7 @@ steps:
   prepare:
     title: Prepare Dependencies
     stage: build
-    image: 'kubevious/node-builder:14'
+    image: "kubevious/node-builder:14"
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - yarn install --frozen-lockfile
@@ -97,7 +96,7 @@ steps:
   compile:
     title: Compile
     stage: build
-    image: 'kubevious/node-builder:14'
+    image: "kubevious/node-builder:14"
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - ./scripts/prepare-package.sh
@@ -116,7 +115,7 @@ steps:
   package_npm:
     title: Package NPM
     stage: package
-    image: 'kubevious/node-builder:14'
+    image: "kubevious/node-builder:14"
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - npm pack
@@ -151,7 +150,7 @@ steps:
     candidate: "${{docker_build}}"
     tags:
       - "${{DOCKER_TAG}}"
-      
+
   commit_main_repo:
     title: Commit Version Changes
     stage: release
@@ -163,7 +162,7 @@ steps:
   publish_npm:
     title: Publish NPM
     stage: release
-    image: 'kubevious/node-builder:14'
+    image: "kubevious/node-builder:14"
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
