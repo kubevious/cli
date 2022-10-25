@@ -12,7 +12,9 @@ if [ $RESULT -ne 0 ]; then
   exit 1;
 fi
 
-./scripts/prepare-packages.sh
+pwd
+
+./scripts/prepare-package.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
   echo "Prepare Package Failed"

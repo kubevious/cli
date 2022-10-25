@@ -1,7 +1,32 @@
-# Kubevious Cli
-Kubevious CLI helps detect Kubernetes manifest misconfiguration. It works as a stand-alone tool and can be easily integrated into CI/CD processes.
+[![Release](https://img.shields.io/github/v/release/kubevious/cli?label=version&color=2ec4b6)](https://github.com/kubevious/cli/releases) [![Issues](https://img.shields.io/github/issues/kubevious/cli?color=red)](https://github.com/kubevious/cli/issues) [![Slack](https://img.shields.io/badge/chat-on%20slack-7b2cbf)](https://kubevious.io/slack) [![Twitter](https://img.shields.io/twitter/url?color=0096c7&logoColor=white&label=Follow&logo=twitter&style=flat&url=https%3A%2F%2Ftwitter.com%2Fkubevious)](https://twitter.com/kubevious)  [![License](https://img.shields.io/badge/License-Apache%202.0-cb997e.svg)](https://opensource.org/licenses/Apache-2.0) ![](https://hit.yhype.me/github/profile?user_id=59004473)
 
-## Installation
+
+# Kubevious CLI
+Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguration. It works as a stand-alone tool and can be easily integrated into CI/CD processes.
+
+- [✨ Key Capabilities](#)
+- [🔮 Coming Soon](#)
+- [📥 Installation](#)
+- [🃏 Examples](#)
+
+## ✨ Key Capabilities
+- Validate from sources:
+   - files & directories
+   - search pattern
+   - web URL
+   - stdin pipe
+- Validate YAML structure
+- Validate manifest syntax
+- Validate towards specified K8s version
+- Validate towards a live running K8s cluster
+- Validate CRs and CRDs
+- Validate configurators such as Helm, Kustomize, etc.
+
+## 🔮 Coming Soon
+- Cross-manifest validation using [Kubevious Validators](https://github.com/kubevious/kubevious#-validate).
+- Integration with [Kubevius Guard](https://github.com/kubevious/kubevious#-guard) to validate custom rules.
+
+## 📥 Installation
 
 ### Option 1:
 
@@ -15,9 +40,12 @@ Download all-in-one executables. Contains versions for Linux, Alpine, Mac OS, an
 TODO: Links to be provided
 
 
-## Example Usage
+## 🃏 Examples
+Try it yourself:
+
 ```sh
-$ cd samples
+$ git clone https://github.com/kubevious/cli.git kubevious-cli.git
+$ cd kubevious-cli.git/samples
 ```
 
 ### Validate single K8s manifest
@@ -32,7 +60,7 @@ $ kubevious lint invalid-service-1.yaml
 ❌ Lint Failed
 ```
 
-### Validate from Web
+### Validate from Web URL
 ```sh
 $ kubevious lint https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/kubernetes-manifests/frontend.yaml
 ℹ️  Linting against Kubernetes Version: 1.25.2
@@ -80,7 +108,7 @@ $ kubevious lint istio-gateway.yaml --live-k8s
 ✅ Lint Succeeded.
 ```
 
-### Validate Custom Resource and it's CRD
+### Validate Custom Resource and corresponding CRD
 ```sh
 $ kubevious lint cr-good.yaml crd.yaml
 ℹ️  Linting against Kubernetes Version: 1.25.2
@@ -92,6 +120,12 @@ $ kubevious lint cr-good.yaml crd.yaml
    ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.contoso.com
 
 ✅ Lint Succeeded.
+```
+
+### Validate Helm Charts
+```sh
+$ helm repo add traefik https://helm.traefik.io/traefik
+$ helm template traefik/traefik | kubevious lint
 ```
 
 ### Validate Entire Directory
