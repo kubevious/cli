@@ -5,6 +5,12 @@ cd $MY_DIR
 
 source configuration.sh
 
+yarn install --frozen-lockfile
+if [ $RESULT -ne 0 ]; then
+  echo "Failed to download packages"
+  exit 1;
+fi
+
 ./build.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
