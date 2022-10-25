@@ -7,7 +7,7 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 - [✨ Key Capabilities](#-key-capabilities)
 - [🔮 Coming Soon](#-coming-soon)
 - [📥 Installation](#-installation)
-- [🃏 Examples](#-examples)
+- [🃏 Usage Examples](#-usage-examples)
 
 ## ✨ Key Capabilities
 - Validate from sources:
@@ -28,24 +28,36 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 
 ## 📥 Installation
 
-### Option 1:
+### Option 1: (NPM Package)
 If you have Node.js v14 or higher:
 ```sh
 $ npm install -g kubevious
 ```
 
-### Option 2:
-Download all-in-one executables. Contains versions for Linux, Alpine, Mac OS, and Windows.
+### Option 2: (Precompiled Binaries)
+All-in-one executables for Linux, Alpine, Mac OS, and Windows and x64 and arm64 architectures.
+Download from here:
+[https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0](https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0)
 
-TODO: Links to be provided
 
-### Option 3:
+### Option 3: (In a container)
 Run in a container:
+```sh
+$ docker run kubevious/cli --help
+$ docker run kubevious/cli --version
+```
 
-TODO: ...
+Validate the entire manifests directory:
+```sh
+$ docker run -v ${PWD}/samples:/manifests kubevious/cli lint /manifests
+```
 
+Validate Helm Chart or any manifests from pipe stream:
+```sh
+$ helm template traefik/traefik | docker run -i kubevious/cli lint
+```
 
-## 🃏 Examples
+## 🃏 Usage Examples
 Try it yourself:
 
 ```sh

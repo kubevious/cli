@@ -5,6 +5,9 @@ MY_DIR="$(dirname $MY_PATH)"
 export BINARY_DIR=${MY_DIR}/binary
 export K8S_API_SCHEMA_DIR=${MY_DIR}/../mock-data.git/k8s-api-json-schema/
 
+export IMAGE_NAME=kubevious-cli
+export CONTAINER_NAME=kubevious-cli-test
+
 ## PLATFORM TARGETS
 NODE_VERSION=node14
 TARGETS=()
