@@ -7,9 +7,9 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 - [✨ Key Capabilities](#-key-capabilities)
 - [🔮 Coming Soon](#-coming-soon)
 - [📥 Installation](#-installation)
-  - [👇 NPM Package](#)
-  - [👇 Precompiled Binaries](#)
-  - [👇 Docker image](#)
+  - [👇 NPM Package](#-option-1-npm-package)
+  - [👇 Precompiled Binaries](#-option-2-precompiled-binaries)
+  - [👇 In Docker Container](#-option-3-in-a-docker-container)
 - [🃏 Usage Examples](#-usage-examples)
 
 ## ✨ Key Capabilities
@@ -47,7 +47,7 @@ Download from here:
 [https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0](https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0)
 
 
-### 👇 Option 3: (In a container)
+### 👇 Option 3: (In a Docker container)
 Run in a container:
 ```sh
 $ docker run kubevious/cli --help
@@ -248,6 +248,12 @@ $ kubevious lint *
 
 ❌ Lint Failed
 ```
+
+## 🔭 Kubevious Project
+Learn more about the Kubevious project in the root repository: https://github.com/kubevious/kubevious
+
+## 💬 Slack
+Join the [Kubevious Slack workspace](https://kubevious.io/slack) to chat with Kubevious developers and users. This is a good place to learn about Kubevious, ask questions, and share your experiences.
 
 ## 🏗️ Contributing
 We invite your participation through issues and pull requests! You can peruse the [contributing guidelines](https://github.com/kubevious/kubevious/blob/master/CONTRIBUTING.md).
