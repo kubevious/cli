@@ -7,6 +7,9 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 - [✨ Key Capabilities](#-key-capabilities)
 - [🔮 Coming Soon](#-coming-soon)
 - [📥 Installation](#-installation)
+  - [👇 NPM Package](#)
+  - [👇 Precompiled Binaries](#)
+  - [👇 Docker image](#)
 - [🃏 Usage Examples](#-usage-examples)
 
 ## ✨ Key Capabilities
@@ -28,23 +31,26 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 
 ## 📥 Installation
 
-### Option 1: (NPM Package)
+### 👇 Option 1: (NPM Package)
 If you have Node.js v14 or higher:
 ```sh
 $ npm install -g kubevious
 ```
 
-### Option 2: (Precompiled Binaries)
+```sh
+$ kubevious lint samples/
+```
+
+### 👇 Option 2: (Precompiled Binaries)
 All-in-one executables for Linux, Alpine, Mac OS, and Windows and x64 and arm64 architectures.
 Download from here:
 [https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0](https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0)
 
 
-### Option 3: (In a container)
+### 👇 Option 3: (In a container)
 Run in a container:
 ```sh
 $ docker run kubevious/cli --help
-$ docker run kubevious/cli --version
 ```
 
 Validate the entire manifests directory:

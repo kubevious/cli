@@ -122,6 +122,14 @@ steps:
       - npm pack
       - ls -la
 
+  docker_build:
+    title: Building Kubevious CLI Image
+    stage: package
+    type: build
+    image_name: "${{IMAGE_NAME}}"
+    working_directory: "${{MAIN_REPO_PATH}}"
+    disable_push: true
+
   # build_executables:
   #   title: Build Executables
   #   stage: package
@@ -134,6 +142,16 @@ steps:
   #     - ls -la
   #     - ls -la binary/
 
+  push_dockerhub:
+    title: Pushing Kubevious CLI to DockerHub
+    stage: release
+    type: push
+    image_name: "${{IMAGE_NAME}}"
+    registry: "dockerhub"
+    candidate: "${{docker_build}}"
+    tags:
+      - "${{DOCKER_TAG}}"
+      
   commit_main_repo:
     title: Commit Version Changes
     stage: release

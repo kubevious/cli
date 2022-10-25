@@ -16,15 +16,20 @@ steps:
     shell: bash
     commands:
       - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
+      - export PRODUCT_NAME=${{CF_REPO_NAME}}
+      - cf_export PRODUCT_NAME=${PRODUCT_NAME}
       - cf_export MAIN_REPO_PATH=/codefresh/volume/repo.git
       - export MOCK_DATA_REPO_NAME=mock-data
       - cf_export MOCK_DATA_REPO_NAME=${MOCK_DATA_REPO_NAME}
       - cf_export MOCK_DATA_REPO_PATH=/codefresh/volume/${MOCK_DATA_REPO_NAME}.git
+      - export IMAGE_NAME=kubevious/${PRODUCT_NAME}
+      - cf_export IMAGE_NAME=${IMAGE_NAME}
       - 'echo "Repo: ${{CF_REPO_NAME}}"'
       - 'echo "Branch: ${{CF_BRANCH}}"'
       - 'echo "Revision: ${{CF_REVISION}}"'
       - 'echo "Author: ${{CF_COMMIT_AUTHOR}}"'
       - 'echo "Message: ${{CF_COMMIT_MESSAGE}}"'
+      - 'echo "Image Name: ${IMAGE_NAME}"'
       
   clone:
     title: Clone Repo
@@ -90,3 +95,11 @@ steps:
     commands:
       - npm pack
       - ls -la
+
+  docker_build:
+    title: Building Kubevious CLI Image
+    stage: package
+    type: build
+    image_name: "${{IMAGE_NAME}}"
+    working_directory: "${{MAIN_REPO_PATH}}"
+    disable_push: true
