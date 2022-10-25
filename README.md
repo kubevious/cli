@@ -2,12 +2,12 @@
 
 
 # Kubevious CLI
-Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguration. It works as a stand-alone tool and can be easily integrated into CI/CD processes.
+Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguration. It works as a stand-alone tool and can be easily integrated into CI/CD processes. 
 
-- [✨ Key Capabilities](#)
-- [🔮 Coming Soon](#)
-- [📥 Installation](#)
-- [🃏 Examples](#)
+- [✨ Key Capabilities](#-key-capabilities)
+- [🔮 Coming Soon](#-coming-soon)
+- [📥 Installation](#-installation)
+- [🃏 Examples](#-examples)
 
 ## ✨ Key Capabilities
 - Validate from sources:
@@ -16,11 +16,11 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
    - web URL
    - stdin pipe
 - Validate YAML structure
-- Validate manifest syntax
-- Validate towards specified K8s version
+- Validate Kubernetes manifest syntax
+- Validate for the specified K8s version
 - Validate towards a live running K8s cluster
 - Validate CRs and CRDs
-- Validate configurators such as Helm, Kustomize, etc.
+- Validate configurator packages such as Helm, Kustomize, etc.
 
 ## 🔮 Coming Soon
 - Cross-manifest validation using [Kubevious Validators](https://github.com/kubevious/kubevious#-validate).
@@ -29,7 +29,6 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 ## 📥 Installation
 
 ### Option 1:
-
 If you have Node.js v14 or higher:
 ```sh
 $ npm install -g kubevious
@@ -37,7 +36,13 @@ $ npm install -g kubevious
 
 ### Option 2:
 Download all-in-one executables. Contains versions for Linux, Alpine, Mac OS, and Windows.
+
 TODO: Links to be provided
+
+### Option 3:
+Run in a container:
+
+TODO: ...
 
 
 ## 🃏 Examples
@@ -126,6 +131,18 @@ $ kubevious lint cr-good.yaml crd.yaml
 ```sh
 $ helm repo add traefik https://helm.traefik.io/traefik
 $ helm template traefik/traefik | kubevious lint
+ℹ️  Linting against Kubernetes Version: 1.25.2
+
+❌ ♒ STREAM: stream
+   ✅ API: v1, Kind: Service, Name: release-name-traefik
+   ✅ API: v1, Kind: ServiceAccount, Name: release-name-traefik
+   ✅ API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+   ❌ API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
+      ❌ Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
+
+❌ Lint Failed
 ```
 
 ### Validate Entire Directory
@@ -214,3 +231,14 @@ $ kubevious lint *
 ❌ Lint Failed
 ```
 
+## 🏗️ Contributing
+We invite your participation through issues and pull requests! You can peruse the [contributing guidelines](https://github.com/kubevious/kubevious/blob/master/CONTRIBUTING.md).
+
+## 🏛️ Governance
+The Kubevious project is created by [AUTHORS](https://github.com/kubevious/kubevious/blob/master/AUTHORS.md). Governance policy is yet to be defined.
+
+## 🚀 Roadmap
+Kubevious maintains a public [roadmap](https://github.com/kubevious/kubevious/blob/master/ROADMAP.md), which provides priorities and future capabilities we are planning on adding to Kubevious.
+
+# 📜 License
+Kubevious CLI is an open-source project licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0). 
