@@ -126,6 +126,7 @@ steps:
     stage: package
     type: build
     image_name: "${{IMAGE_NAME}}"
+    tag: "${{DOCKER_TAG}}"
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
 
