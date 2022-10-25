@@ -6,7 +6,7 @@ import glob from 'glob';
 import * as fs from 'fs';
 import * as Path from 'path';
 import { K8sObject } from '../types/k8s';
-import * as yaml from 'js-yaml'
+import YAML from 'yaml';
 
 import { ManifestSource, ManifestPackage } from './manifest-package';
 import { readFromInputStream } from '../utils/stream';
@@ -131,7 +131,7 @@ export class ManifetsLoader
                 if (!manifests) {
                     try
                     {
-                        manifests = yaml.loadAll(contents);    
+                        manifests = parseYaml(contents);
                     }
                     catch(reason: any)
                     {
@@ -175,10 +175,10 @@ export class ManifetsLoader
         const extension = Path.extname(path);
         if (extension === '.yaml' || extension === '.yml')
         {
-            let manifests : any[] = [];
+        let manifests : any[] | null = [];
             try
             {
-                manifests = yaml.loadAll(contents);    
+                manifests = parseYaml(contents);    
             }
             catch(reason: any)
             {
@@ -187,12 +187,19 @@ export class ManifetsLoader
 
             if (manifests)
             {
-                this._logger.info("[_loadFile]     count: %s", manifests.length);
+                this._logger.info("[_parseSource] Manifest Count: %s", manifests.length);
+                this._logger.silly("[_parseSource] Manifests: ", manifests);
                 for(const manifest of manifests)
                 {
                     this._addManifest(source, manifest);
                 }
-            }            
+            }         
+            else
+            {
+                this._logger.info("[_parseSource] No Manifests Found.");
+            }
+            
+            
         }
         else if (extension === '.json')
         {
@@ -275,4 +282,24 @@ export class ManifetsLoader
         return null;
     }
 
+}
+
+function parseYaml(contents: string) : any[] | null
+{
+    // console.log(">>>>>>>>>>>>>>>")
+    // console.log(contents);
+    // console.log("<<<<<<<<>>>>>>>>*")
+
+    const result = YAML.parseAllDocuments(contents, {
+    });
+
+    if (!result) {
+        return [];
+    }
+    
+    const jsons = result.map(x => x.toJS({ })); // emptySourceAsObject: false 
+    // console.log("***************************")
+    // console.log(jsons);
+    // console.log("***************************")
+    return jsons;
 }

@@ -63,6 +63,11 @@ export class K8sManifestValidator
                 ['$ref'] : `#/definitions/${definitionKey}`,
                 definitions: this._k8sJsonSchema.definitions
             }
+
+            this._preProcessNode(k8sManifest, {
+                ['$ref'] : schema['$ref']
+            }, null, null);
+            // this._logger.info("PreProcessed Manifest: ", k8sManifest);
     
             const ajvOptions: AjvOptions = {
                 strict: true,
@@ -101,7 +106,97 @@ export class K8sManifestValidator
                 errors: [ reason?.message ?? 'Unkown Error.' ] 
             }
         }
+    }
 
+    private _preProcessNode(node: any, schema: any, parentNode: any, parentProp: any) : void
+    {
+        // this._logger.info('[_preProcessNode] ')
+        if (!schema) {
+            return;
+        }
+
+        {
+            const refName = schema['$ref'];
+            if (refName)
+            {
+                return this._preProcessNodeRef(node, refName, parentNode, parentProp);
+            }
+        }
+
+        {
+            const allOf = schema.allOf;
+            if (allOf)
+            {
+                const firstSchema = _.first(allOf);
+                return this._preProcessNode(node, firstSchema, parentNode, parentProp);
+            }
+        }
+
+        const sType = schema.type;
+        // this._logger.info('[_preProcessNode] type: %s', sType)
+
+        if (sType === 'object')
+        {
+            if (_.isNull(node))
+            {
+                // this._logger.error(">>>>>> OBJECT IS NULL");
+                if (parentNode) {
+                    parentNode[parentProp] = {};
+                }
+            }
+            else if (_.isObject(node)) {
+                const propsSchema = schema.properties;
+                if (propsSchema)
+                {
+                    for(const propName of _.keys(node))
+                    {
+                        // this._logger.info('[_preProcessNode] propName: %s', propName)
+                        const propNode = (node as any)[propName];
+
+                        const propSchema = propsSchema[propName];
+                        if (propSchema)
+                        {
+                            this._preProcessNode(propNode, propSchema, node, propName);
+                        }
+                        // this._logger.info('[_preProcessNode] propNode: ', propNode)
+                    }
+                }
+            }
+        }
+        else if (sType === 'array')
+        {
+            const itemsSchema = schema.items;
+            if (_.isNull(node))
+            {
+                // this._logger.error(">>>>>> ARRAY IS NULL");
+                if (parentNode) {
+                    parentNode[parentProp] = [];
+                }
+            }
+            else if (_.isArray(node))
+            {
+                for(const childNode of node)
+                {
+                    this._preProcessNode(childNode, itemsSchema, null, null);
+                }
+            }
+        }
+
+    }
+
+    private _preProcessNodeRef(node: any, refName: string, parentNode: any, parentProp: any) : void
+    {
+        // this._logger.info('[_preProcessNodeRef] refName: %s', refName);
+
+        const prefix = '#/definitions/';
+        if (_.startsWith(refName, prefix))
+        {
+            const key = refName.substring(prefix.length);
+            // this._logger.info('[_preProcessNodeRef] key: %s', key);
+            const refSchema = this._k8sJsonSchema.definitions[key];
+            // this._logger.info('[_preProcessNodeRef] refSchema: ', refSchema);
+            return this._preProcessNode(node, refSchema, parentNode, parentProp);
+        }
     }
 
     private _mapError(error: ErrorObject)
@@ -112,11 +207,17 @@ export class K8sManifestValidator
         }
         if (error.keyword === 'additionalProperties')
         {
-            return `Unknown property "${error.params.additionalProperty}" under "${error.instancePath}"`;
+            if (error.instancePath) {
+                return `Unknown property "${error.params.additionalProperty}" under "${error.instancePath}"`;
+            }
+            return `Unknown property "${error.params.additionalProperty}"`;
         }
         if (error.keyword === 'required')
         {
-            return `Required property "${error.params.missingProperty}" missing under "${error.instancePath}"`;
+            if (error.instancePath) {
+                return `Required property "${error.params.missingProperty}" missing under "${error.instancePath}"`;
+            }
+            return `Required property "${error.params.missingProperty}" missing.`;
         }
         if (error.keyword === 'enum')
         {

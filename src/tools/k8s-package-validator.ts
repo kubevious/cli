@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { CustomResourceDefinition } from 'kubernetes-types/apiextensions/v1'
+import { CustomResourceDefinition, JSONSchemaProps } from 'kubernetes-types/apiextensions/v1'
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 
@@ -11,6 +11,7 @@ import { ISpinner, spinOperation } from '../utils/screen';
 import { isCRD } from '../utils/k8s';
 import { SchemaObject } from 'ajv/dist/core';
 import { K8sOpenApiResource } from 'k8s-super-client';
+import { CrdSchemaToJsonSchemaConverter } from './crd-schema-to-json-schema-converter';
 
 export interface K8sPackageValidatorParams
 {
@@ -70,9 +71,7 @@ export class K8sPackageValidator
     {
         this._logger.info('[_applyCRD] ', crdManifest.id);
 
-        this._validateManifest(crdManifest);
-
-        if (crdManifest.success)
+        if (this._isValidCRD(crdManifest))
         {
             this._applyCRDToSchema(crdManifest, this._k8sJsonSchema);
         }
@@ -99,42 +98,11 @@ export class K8sPackageValidator
 
     private _isValidCRD(crdManifest: K8sManifest)
     {
-        this._logger.info("[_isValidCRD] Begin...");
-
-        {
-            const validator = new K8sManifestValidator(this._logger, this._origK8sJsonSchema, this._params);
-            const result = validator.validate(crdManifest.config);
-            this._logger.info("[_isValidCRD] success: %s", result.success);
-
-            if (!result.success)
-            {
-                this._logger.verbose("[_isValidCRD] ERRORS: ", result.errors!);
-                this._manifestPackage.manifestErrors(crdManifest, result.errors!);
-                return false;
-            }
-        }
-
-        {
-            const newJsonSchema = this._makeSchemaClone();
-            this._applyCRDToSchema(crdManifest, newJsonSchema);
-
-            const validator = new K8sManifestValidator(this._logger, newJsonSchema, this._params);
-            const result = validator.validate(crdManifest.config);
-            this._logger.info("[_isValidCRD] STAGE 2 success: %s", result.success);
-
-            if (!result.success)
-            {
-                this._logger.verbose("[_isValidCRD] STAGE 2 ERRORS: ", result.errors!);
-                this._manifestPackage.manifestErrors(crdManifest, result.errors!);
-                return false;
-            }
-        }
-        
-
-        return true;
+        this._validateManifest(crdManifest);
+        return crdManifest.success;
     }
 
-    private _applyCRDVersion(group: string, version: string, kind: string, crdCchema : SchemaObject, jsonSchema : K8sApiJsonSchema)
+    private _applyCRDVersion(group: string, version: string, kind: string, crdSchema : JSONSchemaProps, jsonSchema : K8sApiJsonSchema)
     {
         const apiResource : K8sOpenApiResource = {
             group: group,
@@ -156,8 +124,14 @@ export class K8sPackageValidator
         this._logger.info('[_applyCRDToSchema] apiResource: ', apiResource);
         this._logger.info('[_applyCRDToSchema] resourceKey: %s', resourceKey);
 
-        jsonSchema.definitions[definitionKey] = crdCchema;
+        jsonSchema.definitions[definitionKey] = this._convertCrdSchemaToJsonSchema(crdSchema);
         jsonSchema.resources[resourceKey] = definitionKey;
+    }
+
+    private _convertCrdSchemaToJsonSchema(crdSchema : JSONSchemaProps)
+    {
+        const converter = new CrdSchemaToJsonSchemaConverter(this._logger);
+        return converter.convert(crdSchema);
     }
 
     private _validateManifest(manifest: K8sManifest)
