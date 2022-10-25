@@ -156,6 +156,7 @@ steps:
     candidate: "${{docker_build}}"
     tags:
       - "${{DOCKER_TAG}}"
+      - "latest"
 
   commit_main_repo:
     title: Commit Version Changes
