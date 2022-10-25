@@ -1,6 +1,6 @@
 {
   "name": "kubevious",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Kubevious CLI",
   "keywords": [
     "kubernetes",
