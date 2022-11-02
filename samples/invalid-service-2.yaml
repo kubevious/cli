@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     app: db
-  name: db
+  name: db-2
 spec:
   type: ClusterIP
   portish:

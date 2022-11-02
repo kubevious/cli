@@ -11,6 +11,10 @@ import { output } from './output';
 import { formatResult } from './format';
 import { ManifestPackage } from '../../tools/manifest-package';
 import { LintManifestsResult } from './types';
+import { DefaultNamespaceSetter } from '../../tools/default-namespace-setter';
+import { LocalRegistryPopulator } from '../../tools/local-registry-populator';
+import { RuleRegistry } from '../../tools/rule-registry';
+import { RulesRuntime } from '../../tools/rules-runtime';
 
 type TData = {
     manifestPackage: ManifestPackage,
@@ -75,10 +79,29 @@ export default function (program: Command)
                     });
                     await packageValidator.validate();
 
+                    {
+                        const processor = new DefaultNamespaceSetter(logger, packageValidator.k8sJsonSchema, manifestPackage);
+                        processor.process();
+                    }
+
+                    {
+                        const processor = new LocalRegistryPopulator(logger, packageValidator.k8sJsonSchema, manifestPackage);
+                        processor.process();
+                        await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-registry');
+                    }
+
+                    {
+                        const ruleRegistry = new RuleRegistry(logger);
+                        await ruleRegistry.init();
+
+                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry);
+                        await rulesRuntime.init();
+                    }
+
                     return {
                         manifestPackage,
                         k8sSchemaInfo
-                    }
+                    } 
                 })
                 .format(({ manifestPackage, k8sSchemaInfo }) => {
                     const result = formatResult(manifestPackage, k8sSchemaInfo);

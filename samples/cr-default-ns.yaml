@@ -1,8 +1,7 @@
 apiVersion: contoso.com/v1alpha1
 kind: MyPlatform
 metadata:
-  name: test-dotnet-app
-  namespace: xxx
+  name: test-dotnet-app-2
 spec:
   appId: testdotnetapp
   language: csharp

@@ -43,6 +43,9 @@
     "url": "https://github.com/kubevious/cli"
   },
   "dependencies": {
+    "@kubevious/entity-meta": "^1.0.80",
+    "@kubevious/kubik": "^1.0.23",
+    "@kubevious/state-registry": "^1.0.17",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
     "axios": "^0.21.4",
@@ -51,7 +54,7 @@
     "commander": "^9.4.1",
     "express-openapi-validate": "^0.6.1",
     "glob": "^8.0.3",
-    "k8s-super-client": "^2.0.37",
+    "k8s-super-client": "^2.0.38",
     "kubernetes-types": "^1.25.0",
     "node-emoji": "^1.11.0",
     "openapi-schema-validator": "^12.0.2",
@@ -83,7 +86,10 @@
     "the-lodash": "^2.0.9",
     "the-logger": "^2.0.14",
     "the-promise": "^2.0.15",
-    "k8s-super-client": "^2.0.37"
+    "k8s-super-client": "^2.0.38",
+    "@kubevious/state-registry": "^1.0.17",
+    "@kubevious/kubik": "^1.0.23",
+    "@kubevious/entity-meta": "^1.0.80"
   },
   "pkg": {
     "scripts": "dist/**/*.js",
