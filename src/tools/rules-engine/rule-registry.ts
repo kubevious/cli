@@ -39,7 +39,7 @@ error(\`Using not approved email: \${email}\`);
         })
 
         this.loadRule({
-            name: 'certificate-check',
+            name: 'service-selector-check',
             target: `
 ApiVersion('v1')
 .Kind('Service')`,
