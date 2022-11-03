@@ -1,12 +1,20 @@
+import { K8sManifest } from "../manifest-package";
 
-import { K8sObject } from '../../types/k8s';
 
 export class ScriptItem
 {
-    private _config: K8sObject;
+    private _manifest: K8sManifest;
 
-    constructor(config: K8sObject) {
-        this._config = config;
+    constructor(manifest: K8sManifest) {
+        this._manifest = manifest;
+    }
+
+    get config() {
+        return this._manifest.config;
+    }
+
+    get manifest() {
+        return this._manifest;
     }
 
     get apiVersion() {
@@ -23,10 +31,6 @@ export class ScriptItem
 
     get namespace () {
         return this.config?.metadata?.namespace;
-    }
-
-    get config() {
-        return this._config;
     }
 
     get labels() {

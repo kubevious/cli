@@ -1,4 +1,5 @@
 import _ from 'the-lodash'
+import { ILogger } from 'the-logger';
 import { Promise } from 'the-promise';
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution-context';
@@ -11,9 +12,9 @@ export interface QueryResult {
     items: ScriptItem[]
 }
 
-
 export class QueryFetcher
 {
+    private _logger : ILogger;
     private _executionContext : ExecutionContext;
     private _scope: Scope;
 
@@ -27,18 +28,22 @@ export class QueryFetcher
     {
         this._executionContext = executionContext;
         this._scope = scope;
+        this._logger = executionContext.logger.sublogger("QueryFetcher");
     }
 
     execute(): QueryResult
     {
+        this._logger.info("[execute] RUNNING QUERY....")
+
         const k8sQuery = this._scope.query as ScopeK8sQuery;
 
-        const configs = this._executionContext.registryQueryExecutor.query(k8sQuery.filter);
+        const manifests = this._executionContext.registryQueryExecutor.query(k8sQuery.filter);
         this._result.success = true;
-        for(const x of configs)
+        for(const x of manifests)
         {
             this._result.items.push(new ScriptItem(x));
         }
+        this._logger.info("[execute]     RESULT COUNT: %s", this._result.items.length);
     
         return this._result;
     }

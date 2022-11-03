@@ -93,7 +93,7 @@ export default function (program: Command)
                         const ruleRegistry = new RuleRegistry(logger);
                         await ruleRegistry.init();
 
-                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry, processor.localK8sRegistry);
+                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry, processor.localK8sRegistry, manifestPackage);
                         await rulesRuntime.init();
                         await rulesRuntime.execute();
                     }

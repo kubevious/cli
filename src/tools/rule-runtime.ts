@@ -3,11 +3,7 @@ import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { RuleObject } from '../types/rules';
 import { TargetProcessor } from './rules-engine/target/processor';
-// import { ValidationProcessor } from '@kubevious/kubik/dist/processors/validator/processor';
-import { ExecutionState } from '@kubevious/kubik/dist/processors/execution-state';
-import { RegistryQueryExecutor } from './rules-engine/query-executor';
 import { ExecutionContext } from './rules-engine/execution-context';
-import { K8sObject } from '../types/k8s';
 import { ValidationProcessor } from './rules-engine/validator/processor';
 import { ScriptItem } from './rules-engine/script-item';
 
@@ -27,7 +23,6 @@ export class RuleRuntime
         this._ruleObject = ruleObject;
 
         this._executionContext = executionContext;
-
     }
 
     init()
@@ -69,6 +64,7 @@ export class RuleRuntime
 
     private _processValidation(item: ScriptItem)
     {
+
         this._logger.info("[_processValidation] %s :: %s", item.apiVersion, item.kind);
         return Promise.resolve()
             .then(() => {
@@ -76,6 +72,22 @@ export class RuleRuntime
                     .then(result => {
                         this._logger.info("[_processValidation]  result: ", result);
 
+                        if (result.success)
+                        {
+                            if (result.validation)
+                            {
+                                for(const error of _.keys(result.validation.errorMsgs))
+                                {
+                                    const msg = `Rule ${"XXXXX"} failed. ${error}.`;
+                                    this._executionContext.manifestPackage.manifestError(item.manifest, msg);
+                                }
+                                for(const warn of _.keys(result.validation.warnMsgs))
+                                {
+                                    const msg = `Rule ${"XXXXX"} warned. ${warn}.`;
+                                    this._executionContext.manifestPackage.manifestWarning(item.manifest, msg);
+                                }
+                            }
+                        }
                     });
             })
 

@@ -8,6 +8,7 @@ import { RegistryAccessor } from '@kubevious/state-registry';
 import { ExecutionState } from '@kubevious/kubik/dist/processors/execution-state';
 import { RegistryQueryExecutor } from './rules-engine/query-executor';
 import { ExecutionContext } from './rules-engine/execution-context';
+import { ManifestPackage } from './manifest-package';
 
 export class RulesRuntime
 {
@@ -17,14 +18,16 @@ export class RulesRuntime
     private _rules : RuleRuntime[] = [];
 
     private _registryQueryExecutor : RegistryQueryExecutor;
+    private _manifestPackage : ManifestPackage;
     private _executionContext : ExecutionContext;
     
-    constructor(logger: ILogger, ruleRegistry: RuleRegistry, registryQueryExecutor : RegistryQueryExecutor)
+    constructor(logger: ILogger, ruleRegistry: RuleRegistry, registryQueryExecutor : RegistryQueryExecutor, manifestPackage : ManifestPackage)
     {
         this._logger = logger.sublogger('RulesRuntime');
         this._ruleRegistry = ruleRegistry;
         this._registryQueryExecutor = registryQueryExecutor;
-        this._executionContext = new ExecutionContext(this._registryQueryExecutor);
+        this._manifestPackage = manifestPackage;
+        this._executionContext = new ExecutionContext(this._logger, registryQueryExecutor, manifestPackage);
     }
 
     init()

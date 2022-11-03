@@ -25,7 +25,7 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
         this._dict[globalKey] = manifest;
     }
 
-    query(query: K8sTargetFilter) : K8sObject[]
+    query(query: K8sTargetFilter) : K8sManifest[]
     {
         let results = _.values(this._dict);
 
@@ -68,7 +68,7 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
             }));
         }
 
-        return results.map(x => x.config);
+        return results;
     }
 
     private _doesAnyMatch<T>(matchers: T[], cb: ((value: T) => boolean)) : boolean {
