@@ -1,0 +1,33 @@
+apiVersion: kubevious.io/v1alpha1
+kind: Rule
+spec:
+  useWebhook: true
+  target: |
+    ApiVersion('networking.istio.io/v1beta1')
+      .Kind('VirtualService')
+      .label('app', 'hipster')
+  rule: |
+    for(let gatewayName of (config.spec?.gateways || []))
+    {
+      let gateway = 
+            ApiVersion('networking.istio.io/v1beta1')
+              .Kind('Gateway')
+                .name(gatewayName)
+                .single();
+        
+      if (!gateway) {
+        error(`Did not find Gateway ${gatewayName}`); 
+      } else {
+        // warning(`Found Gateway ${gatewayName}`); 
+        
+        for(const gatewayServer of (gateway.config.spec?.servers || []))
+        {
+          for(const host of gatewayServer.hosts || [])
+          {
+            if (host == "*") {
+              error("Wildcard hosts are not allowed!");
+          }
+          }
+        }
+      }
+    }
