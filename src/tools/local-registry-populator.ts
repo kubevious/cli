@@ -11,7 +11,7 @@ import { LocalRegistryAccessor } from './local-registry-accessor';
 
 import { K8sObjectId } from '../types/k8s';
 import { K8sOpenApiResource } from 'k8s-super-client/dist';
-import { parseApiVersion } from '../utils/k8s';
+import { LocalK8sRegistry } from './local-k8s-registry';
 
 export class LocalRegistryPopulator
 {
@@ -21,6 +21,7 @@ export class LocalRegistryPopulator
 
     private _localSourceRegistry: LocalSourceRegistry;
     private _localRegistryAccessor: LocalRegistryAccessor;
+    private _localK8sRegistry : LocalK8sRegistry;
 
     constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, manifestPackage: ManifestPackage)
     {
@@ -30,6 +31,11 @@ export class LocalRegistryPopulator
 
         this._localSourceRegistry = new LocalSourceRegistry(logger, manifestPackage);
         this._localRegistryAccessor = new LocalRegistryAccessor(logger);
+        this._localK8sRegistry = new LocalK8sRegistry(logger);
+    }
+
+    get localK8sRegistry() {
+        return this._localK8sRegistry;
     }
 
     get localRegistryAccessor() {
@@ -38,6 +44,11 @@ export class LocalRegistryPopulator
 
     process()
     {
+        for(const manifest of this._manifestPackage.manifests)
+        {
+            this._localK8sRegistry.loadManifest(manifest);
+        }
+
         for(const manifest of this._manifestPackage.manifests)
         {
             this._processManifest(manifest);

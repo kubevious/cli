@@ -66,25 +66,25 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@kubevious/entity-meta@^1.0.78", "@kubevious/entity-meta@^1.0.80":
+"@kubevious/entity-meta@^1.0.80":
   version "1.0.80"
   resolved "https://registry.yarnpkg.com/@kubevious/entity-meta/-/entity-meta-1.0.80.tgz#84f93ec6a0166d725224ff8cdaab8d600a8921f1"
   integrity sha512-fHNtNv/m/CsI5P/twMbkrX77BOAMHrM497wW6CqDf0bLBpexLMgL5FlUSOvoVB8h3sKvHeLSJyMvmesAwlNr5Q==
   dependencies:
     the-lodash "^2.0.9"
 
-"@kubevious/kubik@^1.0.23":
-  version "1.0.23"
-  resolved "https://registry.yarnpkg.com/@kubevious/kubik/-/kubik-1.0.23.tgz#7771cf01ebd086c979ee4a9c2a0c2064da405d42"
-  integrity sha512-wkkk4MTjuUUnrBzEUT5SARmyBD7evL3yBB2KCtuQtcDcXjffeNWhrIYCLdHr+H3ZZf65bte8ezGC3voWG+Wj6w==
+"@kubevious/kubik@^1.0.25":
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/@kubevious/kubik/-/kubik-1.0.25.tgz#346109238787c5f33436be2b0465750b7d8bae53"
+  integrity sha512-apWI+NXITXVE2kt3a/eSy7pU8Pyr8RzENm+HTRKtTgqFhw4J19dwp+aKIgjaZhQtuG9WY5EDpTY9dujVMX5Sgw==
   dependencies:
-    "@kubevious/entity-meta" "^1.0.78"
-    "@kubevious/state-registry" "^1.0.16"
+    "@kubevious/entity-meta" "^1.0.80"
+    "@kubevious/state-registry" "^1.0.17"
     the-lodash "^2.0.9"
     the-logger "^2.0.14"
     the-promise "^2.0.15"
 
-"@kubevious/state-registry@^1.0.16", "@kubevious/state-registry@^1.0.17":
+"@kubevious/state-registry@^1.0.17":
   version "1.0.17"
   resolved "https://registry.yarnpkg.com/@kubevious/state-registry/-/state-registry-1.0.17.tgz#7ba66da8d8658f9254bf172f91757e00f9ddc428"
   integrity sha512-O5lh3N9euEB3LfDTgxSEWnQjhZXOi+fPMcIPDq8DxxhHXhQ0TjnZgNyaJkpeBRe9+7nNfFiZlVhd6OvqK7/xhA==

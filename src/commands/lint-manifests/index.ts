@@ -87,15 +87,15 @@ export default function (program: Command)
                     {
                         const processor = new LocalRegistryPopulator(logger, packageValidator.k8sJsonSchema, manifestPackage);
                         processor.process();
-                        await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-registry');
-                    }
+                        // await processor.localK8sRegistry.debugOutputToDir(logger, 'local-k8s-registry');
+                        // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
 
-                    {
                         const ruleRegistry = new RuleRegistry(logger);
                         await ruleRegistry.init();
 
-                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry);
+                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry, processor.localK8sRegistry);
                         await rulesRuntime.init();
+                        await rulesRuntime.execute();
                     }
 
                     return {

@@ -1,3 +1,4 @@
+import _ from 'the-lodash';
 import { parseApiVersion } from "../utils/k8s";
 
 export interface K8sObject
@@ -10,6 +11,15 @@ export interface K8sObject
 
 export interface K8sMetadata
 {
+    namespace?: string;
+    name?: string;
+    [key : string] : any;
+}
+
+export interface K8sObjectKey
+{
+    apiVersion: string;
+    kind: string;
     namespace?: string;
     name?: string;
 }
@@ -36,4 +46,19 @@ export function makeId(k8sObject: K8sObject): K8sObjectId
         namespace: k8sObject.metadata?.namespace,
         name: k8sObject.metadata?.name,
     }
+}
+
+export function makeK8sKey(k8sObject: K8sObject): K8sObjectKey
+{
+    return { 
+        apiVersion: k8sObject.apiVersion,
+        kind: k8sObject.kind,
+        namespace: k8sObject.metadata?.namespace,
+        name: k8sObject.metadata?.name,
+    }
+}
+
+export function makeK8sKeyStr(k8sObject: K8sObject): string
+{
+    return _.stableStringify(makeK8sKey(k8sObject));
 }

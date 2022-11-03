@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@kubevious/entity-meta": "^1.0.80",
-    "@kubevious/kubik": "^1.0.23",
+    "@kubevious/kubik": "^1.0.25",
     "@kubevious/state-registry": "^1.0.17",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
@@ -88,7 +88,7 @@
     "the-promise": "^2.0.15",
     "k8s-super-client": "^2.0.38",
     "@kubevious/state-registry": "^1.0.17",
-    "@kubevious/kubik": "^1.0.23",
+    "@kubevious/kubik": "^1.0.25",
     "@kubevious/entity-meta": "^1.0.80"
   },
   "pkg": {

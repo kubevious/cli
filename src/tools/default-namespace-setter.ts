@@ -48,6 +48,10 @@ export class DefaultNamespaceSetter
 
         if (resourceInfo.namespaced) {
             manifest.id.namespace = 'default';
+            if (!manifest.config.metadata) {
+                manifest.config.metadata = {};
+            }
+            manifest.config.metadata.namespace = manifest.id.namespace;
         }
     }
 
