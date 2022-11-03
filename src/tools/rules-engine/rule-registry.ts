@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { RuleObject } from '../types/rules';
+import { RuleObject } from '../../types/rules';
 
 export class RuleRegistry
 {
@@ -72,6 +72,30 @@ function matchesDict(selector, labels)
     return true;
 }
 `
+        });
+
+
+
+        this.loadRule({
+            name: 'bad-rule',
+            target: `
+ApiVersion('cert-manager.io/v1')
+.Kind('Certificate')
+xxx`,
+            script: `
+ddd
+            const issuer = ApiVersion('cert-manager.io/v1')
+            .Kind(config.spec?.issuerRef?.kind)
+            .name(config.spec?.issuerRef?.name)
+            .single();
+if (!issuer) {
+error('Could not find the Certificate Issuer');
+} else {
+const email = issuer.config.spec?.acme?.email ?? "";
+if (!email.endsWith('example.com')) {
+error(\`Using not approved email: \${email}\`);
+}
+}`
         })
     }
 

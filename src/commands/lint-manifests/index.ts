@@ -13,8 +13,8 @@ import { ManifestPackage } from '../../tools/manifest-package';
 import { LintManifestsResult } from './types';
 import { DefaultNamespaceSetter } from '../../tools/default-namespace-setter';
 import { LocalRegistryPopulator } from '../../tools/local-registry-populator';
-import { RuleRegistry } from '../../tools/rule-registry';
-import { RulesRuntime } from '../../tools/rules-runtime';
+import { RuleRegistry } from '../../tools/rules-engine/rule-registry';
+import { RulesRuntime } from '../../tools/rules-engine/rules-runtime';
 
 type TData = {
     manifestPackage: ManifestPackage,
@@ -72,7 +72,7 @@ export default function (program: Command)
                         
                         process.exit(99);
                     }
-        
+
                     const packageValidator = new K8sPackageValidator(logger, k8sSchemaInfo.k8sJsonSchema, manifestPackage, {
                         ignoreUnknown: options.ignoreUnknown ? true : false,
                         skipApplyCrds: options.skipApplyCrds ? true : false,
