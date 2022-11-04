@@ -99,7 +99,7 @@ export class RuleRuntime
         
         return Promise.resolve()
             .then(() => {
-                return this._targetProcessor!.execute()
+                return this._targetProcessor!.execute(this._ruleObject.values)
                     .then(results => {
                         return Promise.serial(results, x => this._processValidation(x));
                     });
@@ -111,7 +111,7 @@ export class RuleRuntime
         this._logger.info("[_processValidation] %s :: %s", item.apiVersion, item.kind);
         return Promise.resolve()
             .then(() => {
-                return this._validationProcessor!.execute(item)
+                return this._validationProcessor!.execute(item, this._ruleObject.values)
                     .then(result => {
                         this._logger.info("[_processValidation]  result: ", result);
 
@@ -160,7 +160,6 @@ export class RuleRuntime
                         }
                     });
             })
-
     }
 
     private _reportError(manifest: K8sManifest, msg: string)

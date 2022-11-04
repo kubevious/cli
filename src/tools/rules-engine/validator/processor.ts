@@ -67,6 +67,7 @@ export class ValidationProcessor {
                 error: null,
                 warning: null,
                 mark: null,
+                values: null
             }
 
             for(const x of _.keys(TopLevelQuery))
@@ -85,7 +86,7 @@ export class ValidationProcessor {
 
     private _validate() {}
 
-    execute(item: ScriptItem) : Promise<ValidationProcessorResult> {
+    execute(item: ScriptItem, values: Record<string, any>) : Promise<ValidationProcessorResult> {
         const result: ValidationProcessorResult = {
             success: false,
             messages: [],
@@ -102,6 +103,7 @@ export class ValidationProcessor {
 
                 const valueMap : Record<string, any> = {
                     item: item,
+                    values: values,
                     config: item.config,
                     error: (msg: string) => {
                         result.validation!.hasErrors = true

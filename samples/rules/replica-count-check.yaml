@@ -1,0 +1,18 @@
+apiVersion: kubevious.io/v1alpha1
+kind: Rule
+metadata:
+  name: replica-count-check
+spec:
+  useWebhook: true
+  target: |
+    ApiVersion('apps/v1')
+    .Kind('Deployment')
+  rule: |
+    const replicas = config.spec?.replicas ?? 1;
+    if (replicas <= values.minReplicas)
+    {
+      error(`Replica count should be more than ${values.minReplicas}`);
+    }
+    // TODO: make it work with HPA
+  values:
+    minReplicas: 0

@@ -22,7 +22,7 @@ export async function command(path: string[], options: any) : Promise<GuardComma
     // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
 
     const ruleRegistry = new RuleRegistry(logger);
-    await ruleRegistry.init();
+    await ruleRegistry.loadFromRegistry(registryPopulator.localK8sRegistry);
 
     const rulesRuntime = new RulesRuntime(logger, ruleRegistry, registryPopulator.localK8sRegistry, lintResult.manifestPackage);
     await rulesRuntime.init();

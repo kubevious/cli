@@ -1,6 +1,6 @@
 import _ from 'the-lodash'
 import { Promise } from 'the-promise'
-import { Compiler } from '@kubevious/kubik/dist/processors/compiler'
+import { Compiler, CompilerScopeDict } from '@kubevious/kubik/dist/processors/compiler';
 import { BaseScopeQuery, Scope, ScopeQueryKind } from '../scope'
 import { makeTargetRootScope } from './scope-builder'
 import { RootScopeBuilder } from '../scope-builders'
@@ -49,15 +49,20 @@ export class TargetProcessor {
             .then(() => result)
     }
 
-    execute(): Promise<ScriptItem[]> {
+    execute(values: Record<string, any>): Promise<ScriptItem[]> {
+        const rootScope : CompilerScopeDict = {};
+        rootScope['values'] = values ?? {};
+
         const fetcher = new QueryFetcher(this._executionContext, this._scope);
         const result = fetcher.execute();
         return Promise.resolve(result.items);
     }
 
     private _loadModule() {
-
-        const rootScope : Record<string, any> = {};
+        
+        const rootScope : CompilerScopeDict = {
+            values: null
+        };
 
         const rootScopeBuilder : RootScopeBuilder = {
             setup: (name: string, func: any) => {

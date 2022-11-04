@@ -1,5 +1,7 @@
 apiVersion: kubevious.io/v1alpha1
 kind: Rule
+metadata:
+  name: istio-gateway-host-check
 spec:
   useWebhook: true
   target: |
