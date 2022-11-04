@@ -1,16 +1,14 @@
 import _ from 'the-lodash';
 
-import { LintManifestsResult, LintRuleResult, LintSeverity, LintSourceResult } from "./types";
+import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
 import { logger } from '../../logger';
 import { ManifestPackage } from '../../tools/manifest-package';
 import { K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
 import { ErrorStatus } from '../../types/manifest';
-import { RulesRuntime } from '../../tools/rules-engine/rules-runtime';
 
 export function formatResult(
     manifestPackage: ManifestPackage,
     schemaInfo: K8sApiSchemaFetcherResult,
-    rulesRuntime?: RulesRuntime
     ) : LintManifestsResult
 {
     const result: LintManifestsResult = {
@@ -75,42 +73,6 @@ export function formatResult(
         _.chain(result.sources)
          .orderBy([x => x.kind, x => x.path])
          .value();
-    
-    if (rulesRuntime)
-    {
-        result.rules = [];
-
-        for(const rule of rulesRuntime.rules)
-        {
-            const ruleResult : LintRuleResult = {
-                rule: rule.rule.name,
-                compiled: rule.isCompiled && !rule.isHasErrors,
-                pass: true
-            };
-
-            if (rule.isHasErrors) {
-                ruleResult.errors = rule.ruleErrors.map(x => x.msg);
-            }
-
-            if (rule.violations && (rule.violations.length > 0))
-            {
-                ruleResult.pass = false;
-                ruleResult.violations = [];
-
-                for(const violation of rule.violations)
-                {
-                    ruleResult.violations.push({
-                        manifest: violation.manifest.id,
-                        source: violation.manifest.source.source,
-                        errors: violation.errors,
-                        warnings: violation.warnings,
-                    });
-                }
-            }
-
-            result.rules.push(ruleResult);
-        }
-    }
 
     return result;
 }

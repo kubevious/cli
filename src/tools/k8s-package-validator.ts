@@ -42,7 +42,7 @@ export class K8sPackageValidator
 
     validate()
     {
-        this._spinner = spinOperation('Validating manifests...');
+        this._spinner = spinOperation('Linting manifests...');
 
         return Promise.resolve()
             .then(() => {
@@ -56,7 +56,7 @@ export class K8sPackageValidator
 
                 return Promise.serial(this._manifestPackage.manifests, x => this._validateManifest(x))
                     .then(() => {
-                        this._spinner!.complete('Validation complete.')
+                        this._spinner!.complete('Lint complete.')
                     });
             })
 
@@ -148,11 +148,11 @@ export class K8sPackageValidator
             return;
         }
 
-        if (manifest.isProcessed) {
+        if (manifest.isLinted) {
             return;
         }
 
-        manifest.isProcessed = true;
+        manifest.isLinted = true;
 
         this._spinner!.update(`Validating ${manifest.source.source.path}...`);
 

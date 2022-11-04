@@ -8,6 +8,7 @@ import { RegistryQueryExecutor } from './query-executor';
 import { ExecutionContext } from './execution-context';
 import { ManifestPackage } from '../manifest-package';
 import { RuleEngineReporter } from './rule-engine-reporter';
+import { ISpinner, spinOperation } from '../../utils/screen';
 
 export class RulesRuntime
 {
@@ -18,6 +19,7 @@ export class RulesRuntime
 
     private _executionContext : ExecutionContext;
     private _ruleEngineReporter : RuleEngineReporter;
+    private _spinner? : ISpinner;
 
     constructor(logger: ILogger,
                 ruleRegistry: RuleRegistry,
@@ -41,7 +43,12 @@ export class RulesRuntime
 
     execute()
     {
-        return Promise.serial(this._rules, x => this._executeRule(x));
+        this._spinner = spinOperation('Validating rules...');
+
+        return Promise.serial(this._rules, x => this._executeRule(x))
+            .then(() => {
+                this._spinner!.complete('Rules validation complete.')
+            })
     }
 
     private _initRule(rule : RuleObject)

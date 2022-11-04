@@ -1,21 +1,25 @@
 import chalk from 'chalk';
 import emoji from 'node-emoji';
 
-import { LintManifestResult, LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from "./types";
+import { LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from "./types";
 import { ErrorStatus } from '../../types/manifest';
+import { K8sObjectId } from '../../types/k8s';
 
-export function output(result: LintManifestsResult)
+export function output(result: LintManifestsResult, skipResult?: boolean)
 {
+    skipResult = skipResult ?? false;
+
     if (!result.foundK8sVersion) {
-        console.log(`${emoji.get('x')}  Failed to find Kubernetes Version ${result.targetK8sVersion}`);
+        print(`${emoji.get('x')}  Failed to find Kubernetes Version ${result.targetK8sVersion}`);
     }
     else {
         if (!result.foundExactK8sVersion) {
-            console.log(`${emoji.get('warning')}  Could not find requested Kubernetes Version: ${result.targetK8sVersion}`);
+            print(`${emoji.get('warning')}  Could not find requested Kubernetes Version: ${result.targetK8sVersion}`);
         }
     }
-    console.log(`${emoji.get('information_source')}  Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
-    console.log();
+    print(`${emoji.get('information_source')}  Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
+    print();
+    
 
     for(const source of result.sources)
     {
@@ -24,27 +28,29 @@ export function output(result: LintManifestsResult)
 
         for(const manifest of source.manifests)
         {
-            outputManifest(manifest);
+            outputManifest(manifest, objectSeverityIcon(manifest), 3);
             outputErrors(manifest, 6);
         }
 
-        console.log();
+        print();
     }
 
-    console.log();
+    print();
 
-    if (result.success)
+    if (!skipResult)
     {
-        console.log(`${emoji.get('white_check_mark')} Lint Succeeded.`);
+        if (result.success)
+        {
+            print(`${emoji.get('white_check_mark')} Lint Succeeded.`);
+        }
+        else
+        {
+            print(`${emoji.get('x')} Lint Failed`);
+        }
     }
-    else
-    {
-        console.log(`${emoji.get('x')} Lint Failed`);
-    }
-
 }
 
-function outputSource(source: LintSourceResult)
+function outputSource(source: LintSourceResult, indent?: number)
 {
     const parts : string[] = [];
 
@@ -66,11 +72,11 @@ function outputSource(source: LintSourceResult)
     parts.push(`${source.kind.toUpperCase()}:`);
 
     parts.push(source.path);
-
-    return console.log(parts.join(' '));
+    
+    print(parts.join(' '), indent);
 }
 
-function outputManifest(manifest: LintManifestResult)
+export function outputManifest(manifest: K8sObjectId, icon: string, indent: number)
 {
     const namingParts : string[] = [];
 
@@ -82,21 +88,21 @@ function outputManifest(manifest: LintManifestResult)
     namingParts.push(`Name: ${manifest.name}`);
 
     const parts : string[] = [];
-    parts.push(objectSeverityIcon(manifest));
+    parts.push(icon);
 
     parts.push(namingParts.join(', '));
 
-    return console.log(indentify(parts.join(' '), 3));
+    print(parts.join(' '), indent);
 }
 
-function outputErrors(obj: ErrorStatus, indent: number)
+function outputErrors(obj: ErrorStatus, indent?: number)
 {
     if (!obj.success) {
         if (obj.errors) {
             for(const msg of obj.errors)
             {
                 const line = `${severityStatusIcon('fail')} ${msg}`;
-                console.log(indentify(line, indent));
+                print(line, indent);
             }
         }
     }
@@ -105,7 +111,7 @@ function outputErrors(obj: ErrorStatus, indent: number)
         for(const msg of obj.warnings)
         {
             const line = `${severityStatusIcon('warning')} ${msg}`;
-            console.log(indentify(line, indent));
+            print(line, indent);
         }
     }
 }
@@ -115,7 +121,7 @@ function objectSeverityIcon(obj: LintStatus)
     return severityStatusIcon(obj.severity);
 }
 
-function severityStatusIcon(severity: LintSeverity)
+export function severityStatusIcon(severity: LintSeverity)
 {
     let iconName = 'question';
     if (severity === 'pass') {
@@ -131,10 +137,15 @@ function severityStatusIcon(severity: LintSeverity)
 }
 
 
-function indentify(str: string, count: number) : string
+export function indentify(str: string, count?: number) : string
 {
-    const prefix = ' '.repeat(count);
+    const prefix = ' '.repeat(count ?? 0);
     let lines = str.split('\n');
     lines = lines.map(x => `${prefix}${x}`);
     return lines.join('\n');
+}
+
+export function print(str?: string, indent?: number)
+{
+    console.log(indentify(str ?? "", indent));
 }
