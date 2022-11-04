@@ -19,6 +19,7 @@ export interface LintManifestsResult
     foundExactK8sVersion: boolean;
 
     sources: LintSourceResult[];
+    rules?: LintRuleResult[];
 }
 
 export type LintSourceResult = ManifestSourceId & LintStatus & {
@@ -28,3 +29,20 @@ export type LintSourceResult = ManifestSourceId & LintStatus & {
 };
 
 export type LintManifestResult = K8sObjectId & LintStatus;
+
+export interface LintRuleResult
+{
+    rule: string;
+    compiled: boolean;
+    pass: boolean;
+    errors?: string[];
+    violations?: LintRuleViolation[];
+}
+
+export interface LintRuleViolation
+{
+    manifest: K8sObjectId;
+    source: ManifestSourceId;
+    errors?: string[];
+    warnings?: string[];
+}

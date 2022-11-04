@@ -18,7 +18,8 @@ import { RulesRuntime } from '../../tools/rules-engine/rules-runtime';
 
 type TData = {
     manifestPackage: ManifestPackage,
-    k8sSchemaInfo: K8sApiSchemaFetcherResult
+    k8sSchemaInfo: K8sApiSchemaFetcherResult,
+    rulesRuntime?: RulesRuntime,
 }
 
 export default function (program: Command)
@@ -50,7 +51,7 @@ export default function (program: Command)
                     } else {
                         k8sSchemaInfo = await k8sApiSchemaFetcher.fetchLocal(options.k8sVersion);
                     }
-
+``
                     if (!k8sSchemaInfo.success) {
                         console.log('Could not fetch Kubernetes API Schema. ');
                         console.log(k8sSchemaInfo.error);
@@ -84,27 +85,26 @@ export default function (program: Command)
                         processor.process();
                     }
 
-                    {
-                        const processor = new LocalRegistryPopulator(logger, packageValidator.k8sJsonSchema, manifestPackage);
-                        processor.process();
-                        // await processor.localK8sRegistry.debugOutputToDir(logger, 'local-k8s-registry');
-                        // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
+                    const registryPopulator = new LocalRegistryPopulator(logger, packageValidator.k8sJsonSchema, manifestPackage);
+                    registryPopulator.process();
+                    // await processor.localK8sRegistry.debugOutputToDir(logger, 'local-k8s-registry');
+                    // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
 
-                        const ruleRegistry = new RuleRegistry(logger);
-                        await ruleRegistry.init();
+                    const ruleRegistry = new RuleRegistry(logger);
+                    await ruleRegistry.init();
 
-                        const rulesRuntime = new RulesRuntime(logger, ruleRegistry, processor.localK8sRegistry, manifestPackage);
-                        await rulesRuntime.init();
-                        await rulesRuntime.execute();
-                    }
+                    const rulesRuntime = new RulesRuntime(logger, ruleRegistry, registryPopulator.localK8sRegistry, manifestPackage);
+                    await rulesRuntime.init();
+                    await rulesRuntime.execute();
 
                     return {
                         manifestPackage,
-                        k8sSchemaInfo
+                        k8sSchemaInfo,
+                        rulesRuntime
                     } 
                 })
-                .format(({ manifestPackage, k8sSchemaInfo }) => {
-                    const result = formatResult(manifestPackage, k8sSchemaInfo);
+                .format(({ manifestPackage, k8sSchemaInfo, rulesRuntime }) => {
+                    const result = formatResult(manifestPackage, k8sSchemaInfo, rulesRuntime);
                     return result;
                 })
                 .output(output)

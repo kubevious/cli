@@ -13,29 +13,14 @@ export class RuleEngineReporter
         this._manifestPackage = manifestPackage;
     }
 
-    reportScriptErrors(rule: RuleObject, source: string, messages: string[])
-    {
-        for(const x of messages)
-        {
-            const line = `Error with rule ${rule.name} ${source}. ${x}`;
-            this._reportRuleError(rule, line);
-        }
-    }
-
     reportError(rule: RuleObject, manifest: K8sManifest, msg: string)
     {
-        const manifestMsg = `Rule ${rule.name} violated. ${msg}.`;
-        this._manifestPackage.manifestError(manifest, manifestMsg);
+        this._manifestPackage.manifestError(manifest, msg);
     }
 
     reportWarning(rule: RuleObject, manifest: K8sManifest, msg: string)
     {
-        const manifestMsg = `Rule ${rule.name} warned. ${msg}.`;
-        this._manifestPackage.manifestWarning(manifest, manifestMsg);
+        this._manifestPackage.manifestWarning(manifest, msg);
     }
 
-    private _reportRuleError(rule: RuleObject, msg: string)
-    {
-        this._logger.info("[_reportRuleError] %s -> %s", rule.name, msg);
-    }
 }

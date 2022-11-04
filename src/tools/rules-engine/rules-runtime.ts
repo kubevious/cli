@@ -30,6 +30,10 @@ export class RulesRuntime
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
     }
 
+    get rules() {
+        return this._rules;
+    }
+
     init()
     {
         return Promise.serial(this._ruleRegistry.rules, x => this._initRule(x));

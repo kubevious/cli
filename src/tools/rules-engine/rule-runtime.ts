@@ -7,19 +7,24 @@ import { ExecutionContext } from './execution-context';
 import { ValidationProcessor } from './validator/processor';
 import { ScriptItem } from './script-item';
 import { RuleEngineReporter } from './rule-engine-reporter';
+import { K8sManifest } from '../manifest-package';
 
 export class RuleRuntime
 {
     private _logger: ILogger;
     private _ruleObject: RuleObject;
 
-    private _isCompiled = false;
     private _targetProcessor?: TargetProcessor;
     private _validationProcessor?: ValidationProcessor;
 
     private _executionContext : ExecutionContext;
     private _ruleEngineReporter : RuleEngineReporter;
     
+    private _isCompiled = false;
+    private _isHasErrors = false;
+    private _ruleErrors : RuleError[] = [];
+    private _violations : ManifestViolations[] = [];
+
     constructor(logger: ILogger,
                 ruleObject: RuleObject,
                 executionContext: ExecutionContext,
@@ -29,6 +34,26 @@ export class RuleRuntime
         this._ruleObject = ruleObject;
         this._executionContext = executionContext;
         this._ruleEngineReporter = ruleEngineReporter;
+    }
+
+    get rule() {
+        return this._ruleObject;
+    }
+
+    get isCompiled() {
+        return this._isCompiled;
+    }
+
+    get isHasErrors() {
+        return this._isHasErrors;
+    }
+
+    get ruleErrors() {
+        return this._ruleErrors;
+    }
+
+    get violations() {
+        return this._violations;
     }
 
     init()
@@ -48,7 +73,7 @@ export class RuleRuntime
                     this._logger.info("[init] _targetProcessor prepare: ", result);
                     if (!result.success) {
                         this._isCompiled = false;
-                        this._ruleEngineReporter.reportScriptErrors(this._ruleObject, 'target', result.messages);
+                        this._reportScriptErrors('target', result.messages);
                     }
                 })
             })
@@ -59,7 +84,7 @@ export class RuleRuntime
                     // this._acceptScriptErrors('target', result)
                     if (!result.success) {
                         this._isCompiled = false;
-                        this._ruleEngineReporter.reportScriptErrors(this._ruleObject, 'script', result.messages);
+                        this._reportScriptErrors('script', result.messages);
                     }
                 })
             })
@@ -94,13 +119,30 @@ export class RuleRuntime
                         {
                             if (result.validation)
                             {
-                                for(const error of _.keys(result.validation.errorMsgs))
+                                if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
                                 {
-                                    this._ruleEngineReporter.reportError(this._ruleObject, item.manifest, error);
-                                }
-                                for(const warn of _.keys(result.validation.warnMsgs))
-                                {
-                                    this._ruleEngineReporter.reportWarning(this._ruleObject, item.manifest, warn);
+                                    const manifestViolations : ManifestViolations = {
+                                        manifest: item.manifest
+                                    }
+
+                                    for(const error of _.keys(result.validation.errorMsgs))
+                                    {
+                                        this._reportError(item.manifest, error);
+                                        if (!manifestViolations.errors) {
+                                            manifestViolations.errors = [];
+                                        }
+                                        manifestViolations.errors.push(error);
+                                    }
+                                    for(const warn of _.keys(result.validation.warnMsgs))
+                                    {
+                                        this._reportWarning(item.manifest, warn);
+                                        if (!manifestViolations.warnings) {
+                                            manifestViolations.warnings = [];
+                                        }
+                                        manifestViolations.warnings.push(warn);
+                                    }
+
+                                    this._violations.push(manifestViolations);
                                 }
                             }
                         }
@@ -108,11 +150,11 @@ export class RuleRuntime
                         {
                             if (result.messages && (result.messages.length > 0))
                             {
-                                this._ruleEngineReporter.reportScriptErrors(this._ruleObject, 'rule', result.messages);
+                                this._reportScriptErrors('rule', result.messages);
                             }
                             else
                             {
-                                this._ruleEngineReporter.reportScriptErrors(this._ruleObject, 'rule', 
+                                this._reportScriptErrors('rule', 
                                     ['Unknown error executing the rule.']);
                             }
                         }
@@ -120,6 +162,46 @@ export class RuleRuntime
             })
 
     }
+
+    private _reportError(manifest: K8sManifest, msg: string)
+    {
+        const manifestMsg = `Rule ${this._ruleObject.name} violated. ${msg}.`;
+        this._ruleEngineReporter.reportError(this._ruleObject, manifest, manifestMsg);
+    }
+
+    private _reportWarning(manifest: K8sManifest, msg: string)
+    {
+        const manifestMsg = `Rule ${this._ruleObject.name} warned. ${msg}.`;
+        this._ruleEngineReporter.reportWarning(this._ruleObject, manifest, manifestMsg);
+    }
+
+    private _reportScriptErrors(source: string, messages: string[])
+    {
+        this._isHasErrors = true;
+
+        for(const x of messages)
+        {
+            const line = `Error with rule ${source}. ${x}`;
+            this._ruleErrors.push({
+                source: source,
+                msg: line
+            });
+
+            this._logger.info("[_reportRuleError] %s", line);
+        }
+    }
+}
+
+export interface RuleError
+{
+    source: string;
+    msg: string;
 }
 
 
+export interface ManifestViolations
+{
+    manifest: K8sManifest;
+    errors?: string[];
+    warnings?: string[];
+}
