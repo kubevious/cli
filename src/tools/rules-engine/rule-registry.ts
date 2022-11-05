@@ -1,9 +1,13 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { RuleKind, RuleObject } from '../../types/rules';
-import { K8sManifest, ManifestSource } from '../manifest-package';
+import { K8sManifest } from '../manifest-package';
 import { RegistryQueryExecutor } from './query-executor';
 import { K8sTargetFilter } from './target/k8s-target-builder';
+
+const KUBEVIOUS_API_NAME = 'kubevious.io';
+const KUBEVIOUS_KIND_CLUSTER_RULE = 'ClusterRule';
+const KUBEVIOUS_KIND_RULE = 'Rule';
 
 export class RuleRegistry
 {
@@ -29,8 +33,8 @@ export class RuleRegistry
     {
         const query: K8sTargetFilter = {
             isApiVersion: false,
-            apiOrNone: 'kubevious.io',
-            kind: 'ClusterRule',
+            apiOrNone: KUBEVIOUS_API_NAME,
+            kind: KUBEVIOUS_KIND_CLUSTER_RULE,
             isAllNamespaces: true,
         };
 
@@ -50,7 +54,6 @@ export class RuleRegistry
         const ruleScript = config.spec?.rule; 
 
         if (!name) {
-            // manifest.source
             return;
         }
 
@@ -68,8 +71,8 @@ export class RuleRegistry
     {
         const query: K8sTargetFilter = {
             isApiVersion: false,
-            apiOrNone: 'kubevious.io',
-            kind: 'Rule',
+            apiOrNone: KUBEVIOUS_API_NAME,
+            kind: KUBEVIOUS_KIND_RULE,
             isAllNamespaces: true,
         };
 
@@ -90,7 +93,6 @@ export class RuleRegistry
         const ruleScript = config.spec?.rule; 
 
         if (!name) {
-            // manifest.source
             return;
         }
 

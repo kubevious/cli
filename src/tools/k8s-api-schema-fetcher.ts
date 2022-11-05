@@ -37,7 +37,7 @@ export class K8sApiSchemaFetcher
                     .then(version => {
 
                         this._logger.info("Cluster version: %s", version);
-                        
+
                         return client.openAPI.queryApiSpecs()
                             .then(k8sOpenApiSpecs => {
 

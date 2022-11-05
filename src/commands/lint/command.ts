@@ -23,7 +23,7 @@ export async function command(path: string[], options: any) : Promise<CommandDat
     } else {
         k8sSchemaInfo = await k8sApiSchemaFetcher.fetchLocal(options.k8sVersion);
     }
-``
+
     if (!k8sSchemaInfo.success) {
         console.log('Could not fetch Kubernetes API Schema. ');
         console.log(k8sSchemaInfo.error);
