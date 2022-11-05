@@ -24,6 +24,7 @@ export class RuleRuntime
     private _isHasErrors = false;
     private _ruleErrors : RuleError[] = [];
     private _violations : ManifestViolations[] = [];
+    private _passed : K8sManifest[] = [];
 
     constructor(logger: ILogger,
                 ruleObject: RuleObject,
@@ -54,6 +55,10 @@ export class RuleRuntime
 
     get violations() {
         return this._violations;
+    }
+
+    get passed() {
+        return this._passed;
     }
 
     init()
@@ -99,11 +104,25 @@ export class RuleRuntime
         
         return Promise.resolve()
             .then(() => {
-                return this._targetProcessor!.execute(this._ruleObject.values)
+                return this._processTarget()
                     .then(results => {
                         return Promise.serial(results, x => this._processValidation(x));
                     });
             })
+    }
+
+    private _processTarget() : Promise<ScriptItem[]>
+    {
+        return Promise.resolve()
+            .then(() => {
+                const applicator = this._ruleObject.application ?? {};
+                return this._targetProcessor!.execute(applicator, this._ruleObject.values)
+            })
+            .catch(reason => {
+                this._logger.error("Failed to execute the rule %s", this._ruleObject.name, reason);
+                this._reportScriptErrors('rule', reason.message);
+                return [];
+            });
     }
 
     private _processValidation(item: ScriptItem)
@@ -117,33 +136,34 @@ export class RuleRuntime
 
                         if (result.success)
                         {
-                            if (result.validation)
+                            if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
                             {
-                                if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
-                                {
-                                    const manifestViolations : ManifestViolations = {
-                                        manifest: item.manifest
-                                    }
-
-                                    for(const error of _.keys(result.validation.errorMsgs))
-                                    {
-                                        this._reportError(item.manifest, error);
-                                        if (!manifestViolations.errors) {
-                                            manifestViolations.errors = [];
-                                        }
-                                        manifestViolations.errors.push(error);
-                                    }
-                                    for(const warn of _.keys(result.validation.warnMsgs))
-                                    {
-                                        this._reportWarning(item.manifest, warn);
-                                        if (!manifestViolations.warnings) {
-                                            manifestViolations.warnings = [];
-                                        }
-                                        manifestViolations.warnings.push(warn);
-                                    }
-
-                                    this._violations.push(manifestViolations);
+                                const manifestViolations : ManifestViolations = {
+                                    manifest: item.manifest
                                 }
+
+                                for(const error of _.keys(result.validation.errorMsgs))
+                                {
+                                    this._reportError(item.manifest, error);
+                                    if (!manifestViolations.errors) {
+                                        manifestViolations.errors = [];
+                                    }
+                                    manifestViolations.errors.push(error);
+                                }
+                                for(const warn of _.keys(result.validation.warnMsgs))
+                                {
+                                    this._reportWarning(item.manifest, warn);
+                                    if (!manifestViolations.warnings) {
+                                        manifestViolations.warnings = [];
+                                    }
+                                    manifestViolations.warnings.push(warn);
+                                }
+
+                                this._violations.push(manifestViolations);
+                            }
+                            else
+                            {
+                                this._passed.push(item.manifest);
                             }
                         }
                         else

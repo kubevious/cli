@@ -5,13 +5,12 @@ import { makeValidatorRootScope } from './scope-builder'
 import { RootScopeBuilder } from '../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../execution-context'
-import { K8sObject } from '../../../types/k8s'
 import { TopLevelQuery } from '../target/types';
 
 export interface ValidationProcessorResult {
-    success?: boolean
+    success: boolean
     messages?: string[]
-    validation?: {
+    validation: {
         hasErrors: boolean
         hasWarnings: boolean
         errorMsgs: {
@@ -106,22 +105,22 @@ export class ValidationProcessor {
                     values: values,
                     config: item.config,
                     error: (msg: string) => {
-                        result.validation!.hasErrors = true
+                        result.validation.hasErrors = true
                         if (msg) {
-                            result.validation!.errorMsgs[msg] = true
+                            result.validation.errorMsgs[msg] = true
                         }
                     },
                     warning: (msg: string) => {
-                        result.validation!.hasWarnings = true
+                        result.validation.hasWarnings = true
                         if (msg) {
-                            result.validation!.warnMsgs[msg] = true
+                            result.validation.warnMsgs[msg] = true
                         }
                     },
                     mark: (kind: string) => {
-                        if (!result.validation!.marks) {
-                            result.validation!.marks = {}
+                        if (!result.validation.marks) {
+                            result.validation.marks = {}
                         }
-                        result.validation!.marks[kind] = true
+                        result.validation.marks[kind] = true
                     },
                 }
                 

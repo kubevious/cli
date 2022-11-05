@@ -2,6 +2,7 @@ apiVersion: kubevious.io/v1alpha1
 kind: Rule
 metadata:
   name: replica-count-check
+  namespace: ordering
 spec:
   useWebhook: true
   target: |
@@ -15,4 +16,4 @@ spec:
     }
     // TODO: make it work with HPA
   values:
-    minReplicas: 0
+    minReplicas: 3

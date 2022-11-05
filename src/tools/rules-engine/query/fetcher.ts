@@ -5,6 +5,7 @@ import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution-context';
 import { ScopeK8sQuery } from '../target/k8s-target-builder';
 import { Scope } from '../scope';
+import { RuleApplicationScope } from '../../../types/rules';
 
 export interface QueryResult {
     success: boolean
@@ -31,11 +32,17 @@ export class QueryFetcher
         this._logger = executionContext.logger.sublogger("QueryFetcher");
     }
 
-    execute(): QueryResult
+    execute(applicationScope?: RuleApplicationScope): QueryResult
     {
-        this._logger.info("[execute] RUNNING QUERY....")
+        this._logger.info("[execute] RUNNING QUERY....");
+
+        applicationScope = applicationScope ?? {};
 
         const k8sQuery = this._scope.query as ScopeK8sQuery;
+
+        if (applicationScope.namespace) {
+            k8sQuery.filter.namespace = applicationScope.namespace;
+        }
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQuery.filter);
         this._result.success = true;

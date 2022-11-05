@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import emoji from 'node-emoji';
 
 import { LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from "./types";
-import { ErrorStatus } from '../../types/manifest';
+import { ErrorStatus, ManifestSourceId } from '../../types/manifest';
 import { K8sObjectId } from '../../types/k8s';
 
 export function output(result: LintManifestsResult, skipResult?: boolean)
@@ -50,11 +50,20 @@ export function output(result: LintManifestsResult, skipResult?: boolean)
     }
 }
 
-function outputSource(source: LintSourceResult, indent?: number)
+export function outputSource(source: LintSourceResult, indent?: number)
 {
     const parts : string[] = [];
 
     parts.push(objectSeverityIcon(source));
+
+    parts.push(produceSourceLine(source));
+    
+    print(parts.join(' '), indent);
+}
+
+export function produceSourceLine(source: ManifestSourceId)
+{
+    const parts : string[] = [];
 
     if (source.kind === 'file')
     {
@@ -73,7 +82,7 @@ function outputSource(source: LintSourceResult, indent?: number)
 
     parts.push(source.path);
     
-    print(parts.join(' '), indent);
+    return parts.join(' ');
 }
 
 export function outputManifest(manifest: K8sObjectId, icon: string, indent: number)

@@ -18,42 +18,52 @@ export function formatResult(
 
     const result: GuardResult = {
         ...lintResult,
+        lintSuccess: lintResult.success,
+        ruleSuccess: true,
         rules: []
     };
 
-    if (rulesRuntime)
+
+    for(const rule of rulesRuntime.rules)
     {
-        for(const rule of rulesRuntime.rules)
-        {
-            const ruleResult : LintRuleResult = {
-                rule: rule.rule.name,
-                compiled: rule.isCompiled && !rule.isHasErrors,
-                pass: true
-            };
+        const ruleResult : LintRuleResult = {
+            source: rule.rule.source,
+            kind: rule.rule.kind,
+            namespace: rule.rule.namespace,
+            rule: rule.rule.name,
+            compiled: rule.isCompiled && !rule.isHasErrors,
+            pass: true,
+            passed: rule.passed.map(x => ({
+                manifest: x.id,
+                source: x.source.source
+            }))
+        };
 
-            if (rule.isHasErrors) {
-                ruleResult.errors = rule.ruleErrors.map(x => x.msg);
-            }
-
-            if (rule.violations && (rule.violations.length > 0))
-            {
-                ruleResult.pass = false;
-                ruleResult.violations = [];
-
-                for(const violation of rule.violations)
-                {
-                    ruleResult.violations.push({
-                        manifest: violation.manifest.id,
-                        source: violation.manifest.source.source,
-                        errors: violation.errors,
-                        warnings: violation.warnings,
-                    });
-                }
-            }
-
-            result.rules.push(ruleResult);
+        if (rule.isHasErrors) {
+            ruleResult.errors = rule.ruleErrors.map(x => x.msg);
         }
+
+        if (rule.violations.length > 0)
+        {
+            result.ruleSuccess = false;
+            ruleResult.pass = false;
+            ruleResult.violations = [];
+
+            for(const violation of rule.violations)
+            {
+                ruleResult.violations.push({
+                    manifest: violation.manifest.id,
+                    source: violation.manifest.source.source,
+                    errors: violation.errors,
+                    warnings: violation.warnings,
+                });
+            }
+        }
+
+        result.rules.push(ruleResult);
     }
+
+    result.success = result.lintSuccess && result.ruleSuccess;
 
     return result;
 }

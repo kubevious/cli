@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { RuleObject } from '../../types/rules';
-import { K8sManifest } from '../manifest-package';
+import { RuleKind, RuleObject } from '../../types/rules';
+import { K8sManifest, ManifestSource } from '../manifest-package';
 import { RegistryQueryExecutor } from './query-executor';
 import { K8sTargetFilter } from './target/k8s-target-builder';
 
@@ -21,6 +21,51 @@ export class RuleRegistry
 
     loadFromRegistry(registry: RegistryQueryExecutor)
     {
+        this._loadClusterRules(registry);
+        this._loadNsRules(registry);
+    }
+
+    private _loadClusterRules(registry: RegistryQueryExecutor)
+    {
+        const query: K8sTargetFilter = {
+            isApiVersion: false,
+            apiOrNone: 'kubevious.io',
+            kind: 'ClusterRule',
+            isAllNamespaces: true,
+        };
+
+        const results = registry.query(query);
+        for(const manifest of results)
+        {
+            this._loadClusterRule(manifest);
+        }
+    }
+
+    private _loadClusterRule(manifest: K8sManifest)
+    {
+        const config = manifest.config;
+        
+        const name = config.metadata?.name;
+        const targetScript = config.spec?.target; 
+        const ruleScript = config.spec?.rule; 
+
+        if (!name) {
+            // manifest.source
+            return;
+        }
+
+        this._loadRuleObject({
+            source: manifest.source.source,
+            kind: RuleKind.ClusterRule,
+            name: name,
+            target: targetScript,
+            script: ruleScript,
+            values: config.spec?.values ?? {}
+        });
+    }
+
+    private _loadNsRules(registry: RegistryQueryExecutor)
+    {
         const query: K8sTargetFilter = {
             isApiVersion: false,
             apiOrNone: 'kubevious.io',
@@ -31,112 +76,39 @@ export class RuleRegistry
         const results = registry.query(query);
         for(const result of results)
         {
-            this._loadRuleManifest(result);
+            this._loadNsRule(result);
         }
     }
 
-    private _loadRuleManifest(manifest: K8sManifest)
+    private _loadNsRule(manifest: K8sManifest)
     {
         const config = manifest.config;
         
         const name = config.metadata?.name;
-        const namespace = config.metadata?.namespace;
+        const namespace = config.metadata?.namespace ?? 'default';
         const targetScript = config.spec?.target; 
         const ruleScript = config.spec?.rule; 
-        const values = config.spec?.values; 
 
-        this.loadRule({
-            name: name!,
+        if (!name) {
+            // manifest.source
+            return;
+        }
+
+        this._loadRuleObject({
+            source: manifest.source.source,
+            kind: RuleKind.Rule,
+            namespace: namespace,
+            name: name,
+            application: {
+                namespace: namespace
+            },
             target: targetScript,
             script: ruleScript,
-            values: values ?? {}
+            values: config.spec?.values ?? {}
         });
     }
 
-//     init()
-//     {
-//         this.loadRule({
-//             name: 'certificate-check',
-//             target: `
-// ApiVersion('cert-manager.io/v1')
-// .Kind('Certificate')`,
-//             script: `
-// const issuer = ApiVersion('cert-manager.io/v1')
-//             .Kind(config.spec?.issuerRef?.kind)
-//             .name(config.spec?.issuerRef?.name)
-//             .single();
-// if (!issuer) {
-// error('Could not find the Certificate Issuer');
-// } else {
-// const email = issuer.config.spec?.acme?.email ?? "";
-// if (!email.endsWith('example.com')) {
-// error(\`Using not approved email: \${email}\`);
-// }
-// }`
-//         })
-
-//         this.loadRule({
-//             name: 'service-selector-check',
-//             target: `
-// ApiVersion('v1')
-// .Kind('Service')`,
-//             script: `
-// const apps = ApiVersion('apps/v1')
-//             .Kind("Deployment")
-//             .many();
-
-// const myApps = [];
-// for(const app of apps)
-// {
-//     if (matchesDict(config.spec.selector ?? {}, app.config.spec.template.metadata.labels ?? {}))
-//     {
-//         myApps.push(app);
-//     }
-// }
-// if (myApps.length === 0) {
-//     error("Could not find APPS for Service");
-// }
-
-// function matchesDict(selector, labels)
-// {
-//     for(const key of Object.keys(selector))
-//     {
-//         if (selector[key] !== labels[key])
-//         {
-//             return false;
-//         }
-//     }
-//     return true;
-// }
-// `
-//         });
-
-
-
-//         this.loadRule({
-//             name: 'bad-rule',
-//             target: `
-// ApiVersion('cert-manager.io/v1')
-// .Kind('Certificate')
-// xxx`,
-//             script: `
-// ddd
-//             const issuer = ApiVersion('cert-manager.io/v1')
-//             .Kind(config.spec?.issuerRef?.kind)
-//             .name(config.spec?.issuerRef?.name)
-//             .single();
-// if (!issuer) {
-// error('Could not find the Certificate Issuer');
-// } else {
-// const email = issuer.config.spec?.acme?.email ?? "";
-// if (!email.endsWith('example.com')) {
-// error(\`Using not approved email: \${email}\`);
-// }
-// }`
-//         })
-//     }
-
-    loadRule(rule : RuleObject)
+    private _loadRuleObject(rule : RuleObject)
     {
         this._rules.push(rule);
     }

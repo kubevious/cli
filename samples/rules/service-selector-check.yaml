@@ -1,5 +1,5 @@
 apiVersion: kubevious.io/v1alpha1
-kind: Rule
+kind: ClusterRule
 metadata:
   name: service-selector-check
 spec:

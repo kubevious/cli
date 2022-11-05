@@ -8,6 +8,7 @@ import { ScopeK8sQuery } from './k8s-target-builder'
 import { ScriptItem } from '../script-item'
 import { ExecutionContext } from '../execution-context'
 import { QueryFetcher } from '../query/fetcher'
+import { RuleApplicationScope } from '../../../types/rules';
 
 export class TargetProcessor {
     private _src: string;
@@ -49,12 +50,12 @@ export class TargetProcessor {
             .then(() => result)
     }
 
-    execute(values: Record<string, any>): Promise<ScriptItem[]> {
+    execute(applicationScope: RuleApplicationScope, values: Record<string, any>): Promise<ScriptItem[]> {
         const rootScope : CompilerScopeDict = {};
         rootScope['values'] = values ?? {};
 
         const fetcher = new QueryFetcher(this._executionContext, this._scope);
-        const result = fetcher.execute();
+        const result = fetcher.execute(applicationScope);
         return Promise.resolve(result.items);
     }
 
@@ -99,6 +100,7 @@ export class TargetProcessor {
     }
 
     private _validateK8sQuery(query: ScopeK8sQuery) {
+        
     }
 
     private _addError(msg: string) {
