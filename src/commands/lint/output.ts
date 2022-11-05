@@ -5,9 +5,16 @@ import { LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from 
 import { ErrorStatus, ManifestSourceId } from '../../types/manifest';
 import { K8sObjectId } from '../../types/k8s';
 
-export function output(result: LintManifestsResult, skipResult?: boolean)
+export interface LintOutputParams {
+    skipResult?: boolean,
+    skipSummary?: boolean
+}
+
+export function output(result: LintManifestsResult, params?: LintOutputParams)
 {
-    skipResult = skipResult ?? false;
+    params = params ?? {};
+    params.skipSummary = params.skipSummary ?? false;
+    params.skipResult = params.skipResult ?? false;
 
     if (!result.foundK8sVersion) {
         print(`${emoji.get('x')}  Failed to find Kubernetes Version ${result.targetK8sVersion}`);
@@ -37,7 +44,13 @@ export function output(result: LintManifestsResult, skipResult?: boolean)
 
     print();
 
-    if (!skipResult)
+    if (!params.skipSummary)
+    {
+        outputLintSummary(result);
+        print();
+    }
+
+    if (!params.skipResult)
     {
         if (result.success)
         {
@@ -48,6 +61,19 @@ export function output(result: LintManifestsResult, skipResult?: boolean)
             print(`${emoji.get('x')} Lint Failed`);
         }
     }
+}
+
+export function outputLintSummary(result: LintManifestsResult)
+{
+    print(chalk.underline('Lint Summary'));
+
+    print(`Sources: ${result.counters.sources.total}`, 4);
+    print(`${severityStatusIcon('fail')} Sources with Errors: ${result.counters.sources.withErrors}`, 8);
+
+    print(`Manifests: ${result.counters.manifests.total}`, 4);
+    print(`${severityStatusIcon('pass')} Manifests Passed: ${result.counters.manifests.passed}`, 8);
+    print(`${severityStatusIcon('fail')} Manifests with Errors: ${result.counters.manifests.withErrors}`, 8);
+    print(`${severityStatusIcon('warning')} Manifests with Warnings: ${result.counters.manifests.withWarnings}`, 8);
 }
 
 export function outputSource(source: LintSourceResult, indent?: number)

@@ -12,11 +12,30 @@ export interface GuardCommandData {
     rulesRuntime: RulesRuntime,
 }
 
-export interface GuardResult extends LintManifestsResult
+export interface GuardResult
 {
-    lintSuccess: boolean;
+    success: boolean;
+
+    lintResult: LintManifestsResult;
+    
     ruleSuccess: boolean;
     rules: LintRuleResult[];
+
+    counters: {
+        rules: {
+            total: number,
+            failed: number,
+            passed: number,
+            withErrors: number,
+            withWarnings: number
+        },
+        manifests: {
+            total: number,
+            passed: number,
+            withErrors: number,
+            withWarnings: number
+        }
+    }
 }
 
 export interface LintRuleResult
@@ -27,6 +46,8 @@ export interface LintRuleResult
     rule: string;
     compiled: boolean;
     pass: boolean;
+    hasViolationErrors: boolean;
+    hasViolationWarnings: boolean;
     errors?: string[];
     violations?: LintRuleViolation[];
     passed: {

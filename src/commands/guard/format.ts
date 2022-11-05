@@ -17,10 +17,26 @@ export function formatResult(
     const lintResult = lintFormatResult(manifestPackage, schemaInfo);
 
     const result: GuardResult = {
-        ...lintResult,
-        lintSuccess: lintResult.success,
+        success: true,
+        lintResult : lintResult,
         ruleSuccess: true,
-        rules: []
+        rules: [],
+
+        counters: {
+            rules: {
+                total: rulesRuntime.rules.length,
+                passed: 0,
+                failed: 0,
+                withErrors: 0,
+                withWarnings: 0
+            },
+            manifests: {
+                total: 0,
+                passed: 0,
+                withErrors: 0,
+                withWarnings: 0
+            }
+        }
     };
 
 
@@ -33,6 +49,8 @@ export function formatResult(
             rule: rule.rule.name,
             compiled: rule.isCompiled && !rule.isHasErrors,
             pass: true,
+            hasViolationErrors: false,
+            hasViolationWarnings: false,
             passed: rule.passed.map(x => ({
                 manifest: x.id,
                 source: x.source.source
@@ -41,16 +59,25 @@ export function formatResult(
 
         if (rule.isHasErrors) {
             ruleResult.errors = rule.ruleErrors.map(x => x.msg);
+            result.counters.rules.failed++;
         }
 
         if (rule.violations.length > 0)
         {
-            result.ruleSuccess = false;
-            ruleResult.pass = false;
             ruleResult.violations = [];
+
 
             for(const violation of rule.violations)
             {
+                if (violation.hasErrors) {
+                    result.ruleSuccess = false;
+                    ruleResult.pass = false;
+                    ruleResult.hasViolationErrors = true;
+                }
+                if (violation.hasWarnings) {
+                    ruleResult.hasViolationWarnings = true;
+                }
+
                 ruleResult.violations.push({
                     manifest: violation.manifest.id,
                     source: violation.manifest.source.source,
@@ -60,10 +87,23 @@ export function formatResult(
             }
         }
 
+        if (!ruleResult.compiled) {
+            result.counters.rules.failed++;
+        }
+        if (ruleResult.passed) {
+            result.counters.rules.passed++;
+        }
+        if (ruleResult.hasViolationErrors) {
+            result.counters.rules.withErrors++;
+        }
+        if (ruleResult.hasViolationWarnings) {
+            result.counters.rules.withWarnings++;
+        }
+
         result.rules.push(ruleResult);
     }
 
-    result.success = result.lintSuccess && result.ruleSuccess;
+    result.success = result.lintResult.success && result.ruleSuccess;
 
     return result;
 }

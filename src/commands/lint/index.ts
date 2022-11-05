@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { logger } from '../../logger';
 
 import { CommandBuilder } from '../../infra/command-action';
-import { CommandData, LintManifestsResult } from './types';
+import { LintCommandData, LintManifestsResult } from './types';
 
 import { command } from './command';
 import { formatResult } from './format';
@@ -22,7 +22,7 @@ export default function (program: Command)
         .option('--kubeconfig <path>', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
         .option('--json', 'Output lint result in JSON.')
         .action(
-            new CommandBuilder<CommandData, LintManifestsResult>()
+            new CommandBuilder<LintCommandData, LintManifestsResult>()
                 .perform(async (path: string[], options) => {
 
                     return command(path, options);

@@ -5,10 +5,10 @@ import { ManifetsLoader } from '../../tools/manifests-loader'
 import { K8sPackageValidator } from '../../tools/k8s-package-validator';
 import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
 
-import { CommandData } from './types';
+import { LintCommandData } from './types';
 import { DefaultNamespaceSetter } from '../../tools/default-namespace-setter';
 
-export async function command(path: string[], options: any) : Promise<CommandData>
+export async function command(path: string[], options: any) : Promise<LintCommandData>
 {
     logger.info("[PATH] ", path);
 

@@ -139,7 +139,9 @@ export class RuleRuntime
                             if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
                             {
                                 const manifestViolations : ManifestViolations = {
-                                    manifest: item.manifest
+                                    manifest: item.manifest,
+                                    hasErrors: (_.keys(result.validation.errorMsgs).length > 0),
+                                    hasWarnings: (_.keys(result.validation.warnMsgs).length > 0),
                                 }
 
                                 for(const error of _.keys(result.validation.errorMsgs))
@@ -221,6 +223,8 @@ export interface RuleError
 export interface ManifestViolations
 {
     manifest: K8sManifest;
+    hasErrors: boolean;
+    hasWarnings: boolean;
     errors?: string[];
     warnings?: string[];
 }

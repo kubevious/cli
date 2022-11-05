@@ -7,7 +7,9 @@ import { outputManifest, print, severityStatusIcon } from '../lint/output'
 
 export function output(result: GuardResult)
 {
-    lintOutput(result);
+    lintOutput(result.lintResult);
+
+    print();
 
     if (result.rules)
     {

@@ -18,7 +18,22 @@ export function formatResult(
         targetK8sVersion: schemaInfo.targetVersion || undefined,
         selectedK8sVersion: schemaInfo.selectedVersion || undefined,
         foundK8sVersion: schemaInfo.found,
-        foundExactK8sVersion: schemaInfo.foundExact
+        foundExactK8sVersion: schemaInfo.foundExact,
+
+        counters: {
+            sources: {
+                total: manifestPackage.sources.length,
+                withErrors: 0,
+                withWarnings: 0
+            },
+            manifests: {
+                total: manifestPackage.manifests.length,
+                passed: 0,
+                withErrors: 0,
+                withWarnings: 0
+            }
+        }
+
     };
 
     for(const source of manifestPackage.sources)
@@ -39,6 +54,11 @@ export function formatResult(
         if (!source.success) {
             outputSource.success = false;
             result.success = false;
+            result.counters.sources.withErrors++;
+        }
+
+        if (source.warnings.length > 0) {
+            result.counters.sources.withWarnings++;
         }
 
         for(const manifest of source.contents)
@@ -57,9 +77,17 @@ export function formatResult(
                 warnings: manifest.warnings,
             });
 
+            
             if (!manifest.success) {
                 outputSource.success = false;
                 result.success = false;
+                result.counters.manifests.withErrors++;
+            } else {
+                result.counters.manifests.passed++;
+            }
+
+            if (manifest.warnings.length > 0) {
+                result.counters.manifests.withWarnings++;
             }
         }
 
