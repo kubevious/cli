@@ -3,7 +3,6 @@ kind: ClusterRule
 metadata:
   name: bad-rule
 spec:
-  useWebhook: true
   target: |
     ApiVersion('cert-manager.io/v1')
     .Kind('Certificate')

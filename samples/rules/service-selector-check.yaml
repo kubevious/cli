@@ -3,7 +3,6 @@ kind: ClusterRule
 metadata:
   name: service-selector-check
 spec:
-  useWebhook: true
   target: |
     ApiVersion('v1')
     .Kind('Service')

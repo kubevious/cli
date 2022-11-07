@@ -3,7 +3,6 @@ kind: ClusterRule
 metadata:
   name: certificate-check
 spec:
-  useWebhook: true
   target: |
     ApiVersion('cert-manager.io/v1')
     .Kind('Certificate')
@@ -12,11 +11,14 @@ spec:
                 .Kind(config.spec?.issuerRef?.kind)
                 .name(config.spec?.issuerRef?.name)
                 .single();
+    warning('test1234');
     if (!issuer) {
       error('Could not find the Certificate Issuer');
     } else {
       const email = issuer.config.spec?.acme?.email ?? "";
-      if (!email.endsWith('example.com')) {
-        error(`Using not approved email: ${email}`);
+      if (!email.endsWith(values.domain)) {
+        error(`Using not approved email: ${email}. Should be from ${values.domain} domain.`);
       }
     }
+  values:
+    domain: example.com

@@ -3,7 +3,6 @@ kind: ClusterRule
 metadata:
   name: istio-gateway-host-check
 spec:
-  useWebhook: true
   target: |
     ApiVersion('networking.istio.io/v1beta1')
       .Kind('VirtualService')

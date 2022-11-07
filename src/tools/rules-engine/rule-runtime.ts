@@ -4,7 +4,7 @@ import { ILogger } from 'the-logger';
 import { RuleObject } from '../../types/rules';
 import { TargetProcessor } from './target/processor';
 import { ExecutionContext } from './execution-context';
-import { ValidationProcessor } from './validator/processor';
+import { ValidationProcessor, ValidationProcessorResult } from './validator/processor';
 import { ScriptItem } from './script-item';
 import { RuleEngineReporter } from './rule-engine-reporter';
 import { K8sManifest } from '../manifest-package';
@@ -136,37 +136,7 @@ export class RuleRuntime
 
                         if (result.success)
                         {
-                            if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
-                            {
-                                const manifestViolations : ManifestViolations = {
-                                    manifest: item.manifest,
-                                    hasErrors: (_.keys(result.validation.errorMsgs).length > 0),
-                                    hasWarnings: (_.keys(result.validation.warnMsgs).length > 0),
-                                }
-
-                                for(const error of _.keys(result.validation.errorMsgs))
-                                {
-                                    this._reportError(item.manifest, error);
-                                    if (!manifestViolations.errors) {
-                                        manifestViolations.errors = [];
-                                    }
-                                    manifestViolations.errors.push(error);
-                                }
-                                for(const warn of _.keys(result.validation.warnMsgs))
-                                {
-                                    this._reportWarning(item.manifest, warn);
-                                    if (!manifestViolations.warnings) {
-                                        manifestViolations.warnings = [];
-                                    }
-                                    manifestViolations.warnings.push(warn);
-                                }
-
-                                this._violations.push(manifestViolations);
-                            }
-                            else
-                            {
-                                this._passed.push(item.manifest);
-                            }
+                            this._processValidationResult(item.manifest, result);
                         }
                         else
                         {
@@ -182,6 +152,52 @@ export class RuleRuntime
                         }
                     });
             })
+    }
+
+    private _processValidationResult(manifest: K8sManifest, result: ValidationProcessorResult)
+    {
+        manifest.rules.processed = true;
+
+        if ((_.keys(result.validation.errorMsgs).length + _.keys(result.validation.warnMsgs).length) > 0)
+        {
+            if (_.keys(result.validation.errorMsgs).length > 0) {
+                manifest.rules.errors = true;
+            }
+
+            if (_.keys(result.validation.warnMsgs).length > 0) {
+                manifest.rules.warnings = true;
+            }
+
+            const manifestViolations : ManifestViolations = {
+                manifest: manifest,
+                hasErrors: (_.keys(result.validation.errorMsgs).length > 0),
+                hasWarnings: (_.keys(result.validation.warnMsgs).length > 0),
+            }
+
+            for(const error of _.keys(result.validation.errorMsgs))
+            {
+                this._reportError(manifest, error);
+                if (!manifestViolations.errors) {
+                    manifestViolations.errors = [];
+                }
+                manifestViolations.errors.push(error);
+            }
+
+            for(const warn of _.keys(result.validation.warnMsgs))
+            {
+                this._reportWarning(manifest, warn);
+                if (!manifestViolations.warnings) {
+                    manifestViolations.warnings = [];
+                }
+                manifestViolations.warnings.push(warn);
+            }
+
+            this._violations.push(manifestViolations);
+        }
+        else
+        {
+            this._passed.push(manifest);
+        }
     }
 
     private _reportError(manifest: K8sManifest, msg: string)

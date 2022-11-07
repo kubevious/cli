@@ -2,12 +2,14 @@ import chalk from 'chalk';
 import emoji from 'node-emoji';
 
 import { GuardResult } from "./types";
-import { output as lintOutput, produceSourceLine } from '../lint/output'
+import { output as lintOutput, outputLintSummary, produceSourceLine } from '../lint/output'
 import { outputManifest, print, severityStatusIcon } from '../lint/output'
 
 export function output(result: GuardResult)
 {
-    lintOutput(result.lintResult);
+    lintOutput(result.lintResult, {
+        skipSummary: true,
+    });
 
     print();
 
@@ -17,11 +19,11 @@ export function output(result: GuardResult)
         {
             if (rule.namespace)
             {
-                print(`${emoji.get('page_with_curl')} [${rule.kind}] Namespace: ${rule.namespace}, ${rule.rule}`);
+                print(`${emoji.get('scroll')} [${rule.kind}] Namespace: ${rule.namespace}, ${rule.rule}`);
             }
             else
             {
-                print(`${emoji.get('page_with_curl')} [${rule.kind}] ${rule.rule}`);
+                print(`${emoji.get('scroll')} [${rule.kind}] ${rule.rule}`);
             }
 
             print(produceSourceLine(rule.source), 3);
@@ -92,6 +94,12 @@ export function output(result: GuardResult)
         print();
     }
 
+    outputLintSummary(result.lintResult);
+    print();
+
+    outputGuardSummary(result);
+    print();
+
     if (result.success)
     {
         print(`${emoji.get('white_check_mark')} Guard Succeeded.`);
@@ -102,3 +110,19 @@ export function output(result: GuardResult)
     }
 }
 
+export function outputGuardSummary(result: GuardResult)
+{
+    print(chalk.underline('Guard Summary'));
+
+    print(`Rules: ${result.counters.rules.total}`, 4);
+    print(`${severityStatusIcon('pass')} Rules Passed: ${result.counters.rules.passed}`, 8);
+    print(`${emoji.get(':red_circle:')} Rules Failed: ${result.counters.rules.failed}`, 8);
+    print(`${severityStatusIcon('fail')} Rules With Errors: ${result.counters.rules.withErrors}`, 8);
+    print(`${severityStatusIcon('warning')} Rules With Warnings: ${result.counters.rules.withWarnings}`, 8);
+
+    print(`Manifests: ${result.counters.manifests.total}`, 4);
+    print(`${emoji.get('page_facing_up')} Manifests Processed: ${result.counters.manifests.processed}`, 8);
+    print(`${severityStatusIcon('pass')} Manifests Passed: ${result.counters.manifests.passed}`, 8);
+    print(`${severityStatusIcon('fail')} Manifests with Errors: ${result.counters.manifests.withErrors}`, 8);
+    print(`${severityStatusIcon('warning')} Manifests with Warnings: ${result.counters.manifests.withWarnings}`, 8);
+}

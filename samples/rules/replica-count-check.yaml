@@ -4,7 +4,6 @@ metadata:
   name: replica-count-check
   namespace: ordering
 spec:
-  useWebhook: true
   target: |
     ApiVersion('apps/v1')
     .Kind('Deployment')

@@ -31,14 +31,14 @@ export function formatResult(
                 withWarnings: 0
             },
             manifests: {
-                total: 0,
+                total: manifestPackage.manifests.length,
+                processed: 0,
                 passed: 0,
                 withErrors: 0,
                 withWarnings: 0
             }
         }
     };
-
 
     for(const rule of rulesRuntime.rules)
     {
@@ -65,7 +65,6 @@ export function formatResult(
         if (rule.violations.length > 0)
         {
             ruleResult.violations = [];
-
 
             for(const violation of rule.violations)
             {
@@ -101,6 +100,27 @@ export function formatResult(
         }
 
         result.rules.push(ruleResult);
+    }
+    
+    for(const manifest of manifestPackage.manifests)
+    {
+        if (manifest.rules.processed)
+        {
+            result.counters.manifests.processed++;
+            if (manifest.rules.errors)
+            {
+                result.counters.manifests.withErrors++;
+            }
+            else
+            {
+                result.counters.manifests.passed++;
+            }
+
+            if (manifest.rules.warnings)
+            {
+                result.counters.manifests.withWarnings++;
+            }
+        }
     }
 
     result.success = result.lintResult.success && result.ruleSuccess;

@@ -31,11 +31,13 @@ export interface GuardResult
         },
         manifests: {
             total: number,
+            processed: number,
             passed: number,
             withErrors: number,
             withWarnings: number
         }
     }
+    
 }
 
 export interface LintRuleResult
