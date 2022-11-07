@@ -1,0 +1,13 @@
+---
+apiVersion: kubevious.io/v1alpha1
+kind: RuleApplicator
+metadata:
+  name: certificate-check-applicator
+  namespace: kubevious
+spec:
+  ruleRef:
+    kind: ClusterRule
+    name: certificate-check
+  disabled: true
+  values:
+    domain: pepsi.com

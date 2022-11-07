@@ -33,7 +33,33 @@ spec:
                       - type: integer
                       - type: boolean
                       - type: object
-                      - type: any
+                disabled:
+                  type: boolean
+                application:
+                  type: object
+                  properties:
+                    useApplicator:
+                      type: boolean
+                    namespaces: 
+                      type: array
+                      items:
+                        anyOf:
+                          - type: string
+                          - type: object
+                            properties:
+                              name: 
+                                type: string
+                              values:
+                                type: object
+                                x-kubernetes-preserve-unknown-fields: true
+                                additionalProperties:
+                                  anyOf:
+                                    - type: string
+                                    - type: integer
+                                    - type: boolean
+                                    - type: object
+                            required:
+                              - name
               required:
                 - target
                 - rule
