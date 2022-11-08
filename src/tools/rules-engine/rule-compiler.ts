@@ -17,7 +17,7 @@ export class RuleCompiler
     private _validationProcessor: ValidationProcessor;
 
     private _isCompiled = false;
-    private _isHasErrors = false;
+    private _hasRuntimeErrors = false;
     private _ruleErrors : RuleError[] = [];
 
     constructor(logger: ILogger,
@@ -40,8 +40,8 @@ export class RuleCompiler
         return this._isCompiled;
     }
 
-    get isHasErrors() {
-        return this._isHasErrors;
+    get hasRuntimeErrors() {
+        return this._hasRuntimeErrors;
     }
 
     get ruleErrors() {
@@ -88,7 +88,7 @@ export class RuleCompiler
 
     reportScriptErrors(source: string, messages: string[])
     {
-        this._isHasErrors = true;
+        this._hasRuntimeErrors = true;
 
         for(const x of messages)
         {

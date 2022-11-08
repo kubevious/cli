@@ -7,6 +7,6 @@ metadata:
 spec:
   clusterRuleRef:
     name: certificate-check
-  disabled: true
+  # disabled: true
   values:
-    domain: pepsi.com
+    domain: kubevious.io

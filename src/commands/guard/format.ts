@@ -47,7 +47,7 @@ export function formatResult(
             kind: rule.rule.kind,
             namespace: rule.rule.namespace,
             rule: rule.rule.name,
-            compiled: rule.isCompiled && !rule.isHasErrors,
+            compiled: rule.isCompiled && !rule.hasRuntimeErrors,
             pass: true,
             hasViolationErrors: false,
             hasViolationWarnings: false,
@@ -57,8 +57,9 @@ export function formatResult(
             }))
         };
 
-        if (rule.isHasErrors) {
-            ruleResult.errors = rule.ruleErrors.map(x => x.msg);
+        ruleResult.errors = rule.ruleErrors.map(x => x.msg) ?? [];
+
+        if (!ruleResult.compiled) {
             result.counters.rules.failed++;
         }
 

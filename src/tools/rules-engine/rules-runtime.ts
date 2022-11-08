@@ -19,7 +19,7 @@ export class RulesRuntime
 
     private _clusterRules : Record<string, {
         rule: ClusterRule,
-        compiler: RuleCompiler,
+        compiler?: RuleCompiler,
     }> = {};
     private _rules : RuleRuntime[] = [];
 
@@ -75,6 +75,13 @@ export class RulesRuntime
     {
         this._logger.info("[_initClusterRule] %s...", clusterRule.name);
 
+        if (clusterRule.spec.disabled) {
+            this._clusterRules[clusterRule.name] = {
+                rule: clusterRule
+            }
+            return;
+        }
+
         const compiler = new RuleCompiler(this._logger, clusterRule, this._executionContext);
         return compiler.compile()
             .then(() => {
@@ -115,6 +122,10 @@ export class RulesRuntime
     {
         this._logger.info("[_initRule] %s :: %s...", rule.namespace, rule.name);
 
+        if (rule.spec.disabled) {
+            return;
+        }
+
         const compiler = new RuleCompiler(this._logger, rule, this._executionContext);
         return compiler.compile()
             .then(() => {
@@ -140,6 +151,10 @@ export class RulesRuntime
     {
         this._logger.info("[_initRuleApplicator] %s :: %s...", applicator.namespace, applicator.name);
 
+        if (applicator.spec.disabled) {
+            return;
+        }
+
         const clusterRefName = applicator.spec.clusterRuleRef.name;
         if (!clusterRefName) {
             return;
@@ -149,8 +164,14 @@ export class RulesRuntime
         if (!clusterRuleInfo) {
             return;
         }
+        if (!clusterRuleInfo.compiler) {
+            return;
+        }
 
         if (!clusterRuleInfo.rule.useApplicator) {
+            return;
+        }
+        if (clusterRuleInfo.rule.spec.disabled) {
             return;
         }
 

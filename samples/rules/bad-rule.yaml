@@ -1,5 +1,5 @@
 apiVersion: kubevious.io/v1alpha1
-kind: ClusterRule
+kind: Rule
 metadata:
   name: bad-rule
 spec:

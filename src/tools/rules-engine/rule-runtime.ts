@@ -45,8 +45,8 @@ export class RuleRuntime
         return this._compiler.isCompiled;
     }
 
-    get isHasErrors() {
-        return this._compiler.isHasErrors;
+    get hasRuntimeErrors() {
+        return this._compiler.hasRuntimeErrors;
     }
 
     get ruleErrors() {
