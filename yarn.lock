@@ -1210,10 +1210,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-k8s-super-client@^2.0.38:
-  version "2.0.38"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.38.tgz#6f0ab69136a54c68db3b6ff94094a305e740c4f9"
-  integrity sha512-5ZXOmzTanSVRtzEdjlAPQF5EFUP3lFIw0KIrYpIbffKGfML+1HnpOmWV8wyLUX8DQWoPhXPu3wNpUWUiT4nxCA==
+k8s-super-client@^2.0.40:
+  version "2.0.40"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.40.tgz#4d77794c132cf000e49fedc45abfa8a57292bb41"
+  integrity sha512-tITRZmmL4fomsAf6YMQAONMCI+dFRTvQAhgnBkkhrBmCdmFw/JDmqcAMfJxS80SYainxtiXrxC2CiHTD//2rJQ==
   dependencies:
     "@types/ndjson" "^2.0.0"
     "@types/uuid" "^8.3.0"

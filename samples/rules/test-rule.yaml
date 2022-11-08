@@ -1,0 +1,28 @@
+apiVersion: kubevious.io/v1alpha1
+kind: Rule
+metadata:
+  name: bad-rule
+spec:
+  target: |
+    ApiVersion('cert-manager.io/v1')
+    .Kind('Certificate')
+    xxx
+  rule: |
+    ddd
+    const issuer = ApiVersion('cert-manager.io/v1')
+                .Kind(config.spec?.issuerRef?.kind)
+                .name(config.spec?.issuerRef?.name)
+                .single();
+    if (!issuer) {
+      error('Could not find the Certificate Issuer');
+    } else {
+      const email = issuer.config.spec?.acme?.email ?? "";
+      if (!email.endsWith('example.com')) {
+        error(`Using not approved email: ${email}`);
+      }
+    }
+  values: 
+    foo: bar
+    notFoo: 123
+    # complexFoo: 
+    #   innerFoo: innerBar

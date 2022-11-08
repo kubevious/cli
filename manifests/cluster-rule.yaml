@@ -27,12 +27,12 @@ spec:
                 values:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
-                  additionalProperties:
-                    anyOf:
-                      - type: string
-                      - type: integer
-                      - type: boolean
-                      - type: object
+                  # additionalProperties:
+                  #   anyOf:
+                  #     - type: string
+                  #     - type: integer
+                  #     - type: boolean
+                  #     - type: object
                 disabled:
                   type: boolean
                 application:
@@ -52,12 +52,6 @@ spec:
                           values:
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
-                            additionalProperties:
-                              anyOf:
-                                - type: string
-                                - type: integer
-                                - type: boolean
-                                - type: object
                         required:
                           - name
               required:

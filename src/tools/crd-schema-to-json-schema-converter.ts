@@ -54,7 +54,6 @@ export class CrdSchemaToJsonSchemaConverter
             schema.properties = this._convertProperties(crdSchema.properties);
         }
 
-        crdSchema.items
         if (crdSchema.items) {
             schema.items = this._convert(crdSchema.items);
         }
@@ -90,6 +89,25 @@ export class CrdSchemaToJsonSchemaConverter
                 else
                 {
                     schema.additionalProperties = this._convert(crdSchema.additionalProperties as SchemaObject);
+                }
+            }
+            else
+            {
+                if (crdSchema['x-kubernetes-preserve-unknown-fields'])
+                {
+                    schema.additionalProperties = true;
+                }
+                else
+                {
+                    if (_.isNotNullOrUndefined(crdSchema.additionalProperties))
+                    {
+                        if ((crdSchema.additionalProperties as any)['x-kubernetes-preserve-unknown-fields'])
+                        {
+                            // NOTE: Not the right way, but used in Traefik:
+                            // https://raw.githubusercontent.com/traefik/traefik/v2.9/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
+                            schema.additionalProperties = true;
+                        }
+                    }
                 }
             }
         }

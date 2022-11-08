@@ -61,6 +61,8 @@ export class K8sManifestValidator
                 definitions: this._k8sJsonSchema.definitions
             }
 
+            this._logger.verbose('[validate] %s', resourceInfo.definitionId);
+
             this._preProcessNode(k8sManifest, {
                 ['$ref'] : schema['$ref']
             }, null, null);
