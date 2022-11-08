@@ -12,7 +12,6 @@ spec:
                 .Kind(config.spec?.issuerRef?.kind)
                 .name(config.spec?.issuerRef?.name)
                 .single();
-    warning('test1234');
     if (!issuer) {
       error('Could not find the Certificate Issuer');
     } else {
@@ -27,8 +26,8 @@ spec:
     namespaces:
       - name: foo
       - name: bar
-      - name: ordering
+      - name: kubevious
         values: 
-          foo: bar
+          domain: kubevious.io
   values:
     domain: example.com

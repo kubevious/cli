@@ -58,17 +58,14 @@ export class RuleCompiler
 
     compile()
     {
-        this._logger.info("[init] %s", this._ruleObject.name);
-
-        this._logger.info("[init] TARGET: %s", this._ruleObject.target);
-
+        this._logger.info("[compile] %s", this._ruleObject.name);
 
         this._isCompiled = true;
 
         return Promise.resolve()
             .then(() => {
                 return this._targetProcessor.prepare().then((result) => {
-                    this._logger.info("[init] _targetProcessor prepare: ", result);
+                    this._logger.verbose("[compile] _targetProcessor prepare: ", result);
                     if (!result.success) {
                         this._isCompiled = false;
                         this.reportScriptErrors('target', result.messages);
@@ -77,7 +74,7 @@ export class RuleCompiler
             })
             .then(() => {
                 return this._validationProcessor.prepare().then((result) => {
-                    this._logger.info("[init] _validationProcessor prepare: ", result);
+                    this._logger.verbose("[compile] _validationProcessor prepare: ", result);
                     // console.log("[RULE-PROCESSOR] TARGETS PREPARE RESULT: ", result)
                     // this._acceptScriptErrors('target', result)
                     if (!result.success) {

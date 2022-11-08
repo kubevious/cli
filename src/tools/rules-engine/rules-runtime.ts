@@ -10,6 +10,7 @@ import { ManifestPackage } from '../manifest-package';
 import { RuleEngineReporter } from './rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../utils/screen';
 import { RuleCompiler } from './rule-compiler';
+import cluster from 'cluster';
 
 export class RulesRuntime
 {
@@ -72,6 +73,8 @@ export class RulesRuntime
 
     private _initClusterRule(clusterRule: ClusterRule)
     {
+        this._logger.info("[_initClusterRule] %s...", clusterRule.name);
+
         const compiler = new RuleCompiler(this._logger, clusterRule, this._executionContext);
         return compiler.compile()
             .then(() => {
@@ -82,16 +85,19 @@ export class RulesRuntime
 
                 if (!clusterRule.useApplicator)
                 {
-                    for(const ns of this._namespaces)
+                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._namespaces;
+                    for(const ns of namespaces)
                     {
-                        const ruleNamespace = clusterRule.namespaces[ns];
-                        
+                        const ruleNamespaceInfo = clusterRule.namespaces[ns];
+
+                        this._logger.info("[_initClusterRule] >>> NS: %s...", ns);
+
                         const ruleRuntime = new RuleRuntime(this._logger,
                             compiler.rule,
                             this._ruleEngineReporter,
                             compiler,
                             { namespace: ns },
-                            this._makeValues([ ruleNamespace?.values, clusterRule.values ]));
+                            this._makeValues([ ruleNamespaceInfo?.values, clusterRule.values ]));
                         this._rules.push(ruleRuntime);
                     }
                 }
@@ -107,6 +113,8 @@ export class RulesRuntime
 
     private _initRule(rule: NamespaceRule)
     {
+        this._logger.info("[_initRule] %s :: %s...", rule.namespace, rule.name);
+
         const compiler = new RuleCompiler(this._logger, rule, this._executionContext);
         return compiler.compile()
             .then(() => {
@@ -130,6 +138,8 @@ export class RulesRuntime
 
     private _initRuleApplicator(applicator: ApplicatorRule)
     {
+        this._logger.info("[_initRuleApplicator] %s :: %s...", applicator.namespace, applicator.name);
+
         const clusterRefName = applicator.spec.clusterRuleRef.name;
         if (!clusterRefName) {
             return;
@@ -144,7 +154,12 @@ export class RulesRuntime
             return;
         }
 
-        const ruleNamespaceValues = clusterRuleInfo.rule.namespaces[applicator.namespace];
+        const ruleNamespaceInfo = clusterRuleInfo.rule.namespaces[applicator.namespace];
+        if (clusterRuleInfo.rule.onlySelectedNamespaces) {
+            if (!ruleNamespaceInfo) {
+                return;
+            }
+        }
 
         const ruleConfig : RuleObject = _.clone(clusterRuleInfo.rule);
         ruleConfig.kind = applicator.kind;
@@ -156,7 +171,7 @@ export class RulesRuntime
             this._ruleEngineReporter,
             clusterRuleInfo.compiler,
             { namespace: ruleConfig.namespace },
-            this._makeValues([applicator.values, ruleNamespaceValues, ruleConfig.values])
+            this._makeValues([applicator.values, ruleNamespaceInfo?.values, ruleConfig.values])
             );
         this._rules.push(ruleRuntime);
     }
@@ -185,7 +200,7 @@ export class RulesRuntime
         let result : Record<string, any> = {};
         for(const x of valuesArray)
         {
-            result = _.defaultTo(result, x);
+            result = _.defaults(result, x);
         }
         return result;
     }
