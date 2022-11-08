@@ -5,8 +5,7 @@ metadata:
   name: certificate-check-applicator
   namespace: kubevious
 spec:
-  ruleRef:
-    kind: ClusterRule
+  clusterRuleRef:
     name: certificate-check
   disabled: true
   values:

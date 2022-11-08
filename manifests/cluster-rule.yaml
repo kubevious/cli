@@ -40,26 +40,26 @@ spec:
                   properties:
                     useApplicator:
                       type: boolean
+                    onlySelectedNamespaces:
+                      type: boolean
                     namespaces: 
                       type: array
                       items:
-                        anyOf:
-                          - type: string
-                          - type: object
-                            properties:
-                              name: 
-                                type: string
-                              values:
-                                type: object
-                                x-kubernetes-preserve-unknown-fields: true
-                                additionalProperties:
-                                  anyOf:
-                                    - type: string
-                                    - type: integer
-                                    - type: boolean
-                                    - type: object
-                            required:
-                              - name
+                        type: object
+                        properties:
+                          name: 
+                            type: string
+                          values:
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                            additionalProperties:
+                              anyOf:
+                                - type: string
+                                - type: integer
+                                - type: boolean
+                                - type: object
+                        required:
+                          - name
               required:
                 - target
                 - rule

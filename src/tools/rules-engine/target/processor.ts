@@ -8,7 +8,7 @@ import { ScopeK8sQuery } from './k8s-target-builder'
 import { ScriptItem } from '../script-item'
 import { ExecutionContext } from '../execution-context'
 import { QueryFetcher } from '../query/fetcher'
-import { RuleApplicationScope } from '../../../types/rules';
+import { RuleApplicationScope } from '../types/rules';
 
 export class TargetProcessor {
     private _src: string;

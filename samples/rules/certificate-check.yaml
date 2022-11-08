@@ -23,10 +23,11 @@ spec:
     }
   application:
     useApplicator: true
+    onlySelectedNamespaces: true
     namespaces:
-      - foo
-      - bar
-      - namexxx: ordering
+      - name: foo
+      - name: bar
+      - name: ordering
         values: 
           foo: bar
   values:

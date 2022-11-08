@@ -5,7 +5,7 @@ import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution-context';
 import { ScopeK8sQuery } from '../target/k8s-target-builder';
 import { Scope } from '../scope';
-import { RuleApplicationScope } from '../../../types/rules';
+import { RuleApplicationScope } from '../types/rules';
 
 export interface QueryResult {
     success: boolean

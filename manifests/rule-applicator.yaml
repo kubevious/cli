@@ -20,18 +20,12 @@ spec:
             spec:
               type: object
               properties:
-                ruleRef:
+                clusterRuleRef:
                   type: object
                   properties:
-                    kind:
-                      type: string
-                      enum:
-                        - Rule
-                        - ClusterRule
                     name:
                       type: string
                   required:
-                    - kind
                     - name
                 disabled:
                   type: boolean
@@ -45,7 +39,6 @@ spec:
                       - type: boolean
                       - type: object
               required:
-                - target
-                - rule
+                - clusterRuleRef
           required:
             - spec
