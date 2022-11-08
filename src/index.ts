@@ -3,7 +3,8 @@ import { logger } from './logger';
 import VERSION from './version'
 
 import { program } from 'commander';
-import setupLintManifests from './commands/lint-manifests';
+import setupLintManifests from './commands/lint';
+import setupGuard from './commands/guard';
 import setupListKnownK8sVersions from './commands/list-known-k8s-versions';
 
 logger.info("[execPath]: %s", process.execPath)
@@ -16,6 +17,7 @@ program
   .version(VERSION);
 
 setupLintManifests(program);
+setupGuard(program);
 setupListKnownK8sVersions(program);
 
 program.parse();

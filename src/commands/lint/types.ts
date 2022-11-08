@@ -1,5 +1,12 @@
+import { K8sApiSchemaFetcherResult } from "../../tools/k8s-api-schema-fetcher";
+import { ManifestPackage } from "../../tools/manifest-package";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
+
+export interface LintCommandData {
+    manifestPackage: ManifestPackage,
+    k8sSchemaInfo: K8sApiSchemaFetcherResult,
+}
 
 export type LintSeverity = 'pass' | 'fail' | 'warning';
 export interface LintStatus
@@ -9,6 +16,7 @@ export interface LintStatus
     errors?: string[],
     warnings?: string[]
 }
+
 export interface LintManifestsResult
 {
     success: boolean;
@@ -19,6 +27,20 @@ export interface LintManifestsResult
     foundExactK8sVersion: boolean;
 
     sources: LintSourceResult[];
+
+    counters: {
+        sources: {
+            total: number,
+            withErrors: number,
+            withWarnings: number
+        },
+        manifests: {
+            total: number,
+            passed: number,
+            withErrors: number,
+            withWarnings: number
+        }
+    }
 }
 
 export type LintSourceResult = ManifestSourceId & LintStatus & {
@@ -28,3 +50,4 @@ export type LintSourceResult = ManifestSourceId & LintStatus & {
 };
 
 export type LintManifestResult = K8sObjectId & LintStatus;
+

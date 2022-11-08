@@ -5,10 +5,9 @@ import Ajv, { Options as AjvOptions, ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
-import { K8sOpenApiResource } from 'k8s-super-client';
 
 import { K8sObject } from '../types/k8s';
-import { parseApiVersion } from '../utils/k8s';
+import { getApiResourceId, getJsonSchemaResourceKey } from '../utils/k8s';
 
 export interface K8sManifestValidatorParams
 {
@@ -32,8 +31,7 @@ export class K8sManifestValidator
     {
         try
         {
-            const apiResource = this._getApiResource(k8sManifest);
-            this._logger.info("apiResource: ", apiResource);
+            const apiResource = getApiResourceId(k8sManifest);
             if (!apiResource) {
                 return {
                     success: false,
@@ -41,10 +39,9 @@ export class K8sManifestValidator
                 }
             }
     
-            const resourceKey = _.stableStringify(apiResource);
-            const definitionKey  = this._k8sJsonSchema.resources[resourceKey];
-            this._logger.info("definitionKey: %s", definitionKey);
-            if (!definitionKey) {
+            const resourceKey = getJsonSchemaResourceKey(apiResource);
+            const resourceInfo = this._k8sJsonSchema.resources[resourceKey];
+            if (!resourceInfo) {
                 const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
                 if (this._params.ignoreUnknown) {
                     return {
@@ -60,7 +57,7 @@ export class K8sManifestValidator
             }
     
             const schema = { // : SomeJTDSchemaType
-                ['$ref'] : `#/definitions/${definitionKey}`,
+                ['$ref'] : `#/definitions/${resourceInfo.definitionId}`,
                 definitions: this._k8sJsonSchema.definitions
             }
 
@@ -228,23 +225,6 @@ export class K8sManifestValidator
         return error.message ?? 'unknown error';
     }
 
-    private _getApiResource(k8sManifest : K8sObject) : K8sOpenApiResource | null
-    {
-        if (!k8sManifest.kind) {
-            return null;
-        }
-
-        const apiVersionParts = parseApiVersion(k8sManifest.apiVersion);
-        if (!apiVersionParts) {
-            return null;
-        }
-
-        return {
-            group: apiVersionParts.group,
-            version: apiVersionParts.version,
-            kind: k8sManifest.kind
-        }
-    }
 }
 
 export interface K8sManifestValidationResult

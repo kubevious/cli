@@ -66,6 +66,34 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@kubevious/entity-meta@^1.0.80":
+  version "1.0.80"
+  resolved "https://registry.yarnpkg.com/@kubevious/entity-meta/-/entity-meta-1.0.80.tgz#84f93ec6a0166d725224ff8cdaab8d600a8921f1"
+  integrity sha512-fHNtNv/m/CsI5P/twMbkrX77BOAMHrM497wW6CqDf0bLBpexLMgL5FlUSOvoVB8h3sKvHeLSJyMvmesAwlNr5Q==
+  dependencies:
+    the-lodash "^2.0.9"
+
+"@kubevious/kubik@^1.0.25":
+  version "1.0.25"
+  resolved "https://registry.yarnpkg.com/@kubevious/kubik/-/kubik-1.0.25.tgz#346109238787c5f33436be2b0465750b7d8bae53"
+  integrity sha512-apWI+NXITXVE2kt3a/eSy7pU8Pyr8RzENm+HTRKtTgqFhw4J19dwp+aKIgjaZhQtuG9WY5EDpTY9dujVMX5Sgw==
+  dependencies:
+    "@kubevious/entity-meta" "^1.0.80"
+    "@kubevious/state-registry" "^1.0.17"
+    the-lodash "^2.0.9"
+    the-logger "^2.0.14"
+    the-promise "^2.0.15"
+
+"@kubevious/state-registry@^1.0.17":
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/@kubevious/state-registry/-/state-registry-1.0.17.tgz#7ba66da8d8658f9254bf172f91757e00f9ddc428"
+  integrity sha512-O5lh3N9euEB3LfDTgxSEWnQjhZXOi+fPMcIPDq8DxxhHXhQ0TjnZgNyaJkpeBRe9+7nNfFiZlVhd6OvqK7/xhA==
+  dependencies:
+    "@kubevious/entity-meta" "^1.0.80"
+    the-lodash "^2.0.9"
+    the-logger "^2.0.14"
+    the-promise "^2.0.15"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -1182,10 +1210,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-k8s-super-client@^2.0.37:
-  version "2.0.37"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.37.tgz#e8a08adb7b9fb30116cb20bffd8c74aaf7eaff62"
-  integrity sha512-UZ1KFoPiHE014OYJZjnzaKU1jtyE2vZC92pQZGuwK/0Avt/BNjR1QTXkt81L90kEgzqc8vJe6DcumB76pLC0HA==
+k8s-super-client@^2.0.38:
+  version "2.0.38"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.38.tgz#6f0ab69136a54c68db3b6ff94094a305e740c4f9"
+  integrity sha512-5ZXOmzTanSVRtzEdjlAPQF5EFUP3lFIw0KIrYpIbffKGfML+1HnpOmWV8wyLUX8DQWoPhXPu3wNpUWUiT4nxCA==
   dependencies:
     "@types/ndjson" "^2.0.0"
     "@types/uuid" "^8.3.0"
