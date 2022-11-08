@@ -8,7 +8,7 @@ spec:
   names:
     plural: ruleapplicators
     singular: ruleapplicator
-    kind: RuleApplicator 
+    kind: RuleApplicator
   versions:
     - name: v1alpha1
       served: true

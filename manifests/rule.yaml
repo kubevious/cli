@@ -8,7 +8,7 @@ spec:
   names:
     plural: rules
     singular: rule
-    kind: Rule  
+    kind: Rule
   versions:
     - name: v1alpha1
       served: true
@@ -20,6 +20,8 @@ spec:
             spec:
               type: object
               properties:
+                description:
+                  type: string
                 target:
                   type: string
                 rule:
@@ -28,7 +30,7 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 disabled:
-                  type: boolean                      
+                  type: boolean
               required:
                 - target
                 - rule

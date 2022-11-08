@@ -8,7 +8,7 @@ spec:
   names:
     plural: clusterrules
     singular: clusterrule
-    kind: ClusterRule  
+    kind: ClusterRule
   versions:
     - name: v1alpha1
       served: true
@@ -20,6 +20,8 @@ spec:
             spec:
               type: object
               properties:
+                description:
+                  type: string
                 target:
                   type: string
                 rule:
@@ -27,12 +29,6 @@ spec:
                 values:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
-                  # additionalProperties:
-                  #   anyOf:
-                  #     - type: string
-                  #     - type: integer
-                  #     - type: boolean
-                  #     - type: object
                 disabled:
                   type: boolean
                 application:

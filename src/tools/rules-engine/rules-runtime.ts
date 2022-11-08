@@ -11,6 +11,7 @@ import { RuleEngineReporter } from './rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../utils/screen';
 import { RuleCompiler } from './rule-compiler';
 import cluster from 'cluster';
+import { RuleOverrideValues } from './spec/rule-spec';
 
 export class RulesRuntime
 {
@@ -215,10 +216,10 @@ export class RulesRuntime
         this._namespaces = _.keys(namespaces);
     }
 
-    private _makeValues(valuesArray: Record<string, any>[])
+    private _makeValues(valuesArray: RuleOverrideValues[])
     {
         valuesArray = valuesArray.map(x => x);
-        let result : Record<string, any> = {};
+        let result : RuleOverrideValues = {};
         for(const x of valuesArray)
         {
             result = _.defaults(result, x);

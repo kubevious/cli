@@ -9,6 +9,7 @@ import { ScriptItem } from '../script-item'
 import { ExecutionContext } from '../execution-context'
 import { QueryFetcher } from '../query/fetcher'
 import { RuleApplicationScope } from '../types/rules';
+import { RuleOverrideValues } from '../spec/rule-spec';
 
 export class TargetProcessor {
     private _src: string;
@@ -50,7 +51,7 @@ export class TargetProcessor {
             .then(() => result)
     }
 
-    execute(applicationScope: RuleApplicationScope, values: Record<string, any>): Promise<ScriptItem[]> {
+    execute(applicationScope: RuleApplicationScope, values: RuleOverrideValues): Promise<ScriptItem[]> {
         const rootScope : CompilerScopeDict = {};
         rootScope['values'] = values ?? {};
 
