@@ -4,7 +4,7 @@ metadata:
   name: orderservice
   namespace: ordering
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: orderservice

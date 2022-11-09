@@ -3,7 +3,8 @@ kind: ClusterRule
 metadata:
   name: certificate-check
 spec:
-  # disabled: true
+  values:
+    domain: example.com
   target: |
     ApiVersion('cert-manager.io/v1')
     .Kind('Certificate')
@@ -29,5 +30,4 @@ spec:
           domain: kubevious.io
       - name: pepsi
       - name: foo
-  values:
-    domain: example.com
+  # disabled: true
