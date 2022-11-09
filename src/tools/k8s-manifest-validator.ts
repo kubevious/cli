@@ -40,7 +40,11 @@ export class K8sManifestValidator
             }
     
             const resourceKey = getJsonSchemaResourceKey(apiResource);
+            this._logger.verbose('[validate] resourceKey: ', resourceKey);
+
             const resourceInfo = this._k8sJsonSchema.resources[resourceKey];
+            this._logger.verbose('[validate] resourceInfo: ', resourceInfo);
+
             if (!resourceInfo) {
                 const msg = `Unknown API Resource. apiVersion: ${k8sManifest.apiVersion}, kind: ${k8sManifest.kind}.`;
                 if (this._params.ignoreUnknown) {

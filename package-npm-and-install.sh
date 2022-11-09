@@ -5,6 +5,8 @@ cd $MY_DIR
 
 source configuration.sh
 
+./scripts/prepare-package.sh
+
 npm pack 
 
 npm install -g kubevious-$(node -p -e "require('./package.json').version").tgz
