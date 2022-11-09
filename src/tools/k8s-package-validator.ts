@@ -74,9 +74,19 @@ export class K8sPackageValidator
     {
         this._logger.verbose('[_applyCRD] ', crdManifest.id);
 
+        this._fixCRD(crdManifest);
+
         if (this._isValidCRD(crdManifest))
         {
             this._applyCRDToSchema(crdManifest, this._k8sJsonSchema);
+        }
+    }
+
+    private _fixCRD(crdManifest : K8sManifest)
+    {
+        if (_.isNull(crdManifest.config?.metadata?.creationTimestamp))
+        {
+            delete crdManifest.config?.metadata?.creationTimestamp;
         }
     }
 
