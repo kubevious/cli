@@ -7,6 +7,11 @@ import { RuleKind } from "../../rules-engine/registry/types";
 import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 
 export interface GuardCommandOptions extends LintCommandOptions {
+
+    skipLocalRules: boolean;
+
+    skipRemoteRules: boolean;
+    
 }
 
 export interface GuardCommandData {

@@ -20,6 +20,8 @@ export default function (program: Command)
         .option('--k8s-version <version>', 'Target Kubernetes version. Do not use with --live-k8s option.')
         .option('--live-k8s', 'Lint against live Kubernetes cluster. Allows validation of CRDs. Do not use with --k8s-version option.')
         .option('--kubeconfig <path>', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
+        .option('--skip-local-rules', 'Skip validation of rules passed to the CLI.')
+        .option('--skip-remote-rules', 'Skip validation of rules that are already in the K8s cluster. Only used wth --live-k8s flag.')
         .option('--json', 'Output lint result in JSON.')
         .action(
             new CommandBuilder<GuardCommandData, GuardResult>()

@@ -38,11 +38,17 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     }
 
     const ruleRegistry = new RuleRegistry(logger);
-    if (remoteRegistry)
+    if (!options.skipRemoteRules)
     {
-        await ruleRegistry.loadRemotely(remoteRegistry, manifestPackage.namespaces);
+        if (remoteRegistry)
+        {
+            await ruleRegistry.loadRemotely(remoteRegistry, manifestPackage.namespaces);
+        }
     }
-    await ruleRegistry.loadLocally(localK8sRegistry);
+    if (!options.skipLocalRules)
+    {
+        await ruleRegistry.loadLocally(localK8sRegistry);
+    }
 
 
     let finalRegistry : RegistryQueryExecutor = localK8sRegistry;
@@ -69,6 +75,9 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 export function massageGuardOptions(options: Partial<GuardCommandOptions>) : GuardCommandOptions
 {
     return {
-        ...massageLintOptions(options)
+        ...massageLintOptions(options),
+        
+        skipLocalRules: options.skipLocalRules ?? false,
+        skipRemoteRules: options.skipRemoteRules ?? false,
     }
 }

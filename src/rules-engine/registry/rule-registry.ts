@@ -43,13 +43,13 @@ export class RuleRegistry
 
     loadLocally(registry: RegistryQueryExecutor, namespaces? : string[])
     {
-        const spinner = spinOperation("Populating RulesLibrary...");
+        const spinner = spinOperation("Populating local RulesLibrary...");
 
         this._loadClusterRules(registry);
         this._loadNsRules(registry, namespaces);
         this._loadApplicatorRules(registry, namespaces);
 
-        spinner.complete("RulesLibrary populated.")
+        spinner.complete("RulesLibrary locally populated.")
     }
 
     loadRemotely(registry: RegistryQueryExecutor, namespaces : string[])
