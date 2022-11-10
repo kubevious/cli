@@ -1,13 +1,13 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { RuleApplicationScope, RuleObject } from './types/rules';
-import { ValidationProcessorResult } from './validator/processor';
-import { ScriptItem } from './script-item';
-import { RuleEngineReporter } from './rule-engine-reporter';
-import { K8sManifest } from '../manifests/manifest-package';
-import { RuleCompiler } from './rule-compiler';
-import { RuleOverrideValues } from './spec/rule-spec';
+import { RuleApplicationScope, RuleObject } from '../registry/types';
+import { ValidationProcessorResult } from '../validator/processor';
+import { ScriptItem } from '../script-item';
+import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
+import { RuleCompiler } from '../compiler/rule-compiler';
+import { RuleOverrideValues } from '../spec/rule-spec';
+import { K8sManifest } from '../../manifests/k8s-manifest';
 
 export class RuleRuntime
 {

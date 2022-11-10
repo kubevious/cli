@@ -1,4 +1,4 @@
-import { ExecutionContext } from '../execution-context';
+import { ExecutionContext } from '../execution/execution-context';
 import { Scope } from '../scope'
 import { ScriptItem } from '../script-item';
 import { K8sTarget, K8sTargetBuilder, K8sTargetBuilderContext } from '../target/k8s-target-builder';

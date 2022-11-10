@@ -6,9 +6,9 @@ import { makeTargetRootScope } from './scope-builder'
 import { RootScopeBuilder } from '../scope-builders'
 import { ScopeK8sQuery } from './k8s-target-builder'
 import { ScriptItem } from '../script-item'
-import { ExecutionContext } from '../execution-context'
+import { ExecutionContext } from '../execution/execution-context'
 import { QueryFetcher } from '../query/fetcher'
-import { RuleApplicationScope } from '../types/rules';
+import { RuleApplicationScope } from '../registry/types';
 import { RuleOverrideValues } from '../spec/rule-spec';
 
 export class TargetProcessor {

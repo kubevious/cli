@@ -4,7 +4,7 @@ import { ScriptItem } from '../script-item'
 import { makeValidatorRootScope } from './scope-builder'
 import { RootScopeBuilder } from '../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
-import { ExecutionContext } from '../execution-context'
+import { ExecutionContext } from '../execution/execution-context'
 import { TopLevelQuery } from '../target/types';
 
 export interface ValidationProcessorResult {

@@ -1,17 +1,16 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { ApplicatorRule, ClusterRule, NamespaceRule, RuleObject } from './types/rules';
-import { RuleRegistry } from './rule-registry';
+import { ApplicatorRule, ClusterRule, NamespaceRule, RuleObject } from '../registry/types';
+import { RuleRegistry } from '../registry/rule-registry';
 import { RuleRuntime } from './rule-runtime';
-import { RegistryQueryExecutor } from './query-executor';
+import { RegistryQueryExecutor } from '../query-executor';
 import { ExecutionContext } from './execution-context';
-import { ManifestPackage } from '../manifests/manifest-package';
-import { RuleEngineReporter } from './rule-engine-reporter';
-import { ISpinner, spinOperation } from '../screen/spinner';
-import { RuleCompiler } from './rule-compiler';
-import cluster from 'cluster';
-import { RuleOverrideValues } from './spec/rule-spec';
+import { ManifestPackage } from '../../manifests/manifest-package';
+import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
+import { ISpinner, spinOperation } from '../../screen/spinner';
+import { RuleCompiler } from '../compiler/rule-compiler';
+import { RuleOverrideValues } from '../spec/rule-spec';
 
 export class RulesRuntime
 {
@@ -28,7 +27,6 @@ export class RulesRuntime
     private _executionContext : ExecutionContext;
     private _ruleEngineReporter : RuleEngineReporter;
     private _spinner? : ISpinner;
-    private _namespaces : string[] = [];
 
     constructor(logger: ILogger,
                 ruleRegistry: RuleRegistry,
@@ -40,7 +38,6 @@ export class RulesRuntime
         this._manifestPackage = manifestPackage;
         this._executionContext = new ExecutionContext(this._logger, registryQueryExecutor, manifestPackage);
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
-        this._produceNamespaces();
     }
 
     get rules() {
@@ -93,7 +90,7 @@ export class RulesRuntime
 
                 if (!clusterRule.useApplicator)
                 {
-                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._namespaces;
+                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._manifestPackage.namespaces;
                     for(const ns of namespaces)
                     {
                         const ruleNamespaceInfo = clusterRule.namespaces[ns];
@@ -206,18 +203,6 @@ export class RulesRuntime
         return Promise.resolve()
             .then(() => rule.execute())
             ;
-    }
-
-    private _produceNamespaces()
-    {
-        const namespaces : Record<string, boolean> = {};
-        for(const x of this._manifestPackage.manifests)
-        {
-            if (x.id.namespace) {
-                namespaces[x.id.namespace] = true;
-            }
-        }
-        this._namespaces = _.keys(namespaces);
     }
 
     private _makeValues(valuesArray: RuleOverrideValues[])

@@ -1,13 +1,15 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sObject, K8sObjectId, makeId } from '../types/k8s';
-import { ErrorStatus, ManifestSourceId, ManifestSourceType } from '../types/manifest';
+import { K8sObject } from '../types/k8s';
+import { ManifestSourceId, ManifestSourceType } from '../types/manifest';
+import { K8sManifest, ManifestSource } from './k8s-manifest';
 
 export class ManifestPackage
 {
     private _logger: ILogger;
     private _sources: { [key: string] : ManifestSource } = {}
     private _manifests: K8sManifest[] = [];
+    private _namespaces : string[] = [];
 
     constructor(logger: ILogger)
     {
@@ -20,6 +22,10 @@ export class ManifestPackage
 
     get manifests() {
         return this._manifests;
+    }
+
+    get namespaces() {
+        return this._namespaces;
     }
 
     getSource(kind: ManifestSourceType, path: string) : ManifestSource
@@ -90,51 +96,21 @@ export class ManifestPackage
 
     addManifest(source: ManifestSource, k8sObject: K8sObject)
     {
-        const k8sManifest : K8sManifest = {
-
-            id: makeId(k8sObject),
-
-            isLinted: false,
-            rules: {},
-            
-            success: true,
-            errors: [],
-            warnings: [],
-
-            source: source,
-            config: k8sObject,
-        }
-
+        const k8sManifest = new K8sManifest(k8sObject, source)
 
         source.contents.push(k8sManifest);
         this._manifests.push(k8sManifest);
     }
-}
 
-export interface ManifestSource extends Required<ErrorStatus>
-{
-    source: ManifestSourceId;
-
-    contents: K8sManifest[];
-}
-
-
-export interface K8sManifest extends Required<ErrorStatus>
-{
-    id: K8sObjectId;
-
-    isLinted: boolean;
-    rules: K8sManifestRuleResult;
-
-    errorsWithRule?: boolean;
-
-    source: ManifestSource;
-    config: K8sObject;
-}
-
-export interface K8sManifestRuleResult
-{
-    processed?: boolean;
-    errors?: boolean;
-    warnings?: boolean;
+    public produceNamespaces()
+    {
+        const namespaces : Record<string, boolean> = {};
+        for(const x of this.manifests)
+        {
+            if (x.id.namespace) {
+                namespaces[x.id.namespace] = true;
+            }
+        }
+        this._namespaces = _.keys(namespaces);
+    }
 }

@@ -1,4 +1,4 @@
-import { ExecutionContext } from '../execution-context';
+import { ExecutionContext } from '../execution/execution-context';
 import { Scope, ScopeQueryKind } from '../scope'
 
 

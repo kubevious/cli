@@ -67,6 +67,8 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
         processor.process();
     }
 
+    manifestPackage.produceNamespaces();
+
     return {
         k8sConnector,
         manifestPackage,

@@ -1,6 +1,5 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sManifest, ManifestSource } from '../manifests/manifest-package';
 import { K8sObject, makeId } from '../types/k8s';
 import { K8sTargetFilter } from '../rules-engine/target/k8s-target-builder';
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
@@ -8,6 +7,7 @@ import { K8sClusterConnector } from '../k8s-connector/k8s-cluster-connector';
 import { KubernetesClient, KubernetesObject } from 'k8s-super-client';
 import { parseApiVersion } from '../utils/k8s';
 import { ClientSideFiltering } from './client-side-filtering';
+import { K8sManifest, ManifestSource } from '../manifests/k8s-manifest';
 
 export class RemoteK8sRegistry implements RegistryQueryExecutor
 {
@@ -96,20 +96,7 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
     private _makeManifest(config: KubernetesObject) : K8sManifest
     {
         const k8sObject = config as K8sObject;
-        const k8sManifest : K8sManifest = {
-
-            id: makeId(k8sObject),
-
-            isLinted: false,
-            rules: {},
-            
-            success: true,
-            errors: [],
-            warnings: [],
-
-            source: this._source,
-            config: k8sObject,
-        }
+        const k8sManifest = new K8sManifest(k8sObject, this._source);
         return k8sManifest;
     }
 

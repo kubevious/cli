@@ -1,6 +1,7 @@
 import { ILogger } from "the-logger";
-import { RuleObject } from "./types/rules";
-import { K8sManifest, ManifestPackage } from "../manifests/manifest-package";
+import { RuleObject } from "../registry/types";
+import { ManifestPackage } from "../../manifests/manifest-package";
+import { K8sManifest } from "../../manifests/k8s-manifest";
 
 export class RuleEngineReporter
 {

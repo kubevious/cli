@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { K8sManifest } from "../manifests/manifest-package";
+import { K8sManifest } from '../manifests/k8s-manifest';
 import { KeyValueDict } from "../rules-engine/target/k8s-target-builder";
 
 

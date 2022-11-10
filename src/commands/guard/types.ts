@@ -1,9 +1,9 @@
 import { K8sApiSchemaFetcherResult } from "../../api-schema/k8s-api-schema-fetcher";
 import { ManifestPackage } from "../../manifests/manifest-package";
-import { RulesRuntime } from "../../rules-engine/rules-runtime";
+import { RulesRuntime } from "../../rules-engine/execution/rules-runtime";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
-import { RuleKind } from "../../rules-engine/types/rules";
+import { RuleKind } from "../../rules-engine/registry/types";
 import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 
 export interface GuardCommandOptions extends LintCommandOptions {

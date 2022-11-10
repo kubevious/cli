@@ -1,10 +1,10 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { RuleObject } from './types/rules';
-import { TargetProcessor } from './target/processor';
-import { ExecutionContext } from './execution-context';
-import { ValidationProcessor } from './validator/processor';
+import { RuleObject } from '../registry/types';
+import { TargetProcessor } from '../target/processor';
+import { ExecutionContext } from '../execution/execution-context';
+import { ValidationProcessor } from '../validator/processor';
 
 export class RuleCompiler
 {

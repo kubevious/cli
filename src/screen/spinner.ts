@@ -1,22 +1,26 @@
 import ora from 'ora';
+import { indentify } from '../commands/lint/output';
 
-export function spinOperation(name: string) : ISpinner
+export function spinOperation(name: string, indent?: number) : ISpinner
 {
-    const spinner = ora(name).start();
+    const spinner = ora(indentify(name ?? "", indent)).start();
     // spinner.spinner = 'moon';
     return {
         update: (newName: string) => {
-            spinner.text = newName;
+            spinner.text = indentify(newName ?? "", indent);
         },
         complete: (newName?: string) => {
-            spinner.succeed(newName);
+            spinner.succeed(indentify(newName ?? "", indent));
         },
         fail: (err: string) => {
             // spinner.color = 'red';
-            spinner.fail(err);
+            spinner.fail(indentify(err ?? "", indent));
         }
     }
 }
+
+
+
 
 export interface ISpinner
 {

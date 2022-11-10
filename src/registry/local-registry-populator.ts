@@ -2,10 +2,11 @@ import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
-import { K8sManifest, ManifestPackage } from '../manifests/manifest-package';
+import { ManifestPackage } from '../manifests/manifest-package';
 
 import { LocalK8sRegistry } from './local-k8s-registry';
 import { LocalSourceRegistry } from './local-source-registry';
+import { K8sManifest } from '../manifests/k8s-manifest';
 
 export class LocalRegistryPopulator
 {

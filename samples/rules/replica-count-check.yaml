@@ -5,7 +5,7 @@ metadata:
   namespace: ordering
 spec:
   values:
-    minReplicas: 3
+    minReplicas: 1
   target: |
     ApiVersion('apps/v1')
     .Kind('Deployment')

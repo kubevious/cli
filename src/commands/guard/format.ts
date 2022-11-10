@@ -4,7 +4,7 @@ import { GuardResult,  LintRuleResult } from "./types";
 import { logger } from '../../logger';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
-import { RulesRuntime } from '../../rules-engine/rules-runtime';
+import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
 import { formatResult as lintFormatResult } from '../lint/format';
 

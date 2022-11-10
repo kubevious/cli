@@ -8,9 +8,10 @@ import * as Path from 'path';
 import { K8sObject } from '../types/k8s';
 import YAML from 'yaml';
 
-import { ManifestSource, ManifestPackage } from './manifest-package';
+import { ManifestPackage } from './manifest-package';
 import { readFromInputStream } from '../utils/stream';
 import { spinOperation } from '../screen/spinner';
+import { ManifestSource } from './k8s-manifest';
 
 export class ManifetsLoader
 {

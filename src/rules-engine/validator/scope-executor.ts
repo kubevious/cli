@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { ExecutionContext } from '../execution-context';
+import { ExecutionContext } from '../execution/execution-context';
 import { QueryFetcher } from '../query/fetcher';
 import { Scope } from '../scope';
 import { K8sTargetBuilderContext } from '../target/k8s-target-builder';

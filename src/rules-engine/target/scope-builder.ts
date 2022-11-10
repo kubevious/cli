@@ -3,7 +3,7 @@ import { Scope } from '../scope'
 import { K8sTarget } from './k8s-target-builder';
 import { TopLevelQuery } from './types';
 import { RootScopeBuilder } from '../scope-builders'
-import { ExecutionContext } from '../execution-context';
+import { ExecutionContext } from '../execution/execution-context';
 
 export function makeTargetRootScope(rootScopeBuilder : RootScopeBuilder, executionContext : ExecutionContext, scope: Scope)
 {

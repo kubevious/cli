@@ -1,4 +1,4 @@
-import { K8sManifest } from "../manifests/manifest-package";
+import { K8sManifest } from "../manifests/k8s-manifest";
 import { K8sTargetFilter } from "./target/k8s-target-builder";
 
 export interface RegistryQueryExecutor

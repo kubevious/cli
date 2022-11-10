@@ -1,4 +1,4 @@
-import { K8sManifest } from "../manifests/manifest-package";
+import { K8sManifest } from "../manifests/k8s-manifest";
 
 
 export class ScriptItem

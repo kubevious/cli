@@ -1,4 +1,4 @@
-import { K8sManifest } from "../../manifests/manifest-package";
+import { K8sManifest } from "../../manifests/k8s-manifest";
 import { ManifestSourceId } from "../../types/manifest";
 import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec, RuleOverrideValues } from "../spec/rule-spec";
 
