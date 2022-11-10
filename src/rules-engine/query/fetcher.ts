@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import { Promise } from 'the-promise';
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution-context';
-import { ScopeK8sQuery } from '../target/k8s-target-builder';
+import { K8sTargetBuilderContext, ScopeK8sQuery } from '../target/k8s-target-builder';
 import { Scope } from '../scope';
 import { RuleApplicationScope } from '../types/rules';
 
@@ -32,16 +32,16 @@ export class QueryFetcher
         this._logger = executionContext.logger.sublogger("QueryFetcher");
     }
 
-    execute(applicationScope?: RuleApplicationScope): QueryResult
+    execute(targetScope: K8sTargetBuilderContext): QueryResult
     {
         this._logger.info("[execute] RUNNING QUERY....");
 
-        applicationScope = applicationScope ?? {};
+        targetScope = targetScope ?? {};
 
         const k8sQuery = this._scope.query as ScopeK8sQuery;
 
-        if (applicationScope.namespace) {
-            k8sQuery.filter.namespace = applicationScope.namespace;
+        if (targetScope.namespace) {
+            k8sQuery.filter.namespace = targetScope.namespace;
         }
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQuery.filter);

@@ -44,7 +44,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     const rulesRuntime = new RulesRuntime(logger,
                                           ruleRegistry,
-                                          localK8sRegistry,
+                                          finalRegistry,
                                           lintResult.manifestPackage);
     await rulesRuntime.init();
     await rulesRuntime.execute();
