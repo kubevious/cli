@@ -1,9 +1,9 @@
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 import { ILogger } from 'the-logger';
 import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
-import { connectDefaultRemoteCluster, connectRemoteCluster, K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
+import { K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
 import { spinOperation } from '../utils/screen';
-import { logger } from '../logger';
+import { K8sClusterConnector } from './k8s-cluster-connector';
 
 export class K8sApiSchemaFetcher
 {
@@ -14,25 +14,29 @@ export class K8sApiSchemaFetcher
         this._logger = logger.sublogger('K8sApiSchemaFetcher');
     }
 
-    async fetchRemote(kubeconfigpath? : string) : Promise<K8sApiSchemaFetcherResult>
+    async fetchRemote(k8sConnector: K8sClusterConnector) : Promise<K8sApiSchemaFetcherResult>
     {
-        const spinner = spinOperation('Connecting to K8s Cluster...');
+        const spinner = spinOperation('Extracting K8s API Schema...');
 
-        let isConnected = false;
+        const result : K8sApiSchemaFetcherResult = {
+            success: false,
+            targetVersion: null,
+            selectedVersion: null,
+            found: false,
+            foundExact: false,
+            k8sJsonSchema: null,
+        };
+
         return Promise.resolve()
             .then(() => {
-                if (kubeconfigpath) {
-                    this._logger.info("[fetchRemote] path: %s", kubeconfigpath);
-                    return connectRemoteCluster(this._logger.sublogger('k8s'), kubeconfigpath, undefined, { skipAPIFetch: true })
-                } else {
-                    return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: true })
-                }
-            })
-            .then(client => {
-                spinner.update('Extracting K8s API Schema...')
-                this._logger.info("Connected.");
-                isConnected = true;
 
+                const client = k8sConnector.client;
+
+                if (!client) {
+                    result.error = 'Could not connect to Kubernetes cluster';
+                    return;
+                }
+                
                 return client.openAPI.queryClusterVersion()
                     .then(version => {
 
@@ -46,21 +50,18 @@ export class K8sApiSchemaFetcher
                                 const converter = new K8sOpenApiSpecToJsonSchemaConverter(this._logger, k8sOpenApiSpecs);
                                 const k8sJsonSchema = converter.convert();
 
-                                const result : K8sApiSchemaFetcherResult = {
-                                    success: true,
-                                    targetVersion: null,
-                                    selectedVersion: version,
-                                    found: true,
-                                    foundExact: true,
-                                    k8sJsonSchema: k8sJsonSchema,
-                                };
-                                return result;
+                                result.success = true;
+                                result.selectedVersion = version;
+                                result.found = true;
+                                result.foundExact = true;
+                                result.k8sJsonSchema = k8sJsonSchema;
                             })
 
                     });
             })
+            .then(() => result)
             .catch(reason => {
-                const errorMsg = isConnected ? `Error fetching API Schema. ${reason?.message}` : `Could not connect to Kubernetes cluster. ${reason?.message}`;
+                const errorMsg = `Error fetching API Schema. ${reason?.message}`;
                 spinner.fail(errorMsg);
 
                 const result : K8sApiSchemaFetcherResult = {

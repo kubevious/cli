@@ -3,9 +3,9 @@ import { Command } from 'commander';
 import { logger } from '../../logger';
 
 import { CommandBuilder } from '../../infra/command-action';
-import { GuardCommandData, GuardResult } from './types';
+import { GuardCommandData, GuardCommandOptions, GuardResult } from './types';
 
-import { command } from './command';
+import { command, massageGuardOptions } from './command';
 import { formatResult } from './format';
 import { output } from './output';
 
@@ -23,9 +23,11 @@ export default function (program: Command)
         .option('--json', 'Output lint result in JSON.')
         .action(
             new CommandBuilder<GuardCommandData, GuardResult>()
-                .perform(async (path: string[], options) => {
+                .perform(async (path: string[], options: Partial<GuardCommandOptions>) => {
 
-                    return command(path, options);
+                    const myOptions = massageGuardOptions(options);
+
+                    return command(path, myOptions);
                     
                 })
                 .format(({ manifestPackage, k8sSchemaInfo, rulesRuntime }) => {

@@ -1,9 +1,21 @@
 import { K8sApiSchemaFetcherResult } from "../../tools/k8s-api-schema-fetcher";
+import { K8sClusterConnector } from "../../tools/k8s-cluster-connector";
 import { ManifestPackage } from "../../tools/manifest-package";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 
+export interface LintCommandOptions {
+    k8sVersion?: string;
+    ignoreUnknown: boolean;
+    skipApplyCrds: boolean;
+
+    liveK8s: boolean;
+    kubeconfig?: string;
+}
+
+
 export interface LintCommandData {
+    k8sConnector: K8sClusterConnector,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
 }

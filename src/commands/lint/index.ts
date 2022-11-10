@@ -3,9 +3,9 @@ import { Command } from 'commander';
 import { logger } from '../../logger';
 
 import { CommandBuilder } from '../../infra/command-action';
-import { LintCommandData, LintManifestsResult } from './types';
+import { LintCommandData, LintCommandOptions, LintManifestsResult } from './types';
 
-import { command } from './command';
+import { command, massageLintOptions } from './command';
 import { formatResult } from './format';
 import { output } from './output';
 
@@ -23,9 +23,11 @@ export default function (program: Command)
         .option('--json', 'Output lint result in JSON.')
         .action(
             new CommandBuilder<LintCommandData, LintManifestsResult>()
-                .perform(async (path: string[], options) => {
+                .perform(async (path: string[], options: Partial<LintCommandOptions>) => {
 
-                    return command(path, options);
+                    const myOptions = massageLintOptions(options);
+
+                    return command(path, myOptions);
                     
                 })
                 .format(({ manifestPackage, k8sSchemaInfo }) => {

@@ -4,7 +4,10 @@ import { RulesRuntime } from "../../tools/rules-engine/rules-runtime";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 import { RuleKind } from "../../tools/rules-engine/types/rules";
-import { LintManifestsResult } from "../lint/types";
+import { LintCommandOptions, LintManifestsResult } from "../lint/types";
+
+export interface GuardCommandOptions extends LintCommandOptions {
+}
 
 export interface GuardCommandData {
     manifestPackage: ManifestPackage,
