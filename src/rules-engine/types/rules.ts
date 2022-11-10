@@ -1,4 +1,4 @@
-import { ManifestSourceId } from "../../../types/manifest";
+import { ManifestSourceId } from "../../types/manifest";
 import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec, RuleOverrideValues } from "../spec/rule-spec";
 
 export enum RuleKind {

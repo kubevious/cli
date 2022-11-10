@@ -2,9 +2,9 @@ import _ from 'the-lodash';
 
 import { GuardResult,  LintRuleResult } from "./types";
 import { logger } from '../../logger';
-import { ManifestPackage } from '../../tools/manifest-package';
-import { K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
-import { RulesRuntime } from '../../tools/rules-engine/rules-runtime';
+import { ManifestPackage } from '../../manifests/manifest-package';
+import { K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
+import { RulesRuntime } from '../../rules-engine/rules-runtime';
 
 import { formatResult as lintFormatResult } from '../lint/format';
 

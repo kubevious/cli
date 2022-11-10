@@ -5,12 +5,12 @@ import { CustomResourceDefinition, JSONSchemaProps } from 'kubernetes-types/apie
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
 
-import { K8sManifest, ManifestPackage } from './manifest-package';
+import { K8sManifest, ManifestPackage } from '../manifests/manifest-package';
 import { K8sManifestValidator } from './k8s-manifest-validator';
-import { ISpinner, spinOperation } from '../utils/screen';
+import { ISpinner, spinOperation } from '../screen/spinner';
 import { getJsonSchemaResourceKey, isCRD } from '../utils/k8s';
 import { K8sOpenApiResource } from 'k8s-super-client';
-import { CrdSchemaToJsonSchemaConverter } from './crd-schema-to-json-schema-converter';
+import { CrdSchemaToJsonSchemaConverter } from '../api-schema/crd-schema-to-json-schema-converter';
 
 export interface K8sPackageValidatorParams
 {

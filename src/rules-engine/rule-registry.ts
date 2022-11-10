@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { ApplicatorRule, ClusterRule, NamespaceRule, RuleKind, RuleObject } from './types/rules';
-import { K8sManifest } from '../manifest-package';
+import { K8sManifest } from '../manifests/manifest-package';
 import { RegistryQueryExecutor } from './query-executor';
 import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from './spec/rule-spec';
 import { K8sTargetFilter } from './target/k8s-target-builder';

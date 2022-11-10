@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { ManifestPackage } from './manifest-package';
+import { ManifestPackage } from '../manifests/manifest-package';
 import Table from 'cli-table';
 
 export class PackageRenderer

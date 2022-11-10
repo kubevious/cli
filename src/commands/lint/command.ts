@@ -1,13 +1,13 @@
 import _ from 'the-lodash';
 import { logger } from '../../logger';
 
-import { ManifetsLoader } from '../../tools/manifests-loader'
-import { K8sPackageValidator } from '../../tools/k8s-package-validator';
-import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
+import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
 
 import { LintCommandData, LintCommandOptions } from './types';
-import { DefaultNamespaceSetter } from '../../tools/default-namespace-setter';
-import { K8sClusterConnector } from '../../tools/k8s-cluster-connector';
+import { DefaultNamespaceSetter } from '../../processors/default-namespace-setter';
+import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
+import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 
 export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {

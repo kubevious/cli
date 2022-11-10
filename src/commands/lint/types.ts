@@ -1,6 +1,6 @@
-import { K8sApiSchemaFetcherResult } from "../../tools/k8s-api-schema-fetcher";
-import { K8sClusterConnector } from "../../tools/k8s-cluster-connector";
-import { ManifestPackage } from "../../tools/manifest-package";
+import { K8sApiSchemaFetcherResult } from "../../api-schema/k8s-api-schema-fetcher";
+import { K8sClusterConnector } from "../../k8s-connector/k8s-cluster-connector";
+import { ManifestPackage } from "../../manifests/manifest-package";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 

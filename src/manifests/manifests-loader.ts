@@ -10,7 +10,7 @@ import YAML from 'yaml';
 
 import { ManifestSource, ManifestPackage } from './manifest-package';
 import { readFromInputStream } from '../utils/stream';
-import { spinOperation } from '../utils/screen';
+import { spinOperation } from '../screen/spinner';
 
 export class ManifetsLoader
 {

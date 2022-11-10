@@ -2,14 +2,14 @@ import _ from 'the-lodash';
 import { logger } from '../../logger';
 
 import { GuardCommandData, GuardCommandOptions } from './types';
-import { LocalRegistryPopulator } from '../../tools/local-registry-populator';
-import { RuleRegistry } from '../../tools/rules-engine/rule-registry';
-import { RulesRuntime } from '../../tools/rules-engine/rules-runtime';
+import { LocalRegistryPopulator } from '../../registry/local-registry-populator';
+import { RuleRegistry } from '../../rules-engine/rule-registry';
+import { RulesRuntime } from '../../rules-engine/rules-runtime';
 
 import { command as lintCommand, massageLintOptions } from '../lint/command';
 import { KubernetesClient } from 'k8s-super-client/dist';
-import { K8sClusterConnector } from '../../tools/k8s-cluster-connector';
-import { RemoteK8sRegistry } from '../../tools/remote-k8s-registry';
+import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
+import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 
 export async function command(path: string[], options: GuardCommandOptions) : Promise<GuardCommandData>
 {

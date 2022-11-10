@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sManifest, ManifestPackage } from './manifest-package';
+import { K8sManifest, ManifestPackage } from '../manifests/manifest-package';
 
 export class LocalSourceRegistry
 {

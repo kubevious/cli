@@ -1,6 +1,6 @@
 import { ILogger } from 'the-logger';
 import { connectDefaultRemoteCluster, connectRemoteCluster, KubernetesClient } from 'k8s-super-client';
-import { spinOperation } from '../utils/screen';
+import { spinOperation } from '../screen/spinner';
 
 export class K8sClusterConnector
 {

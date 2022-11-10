@@ -1,10 +1,11 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sManifest } from './manifest-package';
-import { makeK8sKeyStr } from '../types/k8s';
-import { K8sTargetFilter } from './rules-engine/target/k8s-target-builder';
 import { sanitizeDnPath } from '@kubevious/entity-meta';
-import { RegistryQueryExecutor } from './rules-engine/query-executor';
+
+import { K8sManifest } from '../manifests/manifest-package';
+import { makeK8sKeyStr } from '../types/k8s';
+import { K8sTargetFilter } from '../rules-engine/target/k8s-target-builder';
+import { RegistryQueryExecutor } from '../rules-engine/query-executor';
 
 export class LocalK8sRegistry implements RegistryQueryExecutor
 {

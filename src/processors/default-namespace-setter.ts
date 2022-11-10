@@ -2,7 +2,7 @@ import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
-import { K8sManifest, ManifestPackage } from './manifest-package';
+import { K8sManifest, ManifestPackage } from '../manifests/manifest-package';
 import { K8sOpenApiResource } from 'k8s-super-client/dist';
 import { getJsonSchemaResourceKey } from '../utils/k8s';
 

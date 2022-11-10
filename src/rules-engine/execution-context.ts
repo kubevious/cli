@@ -1,5 +1,5 @@
 import { ILogger } from "the-logger";
-import { ManifestPackage } from "../manifest-package";
+import { ManifestPackage } from "../manifests/manifest-package";
 import { RegistryQueryExecutor } from "./query-executor";
 
 export class ExecutionContext

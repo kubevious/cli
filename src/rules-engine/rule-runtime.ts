@@ -5,7 +5,7 @@ import { RuleApplicationScope, RuleObject } from './types/rules';
 import { ValidationProcessorResult } from './validator/processor';
 import { ScriptItem } from './script-item';
 import { RuleEngineReporter } from './rule-engine-reporter';
-import { K8sManifest } from '../manifest-package';
+import { K8sManifest } from '../manifests/manifest-package';
 import { RuleCompiler } from './rule-compiler';
 import { RuleOverrideValues } from './spec/rule-spec';
 

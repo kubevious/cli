@@ -2,8 +2,8 @@ import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types
 import { ILogger } from 'the-logger';
 import { K8sApiSchemaRegistry } from './k8s-api-schema-registry';
 import { K8sOpenApiSpecToJsonSchemaConverter } from 'k8s-super-client';
-import { spinOperation } from '../utils/screen';
-import { K8sClusterConnector } from './k8s-cluster-connector';
+import { spinOperation } from '../screen/spinner';
+import { K8sClusterConnector } from '../k8s-connector/k8s-cluster-connector';
 
 export class K8sApiSchemaFetcher
 {
