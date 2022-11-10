@@ -10,6 +10,8 @@ import { command as lintCommand, massageLintOptions } from '../lint/command';
 import { KubernetesClient } from 'k8s-super-client/dist';
 import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
 import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
+import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
+import { CombinedRegistry } from '../../registry/combined-registry';
 
 export async function command(path: string[], options: GuardCommandOptions) : Promise<GuardCommandData>
 {
@@ -28,21 +30,22 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     // await processor.localK8sRegistry.debugOutputToDir(logger, 'local-k8s-registry');
     // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
 
-    const remoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
-    await remoteRegistry.test();
+    let finalRegistry : RegistryQueryExecutor = localK8sRegistry;
 
-    const ruleRegistry = new RuleRegistry(logger);
-    await ruleRegistry.loadFromRegistry(remoteRegistry);
-    // await ruleRegistry.loadFromRegistry(localK8sRegistry);
+    if (k8sConnector.isUsed)
+    {
+        const remoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
 
-    throw new Error("XXXX");
-
-    if (k8sConnector.isUsed) {
-        await test(k8sConnector);
+        finalRegistry = new CombinedRegistry(logger, [finalRegistry, remoteRegistry]);
     }
 
+    const ruleRegistry = new RuleRegistry(logger);
+    await ruleRegistry.loadFromRegistry(finalRegistry);
 
-    const rulesRuntime = new RulesRuntime(logger, ruleRegistry, localK8sRegistry, lintResult.manifestPackage);
+    const rulesRuntime = new RulesRuntime(logger,
+                                          ruleRegistry,
+                                          localK8sRegistry,
+                                          lintResult.manifestPackage);
     await rulesRuntime.init();
     await rulesRuntime.execute();
 

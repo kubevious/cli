@@ -1,3 +1,4 @@
+import { K8sManifest } from "../../manifests/manifest-package";
 import { ManifestSourceId } from "../../types/manifest";
 import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec, RuleOverrideValues } from "../spec/rule-spec";
 
@@ -23,6 +24,7 @@ export interface RuleApplicationScope {
 
 export interface ClusterRule {
     source: ManifestSourceId,
+    manifest: K8sManifest,
     kind: RuleKind;
     name: string;
     application?: RuleApplicationScope; 
@@ -41,6 +43,7 @@ export interface ClusterRule {
 }
 
 export interface NamespaceRule {
+    manifest: K8sManifest,
     source: ManifestSourceId,
     kind: RuleKind;
     namespace: string;
@@ -55,6 +58,7 @@ export interface NamespaceRule {
 
 
 export interface ApplicatorRule {
+    manifest: K8sManifest,
     source: ManifestSourceId,
     kind: RuleKind;
     namespace: string;

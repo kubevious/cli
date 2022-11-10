@@ -13,6 +13,7 @@ export class RuleRuntime
 {
     private _logger: ILogger;
     private _ruleObject: RuleObject;
+    private _manifest: K8sManifest;
 
     private _compiler: RuleCompiler;
     private _application: RuleApplicationScope;
@@ -23,6 +24,7 @@ export class RuleRuntime
     private _passed : K8sManifest[] = [];
 
     constructor(logger: ILogger,
+                manifest: K8sManifest,
                 ruleObject: RuleObject,
                 ruleEngineReporter: RuleEngineReporter,
                 compiler: RuleCompiler,
@@ -30,6 +32,7 @@ export class RuleRuntime
                 values: RuleOverrideValues)
     {
         this._logger = logger.sublogger('RuleObject');
+        this._manifest = manifest;
         this._ruleObject = ruleObject;
         this._ruleEngineReporter = ruleEngineReporter;
         this._compiler = compiler;
@@ -63,16 +66,24 @@ export class RuleRuntime
 
     execute()
     {
-        if (!this._compiler.isCompiled) {
-            return;
-        }
-        
         return Promise.resolve()
             .then(() => {
-                return this._processTarget()
-                    .then(results => {
-                        return Promise.serial(results, x => this._processValidation(x));
-                    });
+                if (this._compiler.isCompiled) {
+                    return this._processTarget()
+                        .then(results => {
+                            return Promise.serial(results, x => this._processValidation(x));
+                        });
+                }
+            })
+            .then(() => {
+                if (!this.isCompiled  || this.hasRuntimeErrors)
+                {
+                    if (!(this._manifest.errorsWithRule ?? false))
+                    {
+                        this._manifest.errorsWithRule = true;
+                        this._ruleEngineReporter.manifestPackage.manifestError(this._manifest, "Failed to compile the rule.");
+                    }
+                }
             })
     }
 

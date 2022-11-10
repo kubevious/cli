@@ -6,6 +6,7 @@ import { K8sManifest } from '../manifests/manifest-package';
 import { makeK8sKeyStr } from '../types/k8s';
 import { K8sTargetFilter } from '../rules-engine/target/k8s-target-builder';
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
+import { ClientSideFiltering } from './client-side-filtering';
 
 export class LocalK8sRegistry implements RegistryQueryExecutor
 {
@@ -57,33 +58,9 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
             results = results.filter(x => x.id.name && nameDict[x.id.name]);
         }
 
-        if (query.labelFilters && query.labelFilters.length > 0) {
-            results = results.filter(x => this._doesAnyMatch(query.labelFilters!, (labelFilter) => {
-                for (const key of _.keys(labelFilter)) {
-                    const labels = x.config.metadata?.labels ?? {};
-                    if (labels[key] != labelFilter[key]) {
-                        return false
-                    }
-                }
-                return true;
-            }));
-        }
-
-        return results;
-    }
-
-    private _doesAnyMatch<T>(matchers: T[], cb: ((value: T) => boolean)) : boolean {
-        if (matchers.length == 0) {
-            return true;
-        }
-
-        for(const matcher of matchers) {
-            const isMatch = cb(matcher);
-            if (isMatch) {
-                return true;
-            }
-        }
-        return false;
+        const filtering = new ClientSideFiltering(results);
+        filtering.applyLabelFilter(query.labelFilters);
+        return filtering.items;
     }
 
     async debugOutputToDir(logger: ILogger, relPath: string) : Promise<void>

@@ -84,6 +84,7 @@ export class RuleRegistry
         const ruleScript = spec.rule; 
 
         this._clusterRules[name] = {
+            manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.ClusterRule,
             name: name,
@@ -134,6 +135,7 @@ export class RuleRegistry
         }
 
         this._rules.push({
+            manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.Rule,
             namespace: namespace,
@@ -181,6 +183,7 @@ export class RuleRegistry
         }
 
         this._ruleApplicators.push({
+            manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.RuleApplicator,
             namespace: namespace,

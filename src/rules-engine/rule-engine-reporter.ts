@@ -13,6 +13,10 @@ export class RuleEngineReporter
         this._manifestPackage = manifestPackage;
     }
 
+    get manifestPackage() {
+        return this._manifestPackage;
+    }
+
     reportError(rule: RuleObject, manifest: K8sManifest, msg: string)
     {
         this._manifestPackage.manifestError(manifest, msg);

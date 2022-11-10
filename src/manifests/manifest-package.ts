@@ -126,6 +126,8 @@ export interface K8sManifest extends Required<ErrorStatus>
     isLinted: boolean;
     rules: K8sManifestRuleResult;
 
+    errorsWithRule?: boolean;
+
     source: ManifestSource;
     config: K8sObject;
 }

@@ -101,6 +101,7 @@ export class RulesRuntime
                         this._logger.info("[_initClusterRule] >>> NS: %s...", ns);
 
                         const ruleRuntime = new RuleRuntime(this._logger,
+                            clusterRule.manifest,
                             compiler.rule,
                             this._ruleEngineReporter,
                             compiler,
@@ -131,6 +132,7 @@ export class RulesRuntime
         return compiler.compile()
             .then(() => {
                 const ruleRuntime = new RuleRuntime(this._logger,
+                                                    rule.manifest,
                                                     rule,
                                                     this._ruleEngineReporter,
                                                     compiler,
@@ -189,6 +191,7 @@ export class RulesRuntime
         ruleConfig.namespace = applicator.namespace;
 
         const ruleRuntime = new RuleRuntime(this._logger,
+            applicator.manifest,
             ruleConfig,
             this._ruleEngineReporter,
             clusterRuleInfo.compiler,
@@ -201,7 +204,8 @@ export class RulesRuntime
     private _executeRule(rule : RuleRuntime)
     {
         return Promise.resolve()
-            .then(() => rule.execute());
+            .then(() => rule.execute())
+            ;
     }
 
     private _produceNamespaces()
