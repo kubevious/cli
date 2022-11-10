@@ -969,6 +969,11 @@ get-caller-file@^2.0.5:
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
+get-port@^3.1.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/get-port/-/get-port-3.2.0.tgz#dd7ce7de187c06c8bf353796ac71e099f0980ebc"
+  integrity sha512-x5UJKlgeUiNT8nyo/AcnwLnZuZNcSjSw0kogRB+Whd1fjjFq4B1hySFxSFWWSn4mIBzg3sRNUDFYc4g5gjPoLg==
+
 glob-parent@^5.1.2, glob-parent@~5.1.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
@@ -1210,10 +1215,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-k8s-super-client@^2.0.40:
-  version "2.0.40"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.40.tgz#4d77794c132cf000e49fedc45abfa8a57292bb41"
-  integrity sha512-tITRZmmL4fomsAf6YMQAONMCI+dFRTvQAhgnBkkhrBmCdmFw/JDmqcAMfJxS80SYainxtiXrxC2CiHTD//2rJQ==
+k8s-super-client@^2.0.44:
+  version "2.0.44"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.44.tgz#f93a55ed613d0009d390e901ab6233f9f57ccc55"
+  integrity sha512-3bnrHjOV6oUtHkv8RfNMCwFp/CpMZ62jmfp/Hg3Q7CGfOCKAOW/efhwgG1Tp/NvJUOfoZIw1V5RZO6bLwIJ21w==
   dependencies:
     "@types/ndjson" "^2.0.0"
     "@types/uuid" "^8.3.0"
@@ -1223,6 +1228,7 @@ k8s-super-client@^2.0.40:
     js-yaml "^4.1.0"
     kubernetes-types "^1.21.0-beta.1"
     ndjson "^2.0.0"
+    sync-rpc "^1.3.6"
     the-lodash "^2.0.9"
     the-logger "^2.0.14"
     the-promise "^2.0.15"
@@ -1872,6 +1878,13 @@ supports-color@^7.1.0:
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
   dependencies:
     has-flag "^4.0.0"
+
+sync-rpc@^1.3.6:
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/sync-rpc/-/sync-rpc-1.3.6.tgz#b2e8b2550a12ccbc71df8644810529deb68665a7"
+  integrity sha512-J8jTXuZzRlvU7HemDgHi3pGnh/rkoqR/OZSjhTyyZrEkkYQbk7Z33AXp37mkPfPpfdOuj7Ex3H/TJM1z48uPQw==
+  dependencies:
+    get-port "^3.1.0"
 
 text-table@^0.2.0:
   version "0.2.0"

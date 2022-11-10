@@ -2,8 +2,8 @@ import _ from 'the-lodash';
 
 import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
 import { logger } from '../../logger';
-import { ManifestPackage } from '../../tools/manifest-package';
-import { K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
+import { ManifestPackage } from '../../manifests/manifest-package';
+import { K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
 import { ErrorStatus } from '../../types/manifest';
 
 export function formatResult(

@@ -1,5 +1,5 @@
 import { Promise } from 'the-promise';
-import { spinOperation } from './screen';
+import { spinOperation } from '../screen/spinner';
 
 export function readFromInputStream()
 {

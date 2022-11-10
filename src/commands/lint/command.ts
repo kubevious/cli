@@ -1,14 +1,15 @@
 import _ from 'the-lodash';
 import { logger } from '../../logger';
 
-import { ManifetsLoader } from '../../tools/manifests-loader'
-import { K8sPackageValidator } from '../../tools/k8s-package-validator';
-import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../tools/k8s-api-schema-fetcher';
+import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
 
-import { LintCommandData } from './types';
-import { DefaultNamespaceSetter } from '../../tools/default-namespace-setter';
+import { LintCommandData, LintCommandOptions } from './types';
+import { DefaultNamespaceSetter } from '../../processors/default-namespace-setter';
+import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
+import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 
-export async function command(path: string[], options: any) : Promise<LintCommandData>
+export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
     logger.info("[PATH] ", path);
 
@@ -17,9 +18,18 @@ export async function command(path: string[], options: any) : Promise<LintComman
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 
+    const k8sConnector = new K8sClusterConnector(logger);
+    await k8sConnector.setup(options.liveK8s, options.kubeconfig);
+    if (k8sConnector.isUsed) {
+        if (!k8sConnector.isConnected) {
+            console.log('Could not connect to Kubernetes cluster.');
+            process.exit(98);
+        }
+    }
+
     const k8sApiSchemaFetcher = new K8sApiSchemaFetcher(logger);
     if (options.liveK8s) {
-        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote(options.kubeconfig);
+        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote(k8sConnector);
     } else {
         k8sSchemaInfo = await k8sApiSchemaFetcher.fetchLocal(options.k8sVersion);
     }
@@ -57,8 +67,25 @@ export async function command(path: string[], options: any) : Promise<LintComman
         processor.process();
     }
 
+    manifestPackage.produceNamespaces();
+
     return {
+        k8sConnector,
         manifestPackage,
         k8sSchemaInfo
     } 
+}
+
+export function massageLintOptions(options: Partial<LintCommandOptions>) : LintCommandOptions
+{
+    options = options ?? {};
+    
+    return {
+        k8sVersion: options.k8sVersion,
+        ignoreUnknown: options.ignoreUnknown ?? false,
+        skipApplyCrds: options.skipApplyCrds ?? false,
+    
+        liveK8s: options.liveK8s ?? false,
+        kubeconfig: options.kubeconfig,
+    }
 }

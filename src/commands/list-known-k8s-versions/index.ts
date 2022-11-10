@@ -2,12 +2,12 @@ import _ from 'the-lodash';
 import { Command } from 'commander';
 import { logger } from '../../logger';
 
-import { K8sApiSchemaRegistry } from '../../tools/k8s-api-schema-registry';
 
 import { CommandBuilder } from '../../infra/command-action';
 
 import { KnownK8sVersionsResult } from './types';
 import { output } from './output';
+import { K8sApiSchemaRegistry } from '../../api-schema/k8s-api-schema-registry';
 
 export default function (program: Command)
 {

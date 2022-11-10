@@ -103,6 +103,10 @@ export function produceSourceLine(source: ManifestSourceId)
     {
         parts.push(emoji.get('aquarius'));
     }
+    else if (source.kind === 'k8s')
+    {
+        parts.push('☸️ ');
+    }
 
     parts.push(`${source.kind.toUpperCase()}:`);
 
