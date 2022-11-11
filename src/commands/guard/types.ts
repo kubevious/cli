@@ -8,6 +8,8 @@ import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
+    includeRemoteTargets: boolean;
+    
     skipLocalRules: boolean;
 
     skipRemoteRules: boolean;

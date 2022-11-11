@@ -52,7 +52,7 @@ export class RuleRegistry
         spinner.complete("RulesLibrary locally populated.")
     }
 
-    loadRemotely(registry: RegistryQueryExecutor, namespaces : string[])
+    loadRemotely(registry: RegistryQueryExecutor, namespaces? : string[])
     {
         const spinner = spinOperation("Populating RulesLibrary From K8s...");
 

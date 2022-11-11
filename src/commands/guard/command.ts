@@ -42,7 +42,8 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     {
         if (remoteRegistry)
         {
-            await ruleRegistry.loadRemotely(remoteRegistry, manifestPackage.namespaces);
+            const namespaces = options.includeRemoteTargets ? undefined : manifestPackage.namespaces;
+            await ruleRegistry.loadRemotely(remoteRegistry, namespaces);
         }
     }
     if (!options.skipLocalRules)
@@ -50,18 +51,24 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
         await ruleRegistry.loadLocally(localK8sRegistry);
     }
 
-
-    let finalRegistry : RegistryQueryExecutor = localK8sRegistry;
+    let combinedRegistry : RegistryQueryExecutor = localK8sRegistry;
     if (remoteRegistry)
     {
-        finalRegistry = new CombinedRegistry(logger, [finalRegistry, remoteRegistry]);
+        combinedRegistry = new CombinedRegistry(logger, [localK8sRegistry, remoteRegistry]);
     }
 
+    let targetQueryRegistry : RegistryQueryExecutor = localK8sRegistry;
+    if (options.includeRemoteTargets) {
+        targetQueryRegistry = combinedRegistry;
+    }
+
+    const validatorQueryRegistry : RegistryQueryExecutor = combinedRegistry;
 
     const rulesRuntime = new RulesRuntime(logger,
                                           ruleRegistry,
-                                          finalRegistry,
-                                          manifestPackage);
+                                          manifestPackage,
+                                          targetQueryRegistry,
+                                          validatorQueryRegistry);
     await rulesRuntime.init();
     await rulesRuntime.execute();
 
@@ -77,6 +84,7 @@ export function massageGuardOptions(options: Partial<GuardCommandOptions>) : Gua
     return {
         ...massageLintOptions(options),
         
+        includeRemoteTargets: options.includeRemoteTargets ?? false,
         skipLocalRules: options.skipLocalRules ?? false,
         skipRemoteRules: options.skipRemoteRules ?? false,
     }

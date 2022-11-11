@@ -23,20 +23,23 @@ export class RulesRuntime
     }> = {};
     private _rules : RuleRuntime[] = [];
 
-    private _manifestPackage : ManifestPackage;
-    private _executionContext : ExecutionContext;
+    private _namespaces: string[];
+    private _targetExecutionContext : ExecutionContext;
+    private _validatorExecutionContext : ExecutionContext;
     private _ruleEngineReporter : RuleEngineReporter;
     private _spinner? : ISpinner;
 
     constructor(logger: ILogger,
                 ruleRegistry: RuleRegistry,
-                registryQueryExecutor: RegistryQueryExecutor,
-                manifestPackage: ManifestPackage)
+                manifestPackage: ManifestPackage,
+                targetQueryExecutor: RegistryQueryExecutor,
+                validatorQueryExecutor: RegistryQueryExecutor)
     {
         this._logger = logger.sublogger('RulesRuntime');
         this._ruleRegistry = ruleRegistry;
-        this._manifestPackage = manifestPackage;
-        this._executionContext = new ExecutionContext(this._logger, registryQueryExecutor, manifestPackage);
+        this._namespaces = manifestPackage.namespaces;
+        this._targetExecutionContext = new ExecutionContext(this._logger, targetQueryExecutor, manifestPackage);
+        this._validatorExecutionContext = new ExecutionContext(this._logger, validatorQueryExecutor, manifestPackage);
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
     }
 
@@ -59,7 +62,7 @@ export class RulesRuntime
         return Promise.serial(this._rules, x => this._executeRule(x))
             .then(() => {
                 this._spinner!.complete('Rules validation complete.')
-            })
+            });
     }
 
     private _initClusterRules()
@@ -80,7 +83,7 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, clusterRule, this._executionContext);
+        const compiler = new RuleCompiler(this._logger, clusterRule, this._targetExecutionContext, this._validatorExecutionContext);
         return compiler.compile()
             .then(() => {
                 this._clusterRules[clusterRule.name] = {
@@ -90,7 +93,7 @@ export class RulesRuntime
 
                 if (!clusterRule.useApplicator)
                 {
-                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._manifestPackage.namespaces;
+                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._namespaces;
                     for(const ns of namespaces)
                     {
                         const ruleNamespaceInfo = clusterRule.namespaces[ns];
@@ -125,7 +128,7 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, rule, this._executionContext);
+        const compiler = new RuleCompiler(this._logger, rule, this._targetExecutionContext, this._validatorExecutionContext);
         return compiler.compile()
             .then(() => {
                 const ruleRuntime = new RuleRuntime(this._logger,

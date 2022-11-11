@@ -11,7 +11,6 @@ export class RuleCompiler
     private _logger: ILogger;
     private _ruleObject: RuleObject;
 
-    private _executionContext : ExecutionContext;
 
     private _targetProcessor: TargetProcessor;
     private _validationProcessor: ValidationProcessor;
@@ -22,14 +21,14 @@ export class RuleCompiler
 
     constructor(logger: ILogger,
                 ruleObject: RuleObject,
-                executionContext: ExecutionContext)
+                targetExecutionContext: ExecutionContext,
+                validatorExecutionContext: ExecutionContext)
     {
         this._logger = logger.sublogger('RuleCompiler');
         this._ruleObject = ruleObject;
-        this._executionContext = executionContext;
 
-        this._targetProcessor = new TargetProcessor(this._ruleObject.target, this._executionContext);
-        this._validationProcessor = new ValidationProcessor(this._ruleObject.script, this._executionContext);
+        this._targetProcessor = new TargetProcessor(this._ruleObject.target, targetExecutionContext);
+        this._validationProcessor = new ValidationProcessor(this._ruleObject.script, validatorExecutionContext);
     }
 
     get rule() {
