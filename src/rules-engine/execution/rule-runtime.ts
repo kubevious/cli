@@ -66,11 +66,15 @@ export class RuleRuntime
 
     execute()
     {
+        this._logger.info('[execute] %s :: %s :: %s...', this._ruleObject.kind, this._ruleObject.namespace, this._ruleObject.name);
+
         return Promise.resolve()
             .then(() => {
                 if (this._compiler.isCompiled) {
                     return this._processTarget()
                         .then(results => {
+                            this._logger.info('[execute] Targets Count: %s', results.length);
+
                             return Promise.serial(results, x => this._processValidation(x));
                         });
                 }

@@ -127,7 +127,7 @@ export class K8sTargetBuilder
                 isApiVersion: true,
                 apiVersion: apiVersion,
                 kind: this._data.kind,
-                namespace: this._data.namespace,  // TODO: Support this._builderContext?.namespace;
+                namespace: this._data.namespace,
                 isAllNamespaces: this._data.isAllNamespaces,
             
                 nameFilters: this._data.nameFilters,

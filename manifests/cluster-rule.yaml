@@ -34,6 +34,8 @@ spec:
                 application:
                   type: object
                   properties:
+                    clustered:
+                      type: boolean
                     useApplicator:
                       type: boolean
                     onlySelectedNamespaces:

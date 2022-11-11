@@ -52,14 +52,19 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
 
     if (!params.skipResult)
     {
-        if (result.success)
-        {
-            print(`${emoji.get('white_check_mark')} Lint Succeeded.`);
-        }
-        else
-        {
-            print(`${emoji.get('x')} Lint Failed`);
-        }
+        outputLintResult(result);
+    }
+}
+
+export function outputLintResult(result: LintManifestsResult)
+{
+    if (result.success)
+    {
+        print(`${emoji.get('white_check_mark')} Lint Succeeded.`);
+    }
+    else
+    {
+        print(`${emoji.get('x')} Lint Failed`);
     }
 }
 

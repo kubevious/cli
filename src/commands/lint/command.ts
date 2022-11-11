@@ -14,7 +14,13 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
     logger.info("[PATH] ", path);
 
     const loader = new ManifetsLoader(logger);
-    const manifestPackage = await loader.load(path);
+    await loader.load(path);
+
+    if (options.stream) {
+        await loader.loadFromStream();
+    }
+
+    const manifestPackage = loader.package;
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 
@@ -83,6 +89,7 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
     return {
         k8sVersion: options.k8sVersion,
         ignoreUnknown: options.ignoreUnknown ?? false,
+        stream: options.stream ?? false,
         skipApplyCrds: options.skipApplyCrds ?? false,
     
         liveK8s: options.liveK8s ?? false,

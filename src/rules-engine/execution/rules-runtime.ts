@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { ApplicatorRule, ClusterRule, NamespaceRule, RuleObject } from '../registry/types';
+import { ApplicatorRule, ClusterRule, NamespaceRule, RuleApplicationScope, RuleObject } from '../registry/types';
 import { RuleRegistry } from '../registry/rule-registry';
 import { RuleRuntime } from './rule-runtime';
 import { RegistryQueryExecutor } from '../query-executor';
@@ -11,6 +11,7 @@ import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../screen/spinner';
 import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleOverrideValues } from '../spec/rule-spec';
+import cluster from 'cluster';
 
 export class RulesRuntime
 {
@@ -23,20 +24,24 @@ export class RulesRuntime
     }> = {};
     private _rules : RuleRuntime[] = [];
 
-    private _manifestPackage : ManifestPackage;
-    private _executionContext : ExecutionContext;
+    private _namespaces: string[];
+    private _targetExecutionContext : ExecutionContext;
+    private _validatorExecutionContext : ExecutionContext;
     private _ruleEngineReporter : RuleEngineReporter;
     private _spinner? : ISpinner;
 
     constructor(logger: ILogger,
                 ruleRegistry: RuleRegistry,
-                registryQueryExecutor: RegistryQueryExecutor,
-                manifestPackage: ManifestPackage)
+                manifestPackage: ManifestPackage,
+                namespaces: string[],
+                targetQueryExecutor: RegistryQueryExecutor,
+                validatorQueryExecutor: RegistryQueryExecutor)
     {
         this._logger = logger.sublogger('RulesRuntime');
         this._ruleRegistry = ruleRegistry;
-        this._manifestPackage = manifestPackage;
-        this._executionContext = new ExecutionContext(this._logger, registryQueryExecutor, manifestPackage);
+        this._namespaces = namespaces;
+        this._targetExecutionContext = new ExecutionContext(this._logger, targetQueryExecutor, manifestPackage);
+        this._validatorExecutionContext = new ExecutionContext(this._logger, validatorQueryExecutor, manifestPackage);
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
     }
 
@@ -59,7 +64,7 @@ export class RulesRuntime
         return Promise.serial(this._rules, x => this._executeRule(x))
             .then(() => {
                 this._spinner!.complete('Rules validation complete.')
-            })
+            });
     }
 
     private _initClusterRules()
@@ -80,7 +85,7 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, clusterRule, this._executionContext);
+        const compiler = new RuleCompiler(this._logger, clusterRule, this._targetExecutionContext, this._validatorExecutionContext);
         return compiler.compile()
             .then(() => {
                 this._clusterRules[clusterRule.name] = {
@@ -88,26 +93,58 @@ export class RulesRuntime
                     compiler: compiler,
                 }
 
-                if (!clusterRule.useApplicator)
+                if (clusterRule.clustered)
                 {
-                    const namespaces = clusterRule.onlySelectedNamespaces ? _.keys(clusterRule.namespaces) : this._manifestPackage.namespaces;
-                    for(const ns of namespaces)
+                    this._setupClusterRuleRuntime(clusterRule, compiler);
+                }
+                else
+                {
+                    if (!clusterRule.useApplicator)
                     {
-                        const ruleNamespaceInfo = clusterRule.namespaces[ns];
-
-                        this._logger.info("[_initClusterRule] >>> NS: %s...", ns);
-
-                        const ruleRuntime = new RuleRuntime(this._logger,
-                            clusterRule.manifest,
-                            compiler.rule,
-                            this._ruleEngineReporter,
-                            compiler,
-                            { namespace: ns },
-                            this._makeValues([ ruleNamespaceInfo?.values, clusterRule.values ]));
-                        this._rules.push(ruleRuntime);
+                        this._setupClusterRuleApplication(clusterRule, compiler);
                     }
                 }
             });
+    }
+
+    private _setupClusterRuleApplication(clusterRule: ClusterRule, compiler: RuleCompiler)
+    {
+        let namespaces = this._namespaces;
+        if (clusterRule.onlySelectedNamespaces)
+        {
+            namespaces = namespaces.filter(x => clusterRule.namespaces[x]);
+        }
+        for(const ns of namespaces)
+        {
+            this._setupClusterRuleRuntime(clusterRule, compiler, ns);
+        }
+    }
+
+    private _setupClusterRuleRuntime(clusterRule: ClusterRule, compiler: RuleCompiler, namespace? : string)
+    {
+        this._logger.info("[_setupClusterRuleRuntime] >>> %s...", clusterRule.name);
+
+        const application: RuleApplicationScope = {
+        }
+
+        if (namespace) {
+            application.namespace = namespace;
+        }
+
+        let values = clusterRule.values;
+        if (namespace) {
+            const ruleNamespaceInfo = clusterRule.namespaces[namespace];
+            values = this._makeValues([ruleNamespaceInfo?.values, values]);
+        }
+
+        const ruleRuntime = new RuleRuntime(this._logger,
+            clusterRule.manifest,
+            compiler.rule,
+            this._ruleEngineReporter,
+            compiler,
+            application,
+            values);
+        this._rules.push(ruleRuntime);
     }
 
     private _initRules()
@@ -125,7 +162,7 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, rule, this._executionContext);
+        const compiler = new RuleCompiler(this._logger, rule, this._targetExecutionContext, this._validatorExecutionContext);
         return compiler.compile()
             .then(() => {
                 const ruleRuntime = new RuleRuntime(this._logger,

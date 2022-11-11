@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import emoji from 'node-emoji';
 
 import { GuardResult } from "./types";
-import { output as lintOutput, outputLintSummary, produceSourceLine } from '../lint/output'
+import { output as lintOutput, outputLintResult, outputLintSummary, produceSourceLine } from '../lint/output'
 import { outputManifest, print, severityStatusIcon } from '../lint/output'
 
 export function output(result: GuardResult)
@@ -43,7 +43,14 @@ export function output(result: GuardResult)
 
             if (rule.pass && rule.compiled)
             {
-                print(`${severityStatusIcon('pass')} Rule passed`, 3);
+                if (rule.passed.length > 0)
+                {
+                    print(`${severityStatusIcon('pass')} Rule passed`, 3);
+                }
+                else
+                {
+                    print(`${severityStatusIcon('pass')} Rule passed. No manifests found to check.`, 3);
+                }
             }
 
             if (!rule.pass)
@@ -98,6 +105,9 @@ export function output(result: GuardResult)
     print();
 
     outputGuardSummary(result);
+    print();
+
+    outputLintResult(result.lintResult);
     print();
 
     if (result.success)

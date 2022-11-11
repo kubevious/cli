@@ -35,13 +35,15 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
 
     query(query: K8sTargetFilter) : K8sManifest[]
     {
+        this._logger.info("[query] ", query);
+
         let apiName : string | null | undefined = undefined;
         let version : string | undefined = undefined;
 
         if (query.isApiVersion) {
             const apiVersion = parseApiVersion(query.apiVersion!);
 
-            apiName = apiVersion?.group;
+            apiName = apiVersion?.group || null;
             version = apiVersion?.version;
         } else {
             if (query.apiOrNone) {
@@ -55,12 +57,17 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
             }
         }
 
+        this._logger.info("[query] apiName: %s", apiName);
+        this._logger.info("[query] version: %s", version);
+
         if (!query.kind) {
+            this._logger.info("[query] No Kind");
             return [];
         }
 
         const resourceClient = this._client.client(query.kind, apiName, version);
         if (!resourceClient) {
+            this._logger.info("[query] Unknown Resource");
             return [];
         }
 
@@ -85,6 +92,9 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
             // TODO: Try using label filter as an optimization:.
             results = resourceClient.queryAllSync(query.namespace);
         }
+
+        this._logger.info("[query] result count: %s", results.length);
+
 
         const manifests = results.map(x => this._makeManifest(x));
 

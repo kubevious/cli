@@ -28,29 +28,77 @@ export class ManifetsLoader
         return this._package;
     }
 
-    load(fileOrPatternOrUrls: string[]) : Promise<ManifestPackage>
+    load(fileOrPatternOrUrls: string[]) : Promise<void>
     {
         this._logger.info("[load] fileOrPatternOrUrl: ", fileOrPatternOrUrls);
+
+        if (fileOrPatternOrUrls.length === 0)
+        {
+            return Promise.resolve();
+        }
 
         const spinner = spinOperation('Loading manifests...');
 
         return Promise.resolve()
             .then(() => {
-
-                if (fileOrPatternOrUrls.length === 0) {
-                    return this._loadFromStream();
-                }
-                else 
-                {
-                    return this._loadMany(fileOrPatternOrUrls);
-                }
+                return this._loadMany(fileOrPatternOrUrls);
             })
             .then(() => {
                 spinner.complete('Manifests loaded.');
             })
-            .then(() => this.package)
             ;
     }
+
+    public loadFromStream()
+    {
+        this._logger.info("[_loadFromStream] ");
+        const source = this._package.getSource("stream", 'stream');
+
+        return readFromInputStream()
+            .then((contents) => {
+
+                let manifests : any[] | null = null;
+            
+                if (!manifests) {
+                    try
+                    {
+                        manifests = parseYaml(contents);
+                    }
+                    catch(reason: any)
+                    {
+                        this._package.sourceError(source, reason.message ?? 'Error parsing YAML.');
+                    }
+                }
+    
+                if (!manifests) {
+                    try
+                    {
+                        manifests = [JSON.parse(contents)];
+                    }
+                    catch(reason: any)
+                    {
+                        manifests = null;
+                    }
+                }                
+
+                if (manifests)
+                {
+                    for(const manifest of manifests)
+                    {
+                        this._addManifest(source, manifest);
+                    }
+                }
+                else
+                {
+                    this._package.sourceError(source, 'Failed to parse manifests from stream.');
+                }
+
+            })
+            .catch(reason => {
+                this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
+            })
+    }
+
 
     private _loadMany(fileOrPatternOrUrls: string[]) : Promise<void>
     {
@@ -113,56 +161,6 @@ export class ManifetsLoader
             .then(({ data }) => {
                 const contents = data.toString();
                 this._parseSource(source, url, contents);
-            })
-            .catch(reason => {
-                this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
-            })
-    }
-
-    private _loadFromStream()
-    {
-        this._logger.info("[_loadFromStream] ");
-        const source = this._package.getSource("stream", 'stream');
-
-        return readFromInputStream()
-            .then((contents) => {
-
-                let manifests : any[] | null = null;
-            
-                if (!manifests) {
-                    try
-                    {
-                        manifests = parseYaml(contents);
-                    }
-                    catch(reason: any)
-                    {
-                        this._package.sourceError(source, reason.message ?? 'Error parsing YAML.');
-                    }
-                }
-    
-                if (!manifests) {
-                    try
-                    {
-                        manifests = [JSON.parse(contents)];
-                    }
-                    catch(reason: any)
-                    {
-                        manifests = null;
-                    }
-                }                
-
-                if (manifests)
-                {
-                    for(const manifest of manifests)
-                    {
-                        this._addManifest(source, manifest);
-                    }
-                }
-                else
-                {
-                    this._package.sourceError(source, 'Failed to parse manifests from stream.');
-                }
-
             })
             .catch(reason => {
                 this._package.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
