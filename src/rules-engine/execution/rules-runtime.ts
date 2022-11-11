@@ -93,9 +93,16 @@ export class RulesRuntime
                     compiler: compiler,
                 }
 
-                if (!clusterRule.useApplicator)
+                if (clusterRule.clustered)
                 {
-                    this._setupClusterRuleApplication(clusterRule, compiler);
+                    this._setupClusterRuleRuntime(clusterRule, compiler);
+                }
+                else
+                {
+                    if (!clusterRule.useApplicator)
+                    {
+                        this._setupClusterRuleApplication(clusterRule, compiler);
+                    }
                 }
             });
     }

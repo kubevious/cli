@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import emoji from 'node-emoji';
 
 import { GuardResult } from "./types";
-import { output as lintOutput, outputLintSummary, produceSourceLine } from '../lint/output'
+import { output as lintOutput, outputLintResult, outputLintSummary, produceSourceLine } from '../lint/output'
 import { outputManifest, print, severityStatusIcon } from '../lint/output'
 
 export function output(result: GuardResult)
@@ -105,6 +105,9 @@ export function output(result: GuardResult)
     print();
 
     outputGuardSummary(result);
+    print();
+
+    outputLintResult(result.lintResult);
     print();
 
     if (result.success)

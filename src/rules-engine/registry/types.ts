@@ -33,6 +33,7 @@ export interface ClusterRule {
     values: RuleOverrideValues;
 
 
+    clustered: boolean;
     useApplicator: boolean;
     onlySelectedNamespaces: boolean;
     namespaces: Record<string, {

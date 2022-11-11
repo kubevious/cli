@@ -1,0 +1,12 @@
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRule
+metadata:
+  name: cluster-role-check
+spec:
+  target: |
+    ApiVersion('rbac.authorization.k8s.io/v1')
+      .Kind('ClusterRole')
+  rule: |
+    
+  application:
+    clustered: true

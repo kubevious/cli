@@ -112,26 +112,29 @@ export class RuleRegistry
         spec.disabled = spec.disabled ?? false;
         spec.values = spec.values ?? {};
         spec.application = spec.application ?? {};
+        spec.application.clustered = spec.application.clustered ?? false;
         spec.application.useApplicator = spec.application.useApplicator ?? false;
         spec.application.onlySelectedNamespaces = spec.application.onlySelectedNamespaces ?? false;
         spec.application.namespaces = spec.application.namespaces ?? [];
 
-        const targetScript = spec.target; 
-        const ruleScript = spec.rule; 
+        const clustered = spec.application.clustered;
 
         this._clusterRules[name] = {
             manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.ClusterRule,
             name: name,
-            target: targetScript,
-            script: ruleScript,
+            target: spec.target,
+            script: spec.rule,
             values: spec.values,
             spec: spec,
 
-            useApplicator: spec.application.useApplicator,
-            onlySelectedNamespaces: spec.application.onlySelectedNamespaces,
-            namespaces: _.makeDict(spec.application.namespaces, x => x.name, x => ({ values: x.values ?? {} }))
+            clustered: clustered,
+            useApplicator: !clustered && spec.application.useApplicator,
+            onlySelectedNamespaces: !clustered && spec.application.onlySelectedNamespaces,
+            namespaces: 
+                clustered ? {} :
+                _.makeDict(spec.application.namespaces, x => x.name, x => ({ values: x.values ?? {} }))
         };
 
     }

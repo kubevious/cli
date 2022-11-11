@@ -11,6 +11,7 @@ export interface ClusterRuleK8sSpec
 }
 
 export interface ClusterRuleApplication {
+    clustered?: false,
     useApplicator?: false,
     onlySelectedNamespaces?: false,
     namespaces?: {
