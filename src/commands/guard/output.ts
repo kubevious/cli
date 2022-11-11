@@ -43,7 +43,14 @@ export function output(result: GuardResult)
 
             if (rule.pass && rule.compiled)
             {
-                print(`${severityStatusIcon('pass')} Rule passed`, 3);
+                if (rule.passed.length > 0)
+                {
+                    print(`${severityStatusIcon('pass')} Rule passed`, 3);
+                }
+                else
+                {
+                    print(`${severityStatusIcon('pass')} Rule passed. No manifests found to check.`, 3);
+                }
             }
 
             if (!rule.pass)

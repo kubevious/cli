@@ -12,6 +12,12 @@ const KUBEVIOUS_KIND_CLUSTER_RULE = 'ClusterRule';
 const KUBEVIOUS_KIND_RULE = 'Rule';
 const KUBEVIOUS_KIND_APPLICATOR_RULE = 'RuleApplicator';
 
+export interface RuleRegistryLoadOptions {
+    namespaces : string[],
+    onlySelectedNamespaces: boolean,
+    skipClusterScope: boolean,
+}
+
 export class RuleRegistry
 {
     private _logger: ILogger;
@@ -41,30 +47,38 @@ export class RuleRegistry
         return this._clusterRules[name] ?? null;
     }
 
-    loadLocally(registry: RegistryQueryExecutor, namespaces? : string[])
+    loadLocally(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
+        this._logger.info("[loadLocally] options: ", options);
+
         const spinner = spinOperation("Populating local RulesLibrary...");
 
-        this._loadClusterRules(registry);
-        this._loadNsRules(registry, namespaces);
-        this._loadApplicatorRules(registry, namespaces);
+        this._loadClusterRules(registry, options);
+        this._loadNsRules(registry, options);
+        this._loadApplicatorRules(registry, options);
 
         spinner.complete("RulesLibrary locally populated.")
     }
 
-    loadRemotely(registry: RegistryQueryExecutor, namespaces? : string[])
+    loadRemotely(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
+        this._logger.info("[loadRemotely] options: ", options);
+
         const spinner = spinOperation("Populating RulesLibrary From K8s...");
 
-        this._loadClusterRules(registry);
-        this._loadNsRules(registry, namespaces);
-        this._loadApplicatorRules(registry, namespaces);
+        this._loadClusterRules(registry, options);
+        this._loadNsRules(registry, options);
+        this._loadApplicatorRules(registry, options);
 
         spinner.complete("RulesLibrary populated from K8s.")
     }
 
-    private _loadClusterRules(registry: RegistryQueryExecutor)
+    private _loadClusterRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
+        if (options.skipClusterScope) {
+            return;
+        }
+
         const spinner = spinOperation("Loading ClusterRules...", 2);
 
         const query: K8sTargetFilter = {
@@ -122,13 +136,15 @@ export class RuleRegistry
 
     }
 
-    private _loadNsRules(registry: RegistryQueryExecutor, namespaces? : string[])
+    private _loadNsRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
+        this._logger.info("[_loadNsRules] ", options);
+
         const spinner = spinOperation("Loading Rules...", 2);
 
-        if (namespaces)
+        if (options.onlySelectedNamespaces)
         {
-            for(const namespace of namespaces)
+            for(const namespace of options.namespaces)
             {
                 spinner.update(`Loading Rules from ${namespace}...`);
 
@@ -139,7 +155,10 @@ export class RuleRegistry
                     namespace: namespace,
                 };
     
+                this._logger.info("[_loadNsRules] Running namespace: %s query...", namespace);
                 const results = registry.query(query);
+                this._logger.info("[_loadNsRules] count: %s", results.length);
+
                 for(const result of results)
                 {
                     this._loadNsRule(result);
@@ -155,7 +174,10 @@ export class RuleRegistry
                 isAllNamespaces: true,
             };
 
+            this._logger.info("[_loadNsRules] Running global query...");
             const results = registry.query(query);
+            this._logger.info("[_loadNsRules] count: %s", results.length);
+
             for(const result of results)
             {
                 this._loadNsRule(result);
@@ -201,13 +223,13 @@ export class RuleRegistry
         };
     }
 
-    private _loadApplicatorRules(registry: RegistryQueryExecutor, namespaces? : string[])
+    private _loadApplicatorRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         const spinner = spinOperation("Loading RuleApplicators...", 2);
 
-        if (namespaces)
+        if (options.onlySelectedNamespaces)
         {
-            for(const namespace of namespaces)
+            for(const namespace of options.namespaces)
             {
                 spinner.update(`Loading RuleApplicators from ${namespace}...`);
 

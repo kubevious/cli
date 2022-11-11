@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 
 import { GuardCommandData, GuardCommandOptions } from './types';
 import { LocalRegistryPopulator } from '../../registry/local-registry-populator';
-import { RuleRegistry } from '../../rules-engine/registry/rule-registry';
+import { RuleRegistry, RuleRegistryLoadOptions } from '../../rules-engine/registry/rule-registry';
 import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
 import { command as lintCommand, massageLintOptions } from '../lint/command';
@@ -14,6 +14,10 @@ import { CombinedRegistry } from '../../registry/combined-registry';
 export async function command(path: string[], options: GuardCommandOptions) : Promise<GuardCommandData>
 {
     logger.info("[PATH] ", path);
+
+    // logger.info("[areNamespacesSpecified] %s", options.areNamespacesSpecified);
+    // logger.info("[NAMESPACES] ", options.namespaces);
+    // throw new Error("XXX");
 
     const lintResult = await lintCommand(path, options);
 
@@ -42,13 +46,31 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     {
         if (remoteRegistry)
         {
-            const namespaces = options.includeRemoteTargets ? undefined : manifestPackage.namespaces;
-            await ruleRegistry.loadRemotely(remoteRegistry, namespaces);
+            const ruleRegistryLoadOptions : RuleRegistryLoadOptions = {
+                skipClusterScope: options.skipClusterScope,
+                onlySelectedNamespaces: options.areNamespacesSpecified,
+                namespaces:
+                    options.areNamespacesSpecified 
+                        ? options.namespaces
+                        : manifestPackage.namespaces,
+            }
+
+            await ruleRegistry.loadRemotely(remoteRegistry, ruleRegistryLoadOptions);
         }
     }
+
     if (!options.skipLocalRules)
     {
-        await ruleRegistry.loadLocally(localK8sRegistry);
+        const ruleRegistryLoadOptions : RuleRegistryLoadOptions = {
+            skipClusterScope: options.skipClusterScope,
+            onlySelectedNamespaces: true,
+            namespaces:
+                options.areNamespacesSpecified 
+                    ? options.namespaces
+                    : manifestPackage.namespaces,
+        }
+
+        await ruleRegistry.loadLocally(localK8sRegistry, ruleRegistryLoadOptions);
     }
 
     let combinedRegistry : RegistryQueryExecutor = localK8sRegistry;
@@ -64,9 +86,17 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     const validatorQueryRegistry : RegistryQueryExecutor = combinedRegistry;
 
+    let executionNamespaces : string[] = [];
+    if (options.areNamespacesSpecified) {
+        executionNamespaces = options.namespaces;
+    } else {
+        executionNamespaces = manifestPackage.namespaces;
+    }
+
     const rulesRuntime = new RulesRuntime(logger,
                                           ruleRegistry,
                                           manifestPackage,
+                                          executionNamespaces,
                                           targetQueryRegistry,
                                           validatorQueryRegistry);
     await rulesRuntime.init();
@@ -81,11 +111,36 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
 export function massageGuardOptions(options: Partial<GuardCommandOptions>) : GuardCommandOptions
 {
+    // logger.info("XXXXX: ", options.namespaces);
+    // throw new Error("KUKU");
+
+    let areNamespacesSpecified = false;
+    let namespaces: string[] = [];
+    if (options.namespace) {
+        areNamespacesSpecified = true;
+        namespaces = [options.namespace!];
+    } else {
+        if (!_.isUndefined(options.namespaces)) {
+
+            if (_.isBoolean(options.namespaces)) {
+                areNamespacesSpecified = true;
+                namespaces = [];
+            } else {
+                areNamespacesSpecified = true;
+                namespaces = options.namespaces!;
+            }
+        }
+    }
+
     return {
         ...massageLintOptions(options),
         
         includeRemoteTargets: options.includeRemoteTargets ?? false,
         skipLocalRules: options.skipLocalRules ?? false,
         skipRemoteRules: options.skipRemoteRules ?? false,
+        areNamespacesSpecified: areNamespacesSpecified,
+        namespace: undefined,
+        namespaces: namespaces,
+        skipClusterScope: options.skipClusterScope ?? false,
     }
 }

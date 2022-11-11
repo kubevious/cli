@@ -13,7 +13,12 @@ export interface GuardCommandOptions extends LintCommandOptions {
     skipLocalRules: boolean;
 
     skipRemoteRules: boolean;
-    
+
+    areNamespacesSpecified: boolean;
+    namespace?: string;
+    namespaces: string[];
+    skipClusterScope: boolean;
+
 }
 
 export interface GuardCommandData {
