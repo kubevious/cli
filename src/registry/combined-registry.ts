@@ -11,13 +11,13 @@ export class CombinedRegistry implements RegistryQueryExecutor
 
     constructor(logger: ILogger, innerRegistries: RegistryQueryExecutor[])
     {
-        this._logger = logger.sublogger('LocalK8sRegistry');
+        this._logger = logger.sublogger('CombinedRegistry');
         this._innerRegistries = innerRegistries;
     }
 
     query(query: K8sTargetFilter) : K8sManifest[]
     {
-        this._logger.error("[query] ", query);
+        this._logger.info("[query] ", query);
 
         const dict : Record<string, K8sManifest> = {};
 

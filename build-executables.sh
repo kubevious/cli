@@ -5,6 +5,9 @@ cd $MY_DIR
 
 source configuration.sh
 
+echo ">>>"
+echo ">>> Installing YARN Packages"
+echo ">>>"
 yarn install --frozen-lockfile
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
@@ -12,6 +15,9 @@ if [ $RESULT -ne 0 ]; then
   exit 1;
 fi
 
+echo ">>>"
+echo ">>> Building..."
+echo ">>>"
 ./build.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
@@ -21,6 +27,9 @@ fi
 
 pwd
 
+echo ">>>"
+echo ">>> Preparing Binary Package..."
+echo ">>>"
 ./scripts/prepare-package.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
@@ -28,6 +37,9 @@ if [ $RESULT -ne 0 ]; then
   exit 1;
 fi
 
+echo ">>>"
+echo ">>> Compiling Executable..."
+echo ">>>"
 ./scripts/compile-executables.sh
 RESULT=$?
 if [ $RESULT -ne 0 ]; then

@@ -1210,10 +1210,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-k8s-super-client@^2.0.49:
-  version "2.0.49"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.49.tgz#fe645cfa0c4d02fbd418251b01005db59bfdb391"
-  integrity sha512-1P5+GYmhgOWOKjWBFJcWG7q2SK1N8Mr+qu3HTQoCfb2a0Vj0iMb6nNENQnmZH24N2uN7pdx+y2ABmrXxABdo+g==
+k8s-super-client@^2.0.50:
+  version "2.0.50"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.50.tgz#192325a79d0897643634ff6ef991d3240548a119"
+  integrity sha512-90gQMk/KCkkgBfyCnOju4teI24lX3afDWWlibWOd2xDz5fifJ2intc58VqefAxjMnOAH4sXQI2gn4eUz3Fb+Bg==
   dependencies:
     "@types/ndjson" "^2.0.0"
     "@types/uuid" "^8.3.0"
@@ -1223,7 +1223,6 @@ k8s-super-client@^2.0.49:
     js-yaml "^4.1.0"
     kubernetes-types "^1.21.0-beta.1"
     ndjson "^2.0.0"
-    syncingabout "^0.1.0"
     the-lodash "^2.0.9"
     the-logger "^2.0.14"
     the-promise "^2.0.15"
@@ -1873,11 +1872,6 @@ supports-color@^7.1.0:
   integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
   dependencies:
     has-flag "^4.0.0"
-
-syncingabout@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/syncingabout/-/syncingabout-0.1.0.tgz#a90f10758a99ac54d054f9eb4a61371510ff9393"
-  integrity sha512-DMQq4gWDDnmseYW702aNxbHCSX7NPNMdXEmrIOXtnGH9XRzxSwvTDWLgtznsggI6PID7GGyBki+IYJTKZm0NBA==
 
 text-table@^0.2.0:
   version "0.2.0"
