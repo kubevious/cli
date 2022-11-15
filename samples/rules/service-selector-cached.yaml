@@ -1,0 +1,47 @@
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRule
+metadata:
+  name: service-selector-v2
+spec:
+  target: |
+    ApiVersion('v1')
+      .Kind('Service')
+  cache: |
+    cache.apps = [];
+    
+    for(const app of ApiVersion('apps/v1')
+                       .Kind("Deployment")
+                       .many())
+    {
+      cache.apps.push({
+        kind: app.kind,
+        name: app.name
+        labels: app.config.spec.template.metadata.labels ?? {}
+      });
+    }
+  rule: |
+    if (!config.spec.selector) {
+      return;
+    }
+
+    for(const app of cache.apps)
+    {
+      if (matchesDict(config.spec.selector, app.labels))
+      {
+        return;  
+      }
+    }
+
+    error("Could not find Applications for Service");
+
+    function matchesDict(selector, labels)
+    {
+        for(const key of Object.keys(selector))
+        {
+            if (selector[key] !== labels[key])
+            {
+                return false;
+            }
+        }
+        return true;
+    }

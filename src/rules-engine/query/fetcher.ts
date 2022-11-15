@@ -1,6 +1,5 @@
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
-import { Promise } from 'the-promise';
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution/execution-context';
 import { K8sTargetBuilderContext, ScopeK8sQuery } from '../target/k8s-target-builder';

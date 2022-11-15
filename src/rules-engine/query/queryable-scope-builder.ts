@@ -2,11 +2,11 @@ import _ from 'the-lodash'
 import { RootScopeBuilder } from '../scope-builders'
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution/execution-context';
-import { QueryableK8sTarget } from './k8s-target-builder';
+import { QueryableK8sTarget } from './queryable-k8s-target';
 import { Scope } from '../scope';
 import { TopLevelQuery } from '../target/types';
 
-export function makeValidatorRootScope(rootScopeBuilder : RootScopeBuilder, item: ScriptItem, executionContext: ExecutionContext)
+export function buildQueryableTargetScope(rootScopeBuilder : RootScopeBuilder, item: ScriptItem, executionContext: ExecutionContext)
 {
 
     rootScopeBuilder.setup(TopLevelQuery.ApiVersion, (apiVersion: string) => {
@@ -26,4 +26,5 @@ export function makeValidatorRootScope(rootScopeBuilder : RootScopeBuilder, item
 
         return builder;
     });
+    
 }

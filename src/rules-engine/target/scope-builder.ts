@@ -5,7 +5,7 @@ import { TopLevelQuery } from './types';
 import { RootScopeBuilder } from '../scope-builders'
 import { ExecutionContext } from '../execution/execution-context';
 
-export function makeTargetRootScope(rootScopeBuilder : RootScopeBuilder, executionContext : ExecutionContext, scope: Scope)
+export function buildTargetScope(rootScopeBuilder : RootScopeBuilder, executionContext : ExecutionContext, scope: Scope)
 {
     rootScopeBuilder.setup(TopLevelQuery.ApiVersion, (apiVersion: string) => {
         const target = new K8sTarget(scope, executionContext);

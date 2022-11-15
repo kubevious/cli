@@ -2,7 +2,7 @@ import _ from 'the-lodash'
 import { Promise } from 'the-promise'
 import { Compiler, CompilerScopeDict } from '@kubevious/kubik/dist/processors/compiler';
 import { BaseScopeQuery, Scope, ScopeQueryKind } from '../scope'
-import { makeTargetRootScope } from './scope-builder'
+import { buildTargetScope } from './scope-builder'
 import { RootScopeBuilder } from '../scope-builders'
 import { ScopeK8sQuery } from './k8s-target-builder'
 import { ScriptItem } from '../script-item'
@@ -73,7 +73,7 @@ export class TargetProcessor {
         }
 
         return Promise.resolve().then(() => {
-            makeTargetRootScope(rootScopeBuilder, this._executionContext, this._scope);
+            buildTargetScope(rootScopeBuilder, this._executionContext, this._scope);
 
             const compiler = new Compiler(
                 this._src,

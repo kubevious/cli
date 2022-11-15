@@ -1,7 +1,7 @@
 import _ from 'the-lodash'
 import { Promise, Resolvable } from 'the-promise'
 import { ScriptItem } from '../script-item'
-import { makeValidatorRootScope } from './scope-builder'
+import { buildQueryableTargetScope } from '../query/queryable-scope-builder'
 import { RootScopeBuilder } from '../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../execution/execution-context'
@@ -148,7 +148,7 @@ export class ValidationProcessor {
             }
         }
 
-        makeValidatorRootScope(rootScopeBuilder, item, this._executionContext);
+        buildQueryableTargetScope(rootScopeBuilder, item, this._executionContext);
     }
 
     private _addError(list: string[], msg: string) {
