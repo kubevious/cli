@@ -13,3 +13,5 @@ MY_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE
 MY_DIR="$(dirname $MY_PATH)"
 
 ${K8S_DIR}/exec-kubectl.sh apply -f ${MY_DIR}/../manifests/
+
+${K8S_DIR}/exec-kubectl.sh create namespace pepsi

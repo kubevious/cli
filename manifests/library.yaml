@@ -1,10 +1,10 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: library.kubevious.io
+  name: libraries.kubevious.io
 spec:
   group: kubevious.io
-  scope: Library
+  scope: Cluster
   names:
     plural: libraries
     singular: library
