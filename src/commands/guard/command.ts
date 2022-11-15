@@ -11,13 +11,15 @@ import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedRegistry } from '../../registry/combined-registry';
 
+const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/master/index.yaml';
+
 export async function command(path: string[], options: GuardCommandOptions) : Promise<GuardCommandData>
 {
-    logger.info("[PATH] ", path);
+    if (!options.skipCommunityRules) {
+        path.push(COMMUNITY_RULES_PATH);
+    }
 
-    // logger.info("[areNamespacesSpecified] %s", options.areNamespacesSpecified);
-    // logger.info("[NAMESPACES] ", options.namespaces);
-    // throw new Error("XXX");
+    logger.info("[PATH] ", path);
 
     const lintResult = await lintCommand(path, options);
 
@@ -32,8 +34,6 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     const localK8sRegistry = registryPopulator.localK8sRegistry;
     // await processor.localK8sRegistry.debugOutputToDir(logger, 'local-k8s-registry');
-    // await processor.localRegistryAccessor.debugOutputToDir(logger, 'local-logic-registry');
-
 
     let remoteRegistry: RegistryQueryExecutor | undefined;
     if (k8sConnector.isUsed)
@@ -41,7 +41,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
         remoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
     }
 
-    const ruleRegistry = new RuleRegistry(logger);
+    const ruleRegistry = new RuleRegistry(logger, manifestPackage);
     if (!options.skipRemoteRules)
     {
         if (remoteRegistry)
@@ -111,9 +111,6 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
 export function massageGuardOptions(options: Partial<GuardCommandOptions>) : GuardCommandOptions
 {
-    // logger.info("XXXXX: ", options.namespaces);
-    // throw new Error("KUKU");
-
     let areNamespacesSpecified = false;
     let namespaces: string[] = [];
     if (options.namespace) {
@@ -134,7 +131,7 @@ export function massageGuardOptions(options: Partial<GuardCommandOptions>) : Gua
 
     return {
         ...massageLintOptions(options),
-        
+        skipCommunityRules: options.skipCommunityRules ?? false,
         includeRemoteTargets: options.includeRemoteTargets ?? false,
         skipLocalRules: options.skipLocalRules ?? false,
         skipRemoteRules: options.skipRemoteRules ?? false,

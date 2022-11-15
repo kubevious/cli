@@ -94,12 +94,14 @@ export class ManifestPackage
         }
     }
 
-    addManifest(source: ManifestSource, k8sObject: K8sObject)
+    addManifest(source: ManifestSource, k8sObject: K8sObject) : K8sManifest
     {
         const k8sManifest = new K8sManifest(k8sObject, source)
 
         source.contents.push(k8sManifest);
         this._manifests.push(k8sManifest);
+
+        return k8sManifest;
     }
 
     public produceNamespaces()

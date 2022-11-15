@@ -40,3 +40,14 @@ export interface RuleApplicatorK8sSpec
     disabled?: boolean,
     values?: RuleOverrideValues
 }
+
+export interface LibraryK8sSpec
+{
+    rules: LibraryRuleRefK8sSpec[];
+}
+
+export interface LibraryRuleRefK8sSpec
+{
+    name: string,
+    path: string,
+}

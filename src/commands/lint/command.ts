@@ -8,19 +8,20 @@ import { DefaultNamespaceSetter } from '../../processors/default-namespace-sette
 import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
 import { ManifetsLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
+import { ManifestPackage } from '../../manifests/manifest-package';
 
 export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
     logger.info("[PATH] ", path);
 
-    const loader = new ManifetsLoader(logger);
+    const manifestPackage = new ManifestPackage(logger);
+
+    const loader = new ManifetsLoader(logger, manifestPackage);
     await loader.load(path);
 
     if (options.stream) {
         await loader.loadFromStream();
     }
-
-    const manifestPackage = loader.package;
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 

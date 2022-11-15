@@ -19,6 +19,7 @@ export interface GuardCommandOptions extends LintCommandOptions {
     namespaces: string[];
     skipClusterScope: boolean;
 
+    skipCommunityRules: boolean;
 }
 
 export interface GuardCommandData {

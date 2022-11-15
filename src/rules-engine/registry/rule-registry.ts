@@ -2,12 +2,15 @@ import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { ApplicatorRule, ClusterRule, NamespaceRule, RuleKind, RuleObject } from './types';
 import { RegistryQueryExecutor } from '../query-executor';
-import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from '../spec/rule-spec';
+import { ClusterRuleK8sSpec, LibraryK8sSpec, LibraryRuleRefK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from '../spec/rule-spec';
 import { K8sTargetFilter } from '../compiler/target/k8s-target-builder';
 import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
+import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { ManifestPackage } from '../../manifests/manifest-package';
 
 const KUBEVIOUS_API_NAME = 'kubevious.io';
+const KUBEVIOUS_KIND_LIBRARY = 'Library';
 const KUBEVIOUS_KIND_CLUSTER_RULE = 'ClusterRule';
 const KUBEVIOUS_KIND_RULE = 'Rule';
 const KUBEVIOUS_KIND_APPLICATOR_RULE = 'RuleApplicator';
@@ -26,9 +29,15 @@ export class RuleRegistry
     private _rules : Record<string, NamespaceRule> = {};
     private _ruleApplicators : Record<string, ApplicatorRule> = {};
 
-    constructor(logger: ILogger)
+    private _manifestPackage : ManifestPackage;
+    private _manifestsLoader : ManifetsLoader;
+
+    constructor(logger: ILogger, manifestPackage : ManifestPackage)
     {
         this._logger = logger.sublogger('RuleRegistry');
+
+        this._manifestPackage = manifestPackage; //new ManifestPackage(logger);
+        this._manifestsLoader = new ManifetsLoader(logger, this._manifestPackage);
     }
 
     get clusterRules() {
@@ -47,33 +56,37 @@ export class RuleRegistry
         return this._clusterRules[name] ?? null;
     }
 
-    loadLocally(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    async loadLocally(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         this._logger.info("[loadLocally] options: ", options);
 
         const spinner = spinOperation("Populating local RulesLibrary...");
 
-        this._loadClusterRules(registry, options);
-        this._loadNsRules(registry, options);
-        this._loadApplicatorRules(registry, options);
+        await this._loadRegistry(registry, options);
 
         spinner.complete("RulesLibrary locally populated.")
     }
 
-    loadRemotely(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    async loadRemotely(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         this._logger.info("[loadRemotely] options: ", options);
 
         const spinner = spinOperation("Populating RulesLibrary From K8s...");
 
-        this._loadClusterRules(registry, options);
-        this._loadNsRules(registry, options);
-        this._loadApplicatorRules(registry, options);
+        await this._loadRegistry(registry, options);
 
         spinner.complete("RulesLibrary populated from K8s.")
     }
+    
+    private async _loadRegistry(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    {
+        await this._loadLibraries(registry, options);
+        await this._loadClusterRules(registry, options);
+        await this._loadNsRules(registry, options);
+        await this._loadApplicatorRules(registry, options);
+    }
 
-    private _loadClusterRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    private async _loadClusterRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         if (options.skipClusterScope) {
             return;
@@ -91,13 +104,13 @@ export class RuleRegistry
         const results = registry.query(query);
         for(const manifest of results)
         {
-            this._loadClusterRule(manifest);
+            await this._loadClusterRule(manifest);
         }
 
         spinner.complete("ClusterRules loaded.")
     }
 
-    private _loadClusterRule(manifest: K8sManifest)
+    private async _loadClusterRule(manifest: K8sManifest)
     {
         const config = manifest.config;
         
@@ -140,7 +153,7 @@ export class RuleRegistry
 
     }
 
-    private _loadNsRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    private async _loadNsRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         this._logger.info("[_loadNsRules] ", options);
 
@@ -165,7 +178,7 @@ export class RuleRegistry
 
                 for(const result of results)
                 {
-                    this._loadNsRule(result);
+                    await this._loadNsRule(result);
                 }
             }
         }
@@ -184,14 +197,14 @@ export class RuleRegistry
 
             for(const result of results)
             {
-                this._loadNsRule(result);
+                await this._loadNsRule(result);
             }
         }
 
         spinner.complete("Rules loaded.")
     }
 
-    private _loadNsRule(manifest: K8sManifest)
+    private async _loadNsRule(manifest: K8sManifest)
     {
         const config = manifest.config;
         
@@ -225,7 +238,7 @@ export class RuleRegistry
         };
     }
 
-    private _loadApplicatorRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    private async _loadApplicatorRules(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
         const spinner = spinOperation("Loading RuleApplicators...", 2);
 
@@ -245,7 +258,7 @@ export class RuleRegistry
                 const results = registry.query(query);
                 for(const result of results)
                 {
-                    this._loadApplicatorRule(result);
+                    await this._loadApplicatorRule(result);
                 }
             }
         }
@@ -261,14 +274,14 @@ export class RuleRegistry
             const results = registry.query(query);
             for(const result of results)
             {
-                this._loadApplicatorRule(result);
+                await this._loadApplicatorRule(result);
             }
         }
 
         spinner.complete("RuleApplicators loaded");
     }
 
-    private _loadApplicatorRule(manifest: K8sManifest)
+    private async _loadApplicatorRule(manifest: K8sManifest)
     {
         const config = manifest.config;
         
@@ -297,6 +310,55 @@ export class RuleRegistry
             values: spec.values,
             spec: spec
         };
+    }
+
+    private async _loadLibraries(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
+    {
+        const spinner = spinOperation("Loading Libraries...", 2);
+
+        const query: K8sTargetFilter = {
+            isApiVersion: false,
+            apiOrNone: KUBEVIOUS_API_NAME,
+            kind: KUBEVIOUS_KIND_LIBRARY,
+            isAllNamespaces: true,
+        };
+
+        const results = registry.query(query);
+
+        for(const manifest of results)
+        {
+            await this._loadLibrary(manifest);
+        }
+
+        spinner.complete("Libraries loaded.")
+    }
+
+    private async _loadLibrary(manifest: K8sManifest)
+    {
+        const config = manifest.config;
+        
+        const name = config.metadata?.name;
+        
+        this._logger.info("[_loadLibrary] %s ...", name);
+
+        const spec = (config.spec as LibraryK8sSpec) ?? {};
+
+        const ruleRefs = spec.rules ?? [];
+        
+        for(const ruleRef of ruleRefs)
+        {
+            await this._loadLibraryRule(manifest, ruleRef);
+        }
+    }
+
+    private async _loadLibraryRule(library: K8sManifest, ruleRef: LibraryRuleRefK8sSpec)
+    {
+        const ruleManifests = await this._manifestsLoader.loadSingle(ruleRef.path, library.source);
+
+        for(const ruleManifest of ruleManifests)
+        {
+            await this._loadClusterRule(ruleManifest);
+        }
     }
 
 }
