@@ -11,7 +11,6 @@ import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../screen/spinner';
 import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleOverrideValues } from '../spec/rule-spec';
-import cluster from 'cluster';
 
 export class RulesRuntime
 {

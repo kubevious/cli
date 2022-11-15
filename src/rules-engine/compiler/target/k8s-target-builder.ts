@@ -1,5 +1,5 @@
-import { ExecutionContext } from '../execution/execution-context';
-import { Scope, ScopeQueryKind } from '../scope'
+import { ExecutionContext } from '../../execution/execution-context';
+import { Scope, ScopeQueryKind } from '../../scope'
 
 
 export interface KeyValueDict {

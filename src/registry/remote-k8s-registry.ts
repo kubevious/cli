@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sObject, makeId } from '../types/k8s';
-import { K8sTargetFilter } from '../rules-engine/target/k8s-target-builder';
+import { K8sObject } from '../types/k8s';
+import { K8sTargetFilter } from '../rules-engine/compiler/target/k8s-target-builder';
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
 import { K8sClusterConnector } from '../k8s-connector/k8s-cluster-connector';
 import { KubernetesClient, KubernetesObject } from 'k8s-super-client';

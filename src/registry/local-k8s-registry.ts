@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import { sanitizeDnPath } from '@kubevious/entity-meta';
 
 import { makeK8sKeyStr } from '../types/k8s';
-import { K8sTargetFilter } from '../rules-engine/target/k8s-target-builder';
+import { K8sTargetFilter } from '../rules-engine/compiler/target/k8s-target-builder';
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
 import { ClientSideFiltering } from './client-side-filtering';
 import { K8sManifest } from '../manifests/k8s-manifest';

@@ -2,7 +2,7 @@ import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { RuleApplicationScope, RuleObject } from '../registry/types';
-import { ValidationProcessorResult } from '../validator/processor';
+import { ValidationProcessorResult } from '../compiler/validator/processor';
 import { ScriptItem } from '../script-item';
 import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { RuleCompiler } from '../compiler/rule-compiler';
@@ -22,6 +22,11 @@ export class RuleRuntime
     
     private _violations : ManifestViolations[] = [];
     private _passed : K8sManifest[] = [];
+
+    private _ruleCacheData : RuleCache = {
+        cluster: null,
+        namespaces: {} 
+    }
 
     constructor(logger: ILogger,
                 manifest: K8sManifest,
@@ -74,8 +79,7 @@ export class RuleRuntime
                     return this._processTarget()
                         .then(results => {
                             this._logger.info('[execute] Targets Count: %s', results.length);
-
-                            return Promise.serial(results, x => this._processValidation(x));
+                            return Promise.serial(results, x => this._processItem(x));
                         });
                 }
             })
@@ -104,33 +108,107 @@ export class RuleRuntime
             });
     }
 
-    private _processValidation(item: ScriptItem)
+
+    private _processItem(item: ScriptItem)
     {
-        this._logger.info("[_processValidation] %s :: %s", item.apiVersion, item.kind);
+        this._logger.info("[_processItem] %s :: %s", item.apiVersion, item.kind);
+
         return Promise.resolve()
             .then(() => {
-                return this._compiler.validationProcessor.execute(item, this._values)
-                    .then(result => {
-                        this._logger.info("[_processValidation]  result: ", result);
-
-                        if (result.success)
-                        {
-                            this._processValidationResult(item.manifest, result);
-                        }
-                        else
-                        {
-                            if (result.messages && (result.messages.length > 0))
-                            {
-                                this._compiler.reportScriptErrors('rule', result.messages);
-                            }
-                            else
-                            {
-                                this._compiler.reportScriptErrors('rule', 
-                                    ['Unknown error executing the rule.']);
-                            }
-                        }
-                    });
+                return this._processCache(item);
             })
+            .then(result => {
+                this._logger.info("[_processCache] RESULT: ", result);
+
+                if (!result.success) {
+                    return;
+                }
+                return this._processValidation(item, result);
+            })
+    }
+
+    private _processValidation(item: ScriptItem, cacheResult: CacheRunResult)
+    {
+        this._logger.info("[_processValidation] %s :: %s", item.apiVersion, item.kind);
+
+        return this._compiler.validationProcessor.execute(item, cacheResult.cache, this._values)
+            .then(result => {
+                this._logger.info("[_processValidation]  result: ", result);
+
+                if (result.success)
+                {
+                    this._processValidationResult(item.manifest, result);
+                }
+                else
+                {
+                    if (result.messages && (result.messages.length > 0))
+                    {
+                        this._compiler.reportScriptErrors('rule', result.messages);
+                    }
+                    else
+                    {
+                        this._compiler.reportScriptErrors('rule', 
+                            ['Unknown error executing the rule.']);
+                    }
+                }
+            });
+    }
+
+    private _processCache(item: ScriptItem) : Promise<CacheRunResult>
+    {
+        if (!this._compiler.cacheProcessor) {
+            return Promise.resolve({
+                success: true,
+                cache: {}
+            });
+        }
+
+        this._logger.info("[_processCache] %s :: %s", item.apiVersion, item.kind);
+
+        const namespace = item.namespace;
+        if (namespace)
+        {
+            return this._compiler.cacheProcessor.execute(namespace, this._values)
+                .then(result => {
+                    const namespaceData : RuleCacheScope = {
+                        cache: result.cache
+                    };
+        
+                    this._ruleCacheData.namespaces[namespace] = namespaceData;
+
+                    return {
+                        success: true,
+                        cache: namespaceData.cache
+                    }
+                });
+
+        }
+        else
+        {
+            if (this._ruleCacheData.cluster) {
+                return Promise.resolve({
+                    success: true,
+                    cache: this._ruleCacheData.cluster.cache
+                });
+            }
+
+            return this._compiler.cacheProcessor.execute(null, this._values)
+                .then(result => {
+
+                    const clusterData : RuleCacheScope = {
+                        cache: result.cache
+                    };
+                    this._ruleCacheData.cluster = clusterData;
+
+                    return {
+                        success: true,
+                        cache: clusterData.cache
+                    }
+                });
+
+        }
+
+        
     }
 
     private _processValidationResult(manifest: K8sManifest, result: ValidationProcessorResult)
@@ -199,4 +277,22 @@ export interface ManifestViolations
     hasWarnings: boolean;
     errors?: string[];
     warnings?: string[];
+}
+
+interface RuleCache
+{
+    cluster: RuleCacheScope | null;
+    namespaces: Record<string, RuleCacheScope>;
+}
+
+interface RuleCacheScope
+{
+    cache: Record<string, any>;
+}
+
+
+interface CacheRunResult
+{
+    success: boolean,
+    cache: Record<string, any>
 }

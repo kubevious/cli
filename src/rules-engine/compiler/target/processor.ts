@@ -1,15 +1,15 @@
 import _ from 'the-lodash'
 import { Promise } from 'the-promise'
 import { Compiler, CompilerScopeDict } from '@kubevious/kubik/dist/processors/compiler';
-import { BaseScopeQuery, Scope, ScopeQueryKind } from '../scope'
+import { BaseScopeQuery, Scope, ScopeQueryKind } from '../../scope'
 import { buildTargetScope } from './scope-builder'
-import { RootScopeBuilder } from '../scope-builders'
+import { RootScopeBuilder } from '../../scope-builders'
 import { ScopeK8sQuery } from './k8s-target-builder'
-import { ScriptItem } from '../script-item'
-import { ExecutionContext } from '../execution/execution-context'
-import { QueryFetcher } from '../query/fetcher'
-import { RuleApplicationScope } from '../registry/types';
-import { RuleOverrideValues } from '../spec/rule-spec';
+import { ScriptItem } from '../../script-item'
+import { ExecutionContext } from '../../execution/execution-context'
+import { QueryFetcher } from '../../query/fetcher'
+import { RuleApplicationScope } from '../../registry/types';
+import { RuleOverrideValues } from '../../spec/rule-spec';
 
 export class TargetProcessor {
     private _src: string;

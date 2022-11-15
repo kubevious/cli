@@ -2,9 +2,10 @@ import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { RuleObject } from '../registry/types';
-import { TargetProcessor } from '../target/processor';
+import { TargetProcessor } from './target/processor';
+import { CacheProcessor } from './cache/processor';
+import { ValidationProcessor } from './validator/processor';
 import { ExecutionContext } from '../execution/execution-context';
-import { ValidationProcessor } from '../validator/processor';
 
 export class RuleCompiler
 {
@@ -14,6 +15,7 @@ export class RuleCompiler
 
     private _targetProcessor: TargetProcessor;
     private _validationProcessor: ValidationProcessor;
+    private _cacheProcessor?: CacheProcessor;
 
     private _isCompiled = false;
     private _hasRuntimeErrors = false;
@@ -29,6 +31,10 @@ export class RuleCompiler
 
         this._targetProcessor = new TargetProcessor(this._ruleObject.target, targetExecutionContext);
         this._validationProcessor = new ValidationProcessor(this._ruleObject.script, validatorExecutionContext);
+
+        if (this._ruleObject.cache) {
+            this._cacheProcessor = new CacheProcessor(this._ruleObject.cache, validatorExecutionContext);
+        }
     }
 
     get rule() {
@@ -55,6 +61,10 @@ export class RuleCompiler
         return this._validationProcessor;
     }
 
+    get cacheProcessor() {
+        return this._cacheProcessor;
+    }
+
     compile()
     {
         this._logger.info("[compile] %s", this._ruleObject.name);
@@ -74,11 +84,22 @@ export class RuleCompiler
             .then(() => {
                 return this._validationProcessor.prepare().then((result) => {
                     this._logger.verbose("[compile] _validationProcessor prepare: ", result);
-                    // console.log("[RULE-PROCESSOR] TARGETS PREPARE RESULT: ", result)
-                    // this._acceptScriptErrors('target', result)
                     if (!result.success) {
                         this._isCompiled = false;
                         this.reportScriptErrors('script', result.messages);
+                    }
+                })
+            })
+            .then(() => {
+                if (!this._cacheProcessor) {
+                    return;
+                }
+
+                return this._cacheProcessor!.prepare().then((result) => {
+                    this._logger.verbose("[compile] _cacheProcessor prepare: ", result);
+                    if (!result.success) {
+                        this._isCompiled = false;
+                        this.reportScriptErrors('cache', result.messages);
                     }
                 })
             })

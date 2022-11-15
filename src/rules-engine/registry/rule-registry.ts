@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import { ApplicatorRule, ClusterRule, NamespaceRule, RuleKind, RuleObject } from './types';
 import { RegistryQueryExecutor } from '../query-executor';
 import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from '../spec/rule-spec';
-import { K8sTargetFilter } from '../target/k8s-target-builder';
+import { K8sTargetFilter } from '../compiler/target/k8s-target-builder';
 import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 
@@ -125,6 +125,7 @@ export class RuleRegistry
             kind: RuleKind.ClusterRule,
             name: name,
             target: spec.target,
+            cache: spec.cache,
             script: spec.rule,
             values: spec.values,
             spec: spec,
@@ -203,9 +204,6 @@ export class RuleRegistry
         spec.disabled = spec.disabled ?? false;
         spec.values = spec.values ?? {};
 
-        const targetScript = spec.target; 
-        const ruleScript = spec.rule; 
-
         if (!name) {
             return;
         }
@@ -219,8 +217,9 @@ export class RuleRegistry
             application: {
                 namespace: namespace
             },
-            target: targetScript,
-            script: ruleScript,
+            target: spec.target,
+            cache: spec.cache,
+            script: spec.rule,
             values: spec.values,
             spec: spec
         };

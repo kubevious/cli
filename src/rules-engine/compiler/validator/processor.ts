@@ -1,15 +1,15 @@
 import _ from 'the-lodash'
 import { Promise, Resolvable } from 'the-promise'
-import { ScriptItem } from '../script-item'
-import { buildQueryableTargetScope } from '../query/queryable-scope-builder'
-import { RootScopeBuilder } from '../scope-builders';
+import { ScriptItem } from '../../script-item'
+import { buildQueryableTargetScope } from '../../query/queryable-scope-builder'
+import { RootScopeBuilder } from '../../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
-import { ExecutionContext } from '../execution/execution-context'
+import { ExecutionContext } from '../../execution/execution-context'
 import { TopLevelQuery } from '../target/types';
 
 export interface ValidationProcessorResult {
     success: boolean
-    messages?: string[]
+    messages: string[]
     validation: {
         hasErrors: boolean
         hasWarnings: boolean
@@ -63,10 +63,11 @@ export class ValidationProcessor {
             const compilerValues: CompilerScopeDict = {
                 item: null,
                 config: null,
+                cache: null,
+                values: null,
                 error: null,
                 warning: null,
                 mark: null,
-                values: null
             }
 
             for(const x of _.keys(TopLevelQuery))
@@ -85,7 +86,7 @@ export class ValidationProcessor {
 
     private _validate() {}
 
-    execute(item: ScriptItem, values: Record<string, any>) : Promise<ValidationProcessorResult> {
+    execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult> {
         const result: ValidationProcessorResult = {
             success: false,
             messages: [],
@@ -104,6 +105,7 @@ export class ValidationProcessor {
                     item: item,
                     values: values,
                     config: item.config,
+                    cache: cache,
                     error: (msg: string) => {
                         result.validation.hasErrors = true
                         if (msg) {
@@ -148,7 +150,9 @@ export class ValidationProcessor {
             }
         }
 
-        buildQueryableTargetScope(rootScopeBuilder, item, this._executionContext);
+        buildQueryableTargetScope(rootScopeBuilder, 
+                                  item.config?.metadata?.namespace,
+                                  this._executionContext);
     }
 
     private _addError(list: string[], msg: string) {

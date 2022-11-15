@@ -1,5 +1,5 @@
 import { K8sManifest } from "../manifests/k8s-manifest";
-import { K8sTargetFilter } from "./target/k8s-target-builder";
+import { K8sTargetFilter } from "./compiler/target/k8s-target-builder";
 
 export interface RegistryQueryExecutor
 {

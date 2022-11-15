@@ -3,7 +3,7 @@ import { ExecutionContext } from '../execution/execution-context';
 import { QueryFetcher } from './fetcher';
 import { Scope } from '../scope'
 import { ScriptItem } from '../script-item';
-import { K8sTarget, K8sTargetBuilder, K8sTargetBuilderContext } from '../target/k8s-target-builder';
+import { K8sTarget, K8sTargetBuilder, K8sTargetBuilderContext } from '../compiler/target/k8s-target-builder';
 
 class QueryableK8sTargetBuilder extends K8sTargetBuilder
 {
@@ -24,11 +24,13 @@ export class QueryableK8sTarget extends K8sTarget
 {
     private _builderContext: K8sTargetBuilderContext = {};
 
-    constructor(scope: Scope, executionContext: ExecutionContext, item: ScriptItem)
+    constructor(scope: Scope, executionContext: ExecutionContext, targetNamespace: string | null | undefined)
     {
         super(scope, executionContext);
 
-        this._builderContext.namespace = item.config?.metadata?.namespace;
+        if (targetNamespace) {
+            this._builderContext.namespace = targetNamespace;
+        }
     }
 
     protected _makeTargetBuilder()

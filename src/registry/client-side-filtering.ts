@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { K8sManifest } from '../manifests/k8s-manifest';
-import { KeyValueDict } from "../rules-engine/target/k8s-target-builder";
+import { KeyValueDict } from "../rules-engine/compiler/target/k8s-target-builder";
 
 
 export class ClientSideFiltering

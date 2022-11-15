@@ -15,7 +15,7 @@ spec:
     {
       cache.apps.push({
         kind: app.kind,
-        name: app.name
+        name: app.name,
         labels: app.config.spec.template.metadata.labels ?? {}
       });
     }

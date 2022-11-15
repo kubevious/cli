@@ -3,6 +3,7 @@ export type RuleOverrideValues = Record<string, any>;
 export interface ClusterRuleK8sSpec
 {
     target: string,
+    cache?: string,
     rule: string,
     description?: string,
     disabled?: boolean,
@@ -23,6 +24,7 @@ export interface ClusterRuleApplication {
 export interface RuleK8sSpec
 {
     target: string,
+    cache?: string,
     rule: string,
     description?: string,
     disabled?: boolean,

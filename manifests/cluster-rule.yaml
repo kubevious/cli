@@ -24,6 +24,8 @@ spec:
                   type: string
                 target:
                   type: string
+                cache:
+                  type: string
                 rule:
                   type: string
                 values:

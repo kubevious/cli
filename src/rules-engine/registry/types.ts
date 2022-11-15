@@ -14,6 +14,7 @@ export interface RuleObject {
     namespace?: string;
     name: string;
     target: string;
+    cache?: string;
     script: string;
     values: RuleOverrideValues;
 }
@@ -29,6 +30,7 @@ export interface ClusterRule {
     name: string;
     application?: RuleApplicationScope; 
     target: string;
+    cache?: string;
     script: string;
     values: RuleOverrideValues;
 
@@ -51,6 +53,7 @@ export interface NamespaceRule {
     name: string;
     application?: RuleApplicationScope; 
     target: string;
+    cache?: string;
     script: string;
     values: RuleOverrideValues;
 
