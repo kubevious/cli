@@ -10,6 +10,7 @@ import { program } from 'commander';
 import setupLintManifests from './commands/lint';
 import setupGuard from './commands/guard';
 import setupListKnownK8sVersions from './commands/list-known-k8s-versions';
+import setupIndexLibrary from './commands/index-library';
 
 logger.info("[execPath]: %s", process.execPath)
 logger.info("[execArgv]: ", process.execArgv)
@@ -24,5 +25,6 @@ program
 setupLintManifests(program);
 setupGuard(program);
 setupListKnownK8sVersions(program);
+setupIndexLibrary(program);
 
 program.parse();

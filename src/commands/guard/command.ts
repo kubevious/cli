@@ -53,6 +53,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
                     options.areNamespacesSpecified 
                         ? options.namespaces
                         : manifestPackage.namespaces,
+                skipLibraries: false
             }
 
             await ruleRegistry.loadRemotely(remoteRegistry, ruleRegistryLoadOptions);
@@ -68,6 +69,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
                 options.areNamespacesSpecified 
                     ? options.namespaces
                     : manifestPackage.namespaces,
+            skipLibraries: false
         }
 
         await ruleRegistry.loadLocally(localK8sRegistry, ruleRegistryLoadOptions);
@@ -105,7 +107,9 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     return {
         manifestPackage: manifestPackage,
         k8sSchemaInfo: lintResult.k8sSchemaInfo,
-        rulesRuntime
+        rulesRuntime,
+        localK8sRegistry: localK8sRegistry,
+        lintCommandData: lintResult
     } 
 }
 
@@ -139,5 +143,6 @@ export function massageGuardOptions(options: Partial<GuardCommandOptions>) : Gua
         namespace: undefined,
         namespaces: namespaces,
         skipClusterScope: options.skipClusterScope ?? false,
+        skipRuleLibraries: false,
     }
 }

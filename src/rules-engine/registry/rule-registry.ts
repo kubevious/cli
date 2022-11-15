@@ -8,17 +8,14 @@ import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { ManifetsLoader } from '../../manifests/manifests-loader';
 import { ManifestPackage } from '../../manifests/manifest-package';
+import { KubeviousKinds, KUBEVIOUS_API_NAME } from '../../types/kubevious';
 
-const KUBEVIOUS_API_NAME = 'kubevious.io';
-const KUBEVIOUS_KIND_LIBRARY = 'Library';
-const KUBEVIOUS_KIND_CLUSTER_RULE = 'ClusterRule';
-const KUBEVIOUS_KIND_RULE = 'Rule';
-const KUBEVIOUS_KIND_APPLICATOR_RULE = 'RuleApplicator';
 
 export interface RuleRegistryLoadOptions {
     namespaces : string[],
     onlySelectedNamespaces: boolean,
     skipClusterScope: boolean,
+    skipLibraries: boolean
 }
 
 export class RuleRegistry
@@ -97,7 +94,7 @@ export class RuleRegistry
         const query: K8sTargetFilter = {
             isApiVersion: false,
             apiOrNone: KUBEVIOUS_API_NAME,
-            kind: KUBEVIOUS_KIND_CLUSTER_RULE,
+            kind: KubeviousKinds.ClusterRule,
             isAllNamespaces: true,
         };
 
@@ -168,7 +165,7 @@ export class RuleRegistry
                 const query: K8sTargetFilter = {
                     isApiVersion: false,
                     apiOrNone: KUBEVIOUS_API_NAME,
-                    kind: KUBEVIOUS_KIND_RULE,
+                    kind: KubeviousKinds.Rule,
                     namespace: namespace,
                 };
     
@@ -187,7 +184,7 @@ export class RuleRegistry
             const query: K8sTargetFilter = {
                 isApiVersion: false,
                 apiOrNone: KUBEVIOUS_API_NAME,
-                kind: KUBEVIOUS_KIND_RULE,
+                kind: KubeviousKinds.Rule,
                 isAllNamespaces: true,
             };
 
@@ -251,7 +248,7 @@ export class RuleRegistry
                 const query: K8sTargetFilter = {
                     isApiVersion: false,
                     apiOrNone: KUBEVIOUS_API_NAME,
-                    kind: KUBEVIOUS_KIND_APPLICATOR_RULE,
+                    kind: KubeviousKinds.RuleApplicator,
                     namespace: namespace
                 };
         
@@ -267,7 +264,7 @@ export class RuleRegistry
             const query: K8sTargetFilter = {
                 isApiVersion: false,
                 apiOrNone: KUBEVIOUS_API_NAME,
-                kind: KUBEVIOUS_KIND_APPLICATOR_RULE,
+                kind: KubeviousKinds.RuleApplicator,
                 isAllNamespaces: true,
             };
     
@@ -314,12 +311,15 @@ export class RuleRegistry
 
     private async _loadLibraries(registry: RegistryQueryExecutor, options: RuleRegistryLoadOptions)
     {
+        if (options.skipLibraries) {
+            return;
+        }
+        
         const spinner = spinOperation("Loading Libraries...", 2);
-
         const query: K8sTargetFilter = {
             isApiVersion: false,
             apiOrNone: KUBEVIOUS_API_NAME,
-            kind: KUBEVIOUS_KIND_LIBRARY,
+            kind: KubeviousKinds.Library,
             isAllNamespaces: true,
         };
 

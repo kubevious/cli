@@ -38,8 +38,11 @@ export class QueryFetcher
 
         const k8sQuery = this._scope.query as ScopeK8sQuery;
 
-        if (targetScope.namespace) {
-            k8sQuery.filter.namespace = targetScope.namespace;
+        const isAllNamespaces = k8sQuery.filter.isAllNamespaces ?? false;
+        if (!isAllNamespaces) {
+            if (targetScope.namespace) {
+                k8sQuery.filter.namespace = targetScope.namespace;
+            }
         }
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQuery.filter);

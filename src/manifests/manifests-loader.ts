@@ -14,15 +14,28 @@ import { spinOperation } from '../screen/spinner';
 import { K8sManifest, ManifestSource } from './k8s-manifest';
 import { isWeb, joinPath } from '../utils/path';
 
+export interface ManifetsLoaderOptions
+{
+    ignoreNonK8s: boolean;
+}
+
 export class ManifetsLoader
 {
     private _logger: ILogger;
-    private _manifestPackage : ManifestPackage;
+    private _manifestPackage: ManifestPackage;
+    private _options: ManifetsLoaderOptions;
 
-    constructor(logger: ILogger, manifestPackage : ManifestPackage)
+    constructor(logger: ILogger, manifestPackage : ManifestPackage, options? : Partial<ManifetsLoaderOptions>)
     {
         this._logger = logger.sublogger('ManifetsLoader');
         this._manifestPackage = manifestPackage;
+
+        options = options ?? {};
+        this._options = {
+            ignoreNonK8s: options.ignoreNonK8s ?? false
+        };
+
+        this._logger.info("setup. options: ", this._options);
     }
 
     get manifestPackage() {
@@ -134,15 +147,20 @@ export class ManifetsLoader
         }
 
         return Promise.construct<string[]>((resolve, reject) => {
-            return glob(pattern, (err, matches) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(matches);
-                }
-            })
+            return glob(pattern,
+                 {
+                    nodir: true
+                 },
+                 (err, matches) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(matches);
+                    }
+                })
         })
         .then(files => {
+            this._logger.info("[_loadFileOrPattern] files: ", files);
             return Promise.serial(files, file => this._loadFile(file));
         })
         .then(results => _.flatten(results))
@@ -238,7 +256,10 @@ export class ManifetsLoader
         {
             if (source.contents.length === 0)
             {
-                this._manifestPackage.sourceError(source, 'Contains no manifests');
+                if (!this._options.ignoreNonK8s) {
+                    this._manifestPackage.sourceError(source, 'Contains no manifests');
+                }
+
             }
         }
 
@@ -256,7 +277,9 @@ export class ManifetsLoader
         const errors = this._checkK8sManifest(k8sObject);
         if (errors.length > 0)
         {
-            this._manifestPackage.sourceErrors(source, errors);
+            if (!this._options.ignoreNonK8s) {
+                this._manifestPackage.sourceErrors(source, errors);
+            }
             return null;
         }
 

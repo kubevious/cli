@@ -12,6 +12,7 @@ spec:
     const issuer = ApiVersion('cert-manager.io/v1')
                 .Kind(config.spec?.issuerRef?.kind)
                 .name(config.spec?.issuerRef?.name)
+                .allNamespaces()
                 .single();
     if (!issuer) {
       error('Could not find the Certificate Issuer');
@@ -23,11 +24,11 @@ spec:
     }
   application:
     useApplicator: true
-    onlySelectedNamespaces: true
-    namespaces:
-      - name: kubevious
-        values: 
-          domain: kubevious.io
-      - name: pepsi
-      - name: foo
+    # onlySelectedNamespaces: true
+  #   namespaces:
+  #     - name: kubevious
+  #       values: 
+  #         domain: kubevious.io
+  #     - name: pepsi
+  #     - name: foo
   # disabled: true

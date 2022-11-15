@@ -7,6 +7,7 @@ import { ManifestSourceId } from "../../types/manifest";
 export interface LintCommandOptions {
     k8sVersion?: string;
     ignoreUnknown: boolean;
+    ignoreNonK8s: boolean;
     stream: boolean;
     skipApplyCrds: boolean;
 

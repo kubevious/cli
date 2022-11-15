@@ -16,7 +16,9 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
 
     const manifestPackage = new ManifestPackage(logger);
 
-    const loader = new ManifetsLoader(logger, manifestPackage);
+    const loader = new ManifetsLoader(logger, manifestPackage, {
+        ignoreNonK8s: options.ignoreNonK8s
+    });
     await loader.load(path);
 
     if (options.stream) {
@@ -90,6 +92,7 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
     return {
         k8sVersion: options.k8sVersion,
         ignoreUnknown: options.ignoreUnknown ?? false,
+        ignoreNonK8s: options.ignoreNonK8s ?? false,
         stream: options.stream ?? false,
         skipApplyCrds: options.skipApplyCrds ?? false,
     

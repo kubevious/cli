@@ -4,7 +4,8 @@ import { RulesRuntime } from "../../rules-engine/execution/rules-runtime";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 import { RuleKind } from "../../rules-engine/registry/types";
-import { LintCommandOptions, LintManifestsResult } from "../lint/types";
+import { LintCommandData, LintCommandOptions, LintManifestsResult } from "../lint/types";
+import { LocalK8sRegistry } from "../../registry/local-k8s-registry";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
@@ -20,12 +21,17 @@ export interface GuardCommandOptions extends LintCommandOptions {
     skipClusterScope: boolean;
 
     skipCommunityRules: boolean;
+    skipRuleLibraries: boolean;
 }
 
 export interface GuardCommandData {
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
     rulesRuntime: RulesRuntime,
+
+    localK8sRegistry: LocalK8sRegistry,
+
+    lintCommandData: LintCommandData,
 }
 
 export interface GuardResult

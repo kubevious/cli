@@ -1,24 +1,22 @@
 import _ from 'the-lodash';
 
-import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
+import { LintCommandData, LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
 import { logger } from '../../logger';
-import { ManifestPackage } from '../../manifests/manifest-package';
-import { K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
 import { ErrorStatus } from '../../types/manifest';
 
-export function formatResult(
-    manifestPackage: ManifestPackage,
-    schemaInfo: K8sApiSchemaFetcherResult,
-    ) : LintManifestsResult
+export function formatResult({
+        manifestPackage,
+        k8sSchemaInfo,
+    } : LintCommandData) : LintManifestsResult
 {
     const result: LintManifestsResult = {
         success: true,
         sources: [],
 
-        targetK8sVersion: schemaInfo.targetVersion || undefined,
-        selectedK8sVersion: schemaInfo.selectedVersion || undefined,
-        foundK8sVersion: schemaInfo.found,
-        foundExactK8sVersion: schemaInfo.foundExact,
+        targetK8sVersion: k8sSchemaInfo.targetVersion || undefined,
+        selectedK8sVersion: k8sSchemaInfo.selectedVersion || undefined,
+        foundK8sVersion: k8sSchemaInfo.found,
+        foundExactK8sVersion: k8sSchemaInfo.foundExact,
 
         counters: {
             sources: {

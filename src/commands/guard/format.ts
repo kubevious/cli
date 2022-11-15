@@ -1,20 +1,18 @@
 import _ from 'the-lodash';
 
-import { GuardResult,  LintRuleResult } from "./types";
+import { GuardCommandData, GuardResult,  LintRuleResult } from "./types";
 import { logger } from '../../logger';
-import { ManifestPackage } from '../../manifests/manifest-package';
-import { K8sApiSchemaFetcherResult } from '../../api-schema/k8s-api-schema-fetcher';
-import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
 import { formatResult as lintFormatResult } from '../lint/format';
 
-export function formatResult(
-    manifestPackage: ManifestPackage,
-    schemaInfo: K8sApiSchemaFetcherResult,
-    rulesRuntime: RulesRuntime
-    ) : GuardResult
+export function formatResult({
+        manifestPackage,
+        k8sSchemaInfo,
+        rulesRuntime,
+        lintCommandData
+    } : GuardCommandData) : GuardResult
 {
-    const lintResult = lintFormatResult(manifestPackage, schemaInfo);
+    const lintResult = lintFormatResult(lintCommandData);
 
     const result: GuardResult = {
         success: true,

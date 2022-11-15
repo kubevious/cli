@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orderservice
+  name: emailservice
   namespace: pepsi
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: orderservice
+      app: emailservice
   template:
     metadata:
       labels:
-        app: orderservice
+        app: emailservice
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/orderservice:v0.3.6
+        image: gcr.io/google-samples/microservices-demo/emailservice:v0.3.6
         ports:
         - containerPort: 8080
         env:

@@ -16,6 +16,7 @@ export default function (program: Command)
         .description('Check Kubernetes manifests for API syntax validity')
         .argument('[path...]', 'Path to file, directory, search pattern or URL')
         .option('--ignore-unknown', 'Ignore unknown resources. Use when manifests include CRDs and not using --live-k8s option.')
+        .option('--ignore-non-k8s', 'Ignore non-k8s files.')
         .option('--skip-apply-crds', 'Skips CRD application.')
         .option('--k8s-version <version>', 'Target Kubernetes version. Do not use with --live-k8s option.')
         .option('--stream', 'Also read manifests from stream')
@@ -31,10 +32,7 @@ export default function (program: Command)
                     return command(path, myOptions);
                     
                 })
-                .format(({ manifestPackage, k8sSchemaInfo }) => {
-                    const result = formatResult(manifestPackage, k8sSchemaInfo);
-                    return result;
-                })
+                .format(formatResult)
                 .output(output)
                 .decideSuccess(result => {
                     if (!result.success)
