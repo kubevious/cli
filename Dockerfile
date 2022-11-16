@@ -23,8 +23,8 @@ WORKDIR /app
 COPY --from=0 /app/kubevious.tgz ./
 RUN npm install -g ./kubevious.tgz
 RUN rm -rf /app
-WORKDIR /manifests
+WORKDIR /src
 COPY ./docker/docker-entrypoint.sh /
-RUN addgroup -S kubevious && adduser -S kubevious -G kubevious -h /manifests
+RUN addgroup -S kubevious && adduser -S kubevious -G kubevious -h /src
 USER kubevious
 ENTRYPOINT ["/docker-entrypoint.sh"]

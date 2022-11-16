@@ -55,7 +55,7 @@ $ docker run kubevious/cli --help
 
 Validate the entire manifests directory:
 ```sh
-$ docker run -v ${PWD}/samples:/manifests kubevious/cli lint /manifests
+$ docker run -v ${PWD}/samples:/src kubevious/cli lint /src
 ```
 
 Validate Helm Chart or any manifests from pipe stream:

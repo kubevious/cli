@@ -3,6 +3,24 @@
   description: Index Kubevious rules library
   types: [ file, yaml ]
   language: docker_image
-  pass_filenames: true
+  pass_filenames: false
   entry: kubevious/cli
-  args: [ 'lint' ]
+  args: [ 'index-library', '/src']
+
+- id: kubevious-lint
+  name: kubevious lint manifests
+  description: Lint Kuberentes manifests
+  types: [ file, yaml ]
+  language: docker_image
+  pass_filenames: false
+  entry: kubevious/cli
+  args: [ 'lint', '/src' ]
+
+- id: kubevious-guard
+  name: kubevious gurad manifests
+  description: Gurad Kuberentes manifests
+  types: [ file, yaml ]
+  language: docker_image
+  pass_filenames: false
+  entry: kubevious/cli
+  args: [ 'lint', '/src' ]

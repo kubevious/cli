@@ -5,12 +5,12 @@ cd $MY_DIR
 
 source configuration.sh
 
-docker run -i -v ${MY_DIR}/samples:/manifests ${IMAGE_NAME} $@
+docker run -i -v ${MY_DIR}/samples:/src ${IMAGE_NAME} $@
 
 RESULT=$?
 echo "RESULT: $RESULT"
 
 # docker run kubevious-cli --help
 # docker run kubevious-cli --version
-# docker run -v ${PWD}/samples:/manifests kubevious-cli lint /manifests
+# docker run -v ${PWD}/samples:/src kubevious-cli lint /src
 # helm template traefik/traefik | docker run -i kubevious-cli lint
