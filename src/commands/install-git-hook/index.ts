@@ -3,6 +3,7 @@ import { Command } from 'commander';
 
 import setupRulesLibrary from './rule-library';
 import setupLint from './lint';
+import setupGuard from './guard';
 
 export default function (program: Command)
 {

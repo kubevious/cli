@@ -22,7 +22,7 @@ export default function (program: Command)
         .option('--stream', 'Also read manifests from stream')
         .option('--live-k8s', 'Lint against live Kubernetes cluster. Allows validation of CRDs. Do not use with --k8s-version option.')
         .option('--kubeconfig <path>', 'Optionally set the path to the kubeconfig file. Use with --live-k8s option.')
-        .option('--json', 'Output lint result in JSON.')
+        .option('--json', 'Output command result in JSON.')
         .action(
             new CommandBuilder<LintCommandData, LintManifestsResult>()
                 .perform(async (path: string[], options: Partial<LintCommandOptions>) => {

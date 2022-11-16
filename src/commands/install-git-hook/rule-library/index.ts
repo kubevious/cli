@@ -2,10 +2,14 @@ import _ from 'the-lodash';
 import { Command } from 'commander';
 import { logger } from '../../../logger';
 
-
 import { CommandBuilder } from '../../../infra/command-action';
 
-import { output } from './output';
+import { command } from '../command';
+import { formatResult } from '../format';
+import { output } from '../output';
+import { InstallHookCommandData } from '../types';
+
+const HOOK_ID = 'kubevious-index-library';
 
 export default function (program: Command)
 {
@@ -13,27 +17,16 @@ export default function (program: Command)
         .command('rule-library')
         .description('Installs a Git pre-commit hook to index rules library')
         .argument('[path]', 'Path to git repository')
+        .option('--json', 'Output command result in JSON.')
         .action(
-            (...args: any[]) => {
+            new CommandBuilder<InstallHookCommandData, InstallHookCommandData>()
+                .perform(async (path?: string) => {
 
-                logger.info("ARGS: ", args);
-            }
-            // new CommandBuilder<string[], KnownK8sVersionsResult>()
-            //     .perform(async () => {
-
-            //         const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
-            //         k8sApiRegistry.init();
-
-            //         return k8sApiRegistry.getVersions();
-            //     })
-            //     .format(versions => {
-            //         const result: KnownK8sVersionsResult = {
-            //             versions: versions
-            //         }
-            //         return result;
-            //     })
-            //     .output(output)
-            //     .build()
+                    return command(path, { hook: HOOK_ID })
+                })
+                .format(formatResult)
+                .output(output)
+                .build()
         
         );
 }

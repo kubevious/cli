@@ -9,13 +9,13 @@ import { formatResult } from '../format';
 import { output } from '../output';
 import { InstallHookCommandData } from '../types';
 
-const HOOK_ID = 'kubevious-lint';
+const HOOK_ID = 'kubevious-guard';
 
 export default function (program: Command)
 {
     program
         .command('lint')
-        .description('Installs a Git pre-commit hook to Lint Kubernetes Manifests')
+        .description('Installs a Git pre-commit hook to Guard Kubernetes Manifests')
         .argument('[path]', 'Path to git repository')
         .option('--json', 'Output command result in JSON.')
         .action(
