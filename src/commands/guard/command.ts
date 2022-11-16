@@ -6,12 +6,14 @@ import { LocalRegistryPopulator } from '../../registry/local-registry-populator'
 import { RuleRegistry, RuleRegistryLoadOptions } from '../../rules-engine/registry/rule-registry';
 import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
-import { command as lintCommand, massageLintOptions } from '../lint/command';
+import { command as lintCommand, determineLintSuccess, massageLintOptions } from '../lint/command';
 import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedRegistry } from '../../registry/combined-registry';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/master/index.yaml';
+
+const myLogger = logger.sublogger('GuardCommand');
 
 export async function command(path: string[], options: GuardCommandOptions) : Promise<GuardCommandData>
 {
@@ -104,7 +106,29 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     await rulesRuntime.init();
     await rulesRuntime.execute();
 
+    let ruleSuccess = true;
+    for(const rule of rulesRuntime.rules)
+    {
+        for(const violation of rule.violations)
+        {
+            if (violation.hasErrors)
+            {
+                ruleSuccess = false;
+            }
+        }
+    }
+
+    lintResult.success = determineLintSuccess(manifestPackage);
+
+    const success = lintResult.success && ruleSuccess; 
+
+    myLogger.info("Success: %s", success);
+    myLogger.info("RuleSuccess: %s", ruleSuccess);
+    myLogger.info("LintResult.success: %s", lintResult.success);
+
     return {
+        success,
+        ruleSuccess,
         manifestPackage: manifestPackage,
         k8sSchemaInfo: lintResult.k8sSchemaInfo,
         rulesRuntime,

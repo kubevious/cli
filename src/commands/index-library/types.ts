@@ -8,6 +8,7 @@ export interface IndexLibraryCommandOptions  {
 }
 
 export interface IndexLibraryCommandData {
+    success: boolean,
     manifestPackage: ManifestPackage,
     guardCommandData: GuardCommandData,
 

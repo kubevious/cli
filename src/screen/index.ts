@@ -118,7 +118,7 @@ export const OBJECT_ICONS = {
 
 export const SOURCE_ICONS = {
     file: new IconDefinition(emoji.get(':page_facing_up:')),
-    web: new IconDefinition(emoji.get(':web:')),
+    web: new IconDefinition(emoji.get(':globe_with_meridians:')),
     stream: new IconDefinition(emoji.get(':aquarius:')),
     k8s: new IconDefinition('☸️ '),
 }

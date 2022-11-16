@@ -17,6 +17,7 @@ export interface LintCommandOptions {
 
 
 export interface LintCommandData {
+    success: boolean,
     k8sConnector: K8sClusterConnector,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,

@@ -10,6 +10,8 @@ import { ManifetsLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 import { ManifestPackage } from '../../manifests/manifest-package';
 
+const myLogger = logger.sublogger('LintCommand');
+
 export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
     logger.info("[PATH] ", path);
@@ -78,11 +80,34 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
 
     manifestPackage.produceNamespaces();
 
+    const success = determineLintSuccess(manifestPackage);
+    myLogger.info("Success: %s", success);
+
     return {
+        success,
         k8sConnector,
         manifestPackage,
         k8sSchemaInfo
     } 
+}
+
+export function determineLintSuccess(manifestPackage: ManifestPackage)
+{
+    let success = true;
+    for(const source of manifestPackage.sources)
+    {
+        if (!source.success) {
+            success = false;
+        }
+
+        for(const manifest of source.contents)
+        {
+            if (!manifest.success) {
+                success = false;
+            }
+        }
+    }
+    return success;
 }
 
 export function massageLintOptions(options: Partial<LintCommandOptions>) : LintCommandOptions

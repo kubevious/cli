@@ -67,15 +67,21 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
     libraryObject.spec.rules = _.orderBy(libraryObject.spec.rules, [x => x.name, x => x.path]);
 
-    await fs.writeFile(libraryFilePath,
-                    YAML.stringify(libraryObject, {
-                        toStringDefaults: {
-                            indent: 2,
-                            indentSeq: false
-                        }
-                    }));
+    if (guardResult.success)
+    {
+        await fs.writeFile(libraryFilePath,
+            YAML.stringify(libraryObject, {
+                toStringDefaults: {
+                    indent: 2,
+                    indentSeq: false
+                }
+            }));
+    }
+
+    const success = guardResult.success;
 
     return {
+        success,
         manifestPackage,
         guardCommandData: guardResult,
 

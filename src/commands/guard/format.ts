@@ -5,7 +5,11 @@ import { logger } from '../../logger';
 
 import { formatResult as lintFormatResult } from '../lint/format';
 
+const myLogger = logger.sublogger('GuardFormat');
+
 export function formatResult({
+        success,
+        ruleSuccess,
         manifestPackage,
         k8sSchemaInfo,
         rulesRuntime,
@@ -14,10 +18,14 @@ export function formatResult({
 {
     const lintResult = lintFormatResult(lintCommandData);
 
+    myLogger.info("Success: %s", success);
+    myLogger.info("RuleSuccess: %s", ruleSuccess);
+    myLogger.info("LintResult.success: %s", lintResult.success);
+
     const result: GuardResult = {
-        success: true,
+        success: success,
+        ruleSuccess: ruleSuccess,
         lintResult : lintResult,
-        ruleSuccess: true,
         rules: [],
 
         counters: {
@@ -68,7 +76,6 @@ export function formatResult({
             for(const violation of rule.violations)
             {
                 if (violation.hasErrors) {
-                    result.ruleSuccess = false;
                     ruleResult.pass = false;
                     ruleResult.hasViolationErrors = true;
                 }
@@ -122,7 +129,6 @@ export function formatResult({
         }
     }
 
-    result.success = result.lintResult.success && result.ruleSuccess;
 
     return result;
 }

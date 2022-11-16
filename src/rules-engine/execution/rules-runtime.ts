@@ -11,6 +11,7 @@ import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../screen/spinner';
 import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleOverrideValues } from '../spec/rule-spec';
+import { K8sManifest } from '../../manifests/k8s-manifest';
 
 export class RulesRuntime
 {
@@ -23,6 +24,7 @@ export class RulesRuntime
     }> = {};
     private _rules : RuleRuntime[] = [];
 
+    private _manifestPackage: ManifestPackage;
     private _namespaces: string[];
     private _targetExecutionContext : ExecutionContext;
     private _validatorExecutionContext : ExecutionContext;
@@ -39,6 +41,7 @@ export class RulesRuntime
         this._logger = logger.sublogger('RulesRuntime');
         this._ruleRegistry = ruleRegistry;
         this._namespaces = namespaces;
+        this._manifestPackage = manifestPackage;
         this._targetExecutionContext = new ExecutionContext(this._logger, targetQueryExecutor, manifestPackage);
         this._validatorExecutionContext = new ExecutionContext(this._logger, validatorQueryExecutor, manifestPackage);
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
@@ -84,9 +87,8 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, clusterRule, this._targetExecutionContext, this._validatorExecutionContext);
-        return compiler.compile()
-            .then(() => {
+        return this._prepareRule(clusterRule, clusterRule.manifest)
+            .then((compiler) => {
                 this._clusterRules[clusterRule.name] = {
                     rule: clusterRule,
                     compiler: compiler,
@@ -106,6 +108,7 @@ export class RulesRuntime
             });
     }
 
+    
     private _setupClusterRuleApplication(clusterRule: ClusterRule, compiler: RuleCompiler)
     {
         let namespaces = this._namespaces;
@@ -161,9 +164,8 @@ export class RulesRuntime
             return;
         }
 
-        const compiler = new RuleCompiler(this._logger, rule, this._targetExecutionContext, this._validatorExecutionContext);
-        return compiler.compile()
-            .then(() => {
+        return this._prepareRule(rule, rule.manifest)
+            .then((compiler) => {
                 const ruleRuntime = new RuleRuntime(this._logger,
                                                     rule.manifest,
                                                     rule,
@@ -233,6 +235,26 @@ export class RulesRuntime
             );
         this._rules.push(ruleRuntime);
     }
+
+    private _prepareRule(ruleObject: RuleObject, manifest: K8sManifest)
+    {
+        this._logger.info("[_prepareRule] %s :: %s ::%s...", ruleObject.kind, ruleObject.namespace, ruleObject.name)
+        const compiler = new RuleCompiler(this._logger, ruleObject, this._targetExecutionContext, this._validatorExecutionContext);
+        return compiler.compile()
+            .then(() => {
+                this._logger.info("[_prepareRule]   - isCompiled: %s", compiler.isCompiled);
+                this._logger.info("[_prepareRule]   - hasRuntimeErrors: %s", compiler.hasRuntimeErrors);
+                this._logger.info("[_prepareRule]   - errors: ", compiler.ruleErrors);
+
+                for(const error of compiler.ruleErrors)
+                {
+                    this._manifestPackage.manifestError(manifest, error.msg);
+                }
+
+                return compiler;
+            })
+    }
+
 
     private _executeRule(rule : RuleRuntime)
     {

@@ -6,6 +6,7 @@ import { IndexLibraryCommandData, IndexLibraryResult } from "./types";
 import { formatResult as guardFormatResult } from '../guard/format'
 
 export function formatResult({
+    success,
     manifestPackage,
     guardCommandData,
     rules,
@@ -17,7 +18,7 @@ export function formatResult({
     const guardResult = guardFormatResult(guardCommandData);
 
     const result: IndexLibraryResult = {
-        success: guardResult.success,
+        success: success,
 
         guardResult: guardResult,
 

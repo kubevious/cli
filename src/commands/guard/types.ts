@@ -25,6 +25,8 @@ export interface GuardCommandOptions extends LintCommandOptions {
 }
 
 export interface GuardCommandData {
+    success: boolean,
+    ruleSuccess: boolean,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
     rulesRuntime: RulesRuntime,

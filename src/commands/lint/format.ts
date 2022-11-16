@@ -4,13 +4,18 @@ import { LintCommandData, LintManifestsResult, LintSeverity, LintSourceResult } 
 import { logger } from '../../logger';
 import { ErrorStatus } from '../../types/manifest';
 
+const myLogger = logger.sublogger('LintFormat');
+
 export function formatResult({
+        success,
         manifestPackage,
         k8sSchemaInfo,
     } : LintCommandData) : LintManifestsResult
 {
+    myLogger.info("Success: %s", success);
+
     const result: LintManifestsResult = {
-        success: true,
+        success: success,
         sources: [],
 
         targetK8sVersion: k8sSchemaInfo.targetVersion || undefined,
@@ -51,7 +56,6 @@ export function formatResult({
 
         if (!source.success) {
             outputSource.success = false;
-            result.success = false;
             result.counters.sources.withErrors++;
         }
 
@@ -78,7 +82,6 @@ export function formatResult({
             
             if (!manifest.success) {
                 outputSource.success = false;
-                result.success = false;
                 result.counters.manifests.withErrors++;
             } else {
                 result.counters.manifests.passed++;

@@ -181,7 +181,6 @@ export class RuleRuntime
                         cache: namespaceData.cache
                     }
                 });
-
         }
         else
         {
