@@ -108,7 +108,7 @@ export const STATUS_ICONS = {
     error: new IconDefinition(emoji.get(':red_circle:'), emoji.get(':radio_button:')),
     warning: new IconDefinition(`${emoji.get(':warning:')} `, emoji.get(':grey_exclamation:')),
     question: new IconDefinition(`${emoji.get(':question:')} `, emoji.get(':grey_question:')),
-    info: new IconDefinition(`${emoji.get(':information_source:')}`),
+    info: new IconDefinition(`${emoji.get(':information_source:')} `),
 }
 
 export const OBJECT_ICONS = {

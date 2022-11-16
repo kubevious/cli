@@ -29,7 +29,7 @@ export default function (program: Command)
         .option('--namespaces [namespace...]', 'Or specify multiple namespaces to process.')
         .option('--skip-cluster-scope', 'Skip processing clustered manifests and rules.')
         .option('--skip-community-rules', 'Skip community rules library.')
-        .option('--json', 'Output lint result in JSON.')
+        .option('--json', 'Output command result in JSON.')
         .action(
             new CommandBuilder<GuardCommandData, GuardResult>()
                 .perform(async (path: string[], options: Partial<GuardCommandOptions>) => {

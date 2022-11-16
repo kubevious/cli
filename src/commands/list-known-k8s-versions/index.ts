@@ -14,7 +14,7 @@ export default function (program: Command)
     program
         .command('list-known-k8s-versions')
         .description('List of known K8s versions')
-        .option('--json', 'Output in JSON')
+        .option('--json', 'Output command result in JSON.')
         .action(
             new CommandBuilder<string[], KnownK8sVersionsResult>()
                 .perform(async () => {

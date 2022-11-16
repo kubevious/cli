@@ -13,7 +13,7 @@ export default function (program: Command)
         .command('index-library')
         .description('Generate index for rules library repository. Creates index.yaml file.')
         .argument('<dir>', 'Path to the repository which contiains Kubevious rules.')
-        .option('--json', 'Output lint result in JSON.')
+        .option('--json', 'Output command result in JSON.')
         .action(
 
             new CommandBuilder<IndexLibraryCommandData, IndexLibraryResult>()
