@@ -17,4 +17,11 @@ export function output(result: InstallHookCommandData)
     printProcessStatus(result.success, 'Install Git Hook');
 
     printErrors(result.errors, 3);
+
+    if (result.success) {
+        print('Now you can run: ', 3);
+        print(`$> cd ${result.repoPath}`, 5);
+        print(`$> git add .pre-commit-config.yaml`, 5);
+        print('$> pre-commit autoupdate', 5);
+    }
 }

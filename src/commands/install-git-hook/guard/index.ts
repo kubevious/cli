@@ -14,7 +14,7 @@ const HOOK_ID = 'kubevious-guard';
 export default function (program: Command)
 {
     program
-        .command('lint')
+        .command('guard')
         .description('Installs a Git pre-commit hook to Guard Kubernetes Manifests')
         .argument('[path]', 'Path to git repository')
         .option('--json', 'Output command result in JSON.')
