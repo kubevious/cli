@@ -18,9 +18,9 @@
 
 - id: kubevious-guard
   name: kubevious gurad manifests
-  description: Gurad Kuberentes manifests
+  description: Guard Kuberentes manifests
   types: [ file, yaml ]
   language: docker_image
   pass_filenames: false
   entry: kubevious/cli
-  args: [ 'lint', '/src' ]
+  args: [ 'guard', '/src' ]
