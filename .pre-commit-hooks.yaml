@@ -1,0 +1,8 @@
+- id: kubevious-index-library
+  name: kubevious index rules library
+  description: Index Kubevious rules library
+  types: [ file, yaml ]
+  language: docker_image
+  pass_filenames: true
+  entry: kubevious/cli
+  args: [ 'lint' ]
