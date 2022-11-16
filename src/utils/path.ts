@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import path from 'path';
+import Path from 'path';
 
 export function isWeb(fileOrPath : string)
 {
@@ -8,7 +8,7 @@ export function isWeb(fileOrPath : string)
 
 export function parent(fileOrUrl: string)
 {
-    return path.dirname(fileOrUrl);
+    return Path.dirname(fileOrUrl);
 }
 
 export function joinPath(parentFileOrUrl: string, relative: string)
@@ -21,6 +21,17 @@ export function joinPath(parentFileOrUrl: string, relative: string)
             return `${parentDir}/${relative}`;
          }
     } else {
-        return path.join(parentDir, relative);
+        return Path.join(parentDir, relative);
     }
+}
+export function makeRelativePath(fileOrUrl: string, parentDirOrUrl: string)
+{
+    if (isWeb(fileOrUrl)) {
+        return fileOrUrl;
+    }
+
+    fileOrUrl = Path.normalize(fileOrUrl);
+    parentDirOrUrl = Path.normalize(parentDirOrUrl);
+
+    return Path.relative(parentDirOrUrl, fileOrUrl);
 }

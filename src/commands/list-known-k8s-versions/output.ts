@@ -1,15 +1,13 @@
-import chalk from 'chalk';
-import emoji from 'node-emoji';
-
+import { printSectionTitle, SOURCE_ICONS, print } from "../../screen";
 import { KnownK8sVersionsResult } from "./types";
 
 export function output(result: KnownK8sVersionsResult)
 {
-    console.log(`${chalk.underline('Known K8s Versions:')}`);
-    console.log();
+    printSectionTitle('Known K8s Versions:');
+    print();
 
     for(const version of result.versions)
     {
-        console.log(`  ☸️  ${version}`);
+        print(`${SOURCE_ICONS.k8s.get()}  ${version}`, 2);
     }
 }

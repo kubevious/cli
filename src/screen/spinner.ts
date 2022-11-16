@@ -1,5 +1,5 @@
 import ora from 'ora';
-import { indentify } from '../commands/lint/output';
+import { indentify } from './';
 
 export function spinOperation(name: string, indent?: number) : ISpinner
 {

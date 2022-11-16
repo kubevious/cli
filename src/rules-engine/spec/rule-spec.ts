@@ -1,3 +1,5 @@
+import { K8sMetadata } from "../../types/k8s";
+
 export type RuleOverrideValues = Record<string, any>;
 
 export interface ClusterRuleK8sSpec
@@ -50,4 +52,12 @@ export interface LibraryRuleRefK8sSpec
 {
     name: string,
     path: string,
+}
+
+export interface LibraryK8sObject
+{
+    apiVersion: string;
+    kind: string;
+    metadata?: K8sMetadata;
+    spec: LibraryK8sSpec;
 }

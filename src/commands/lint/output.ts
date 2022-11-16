@@ -1,7 +1,5 @@
-import chalk from 'chalk';
-import emoji from 'node-emoji';
-
-import { LintManifestsResult, LintSeverity, LintSourceResult, LintStatus } from "./types";
+import { IconDefinition, print, printErrors, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
+import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
 import { ErrorStatus, ManifestSourceId } from '../../types/manifest';
 import { K8sObjectId } from '../../types/k8s';
 
@@ -17,14 +15,14 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
     params.skipResult = params.skipResult ?? false;
 
     if (!result.foundK8sVersion) {
-        print(`${emoji.get('x')}  Failed to find Kubernetes Version ${result.targetK8sVersion}`);
+        printFailLine(`Failed to find Kubernetes Version ${result.targetK8sVersion}`);
     }
     else {
         if (!result.foundExactK8sVersion) {
-            print(`${emoji.get('warning')}  Could not find requested Kubernetes Version: ${result.targetK8sVersion}`);
+            printWarningLine(`Could not find requested Kubernetes Version: ${result.targetK8sVersion}`);
         }
     }
-    print(`${emoji.get('information_source')}  Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
+    printInfoLine(`Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
     print();
     
 
@@ -35,7 +33,7 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
 
         for(const manifest of source.manifests)
         {
-            outputManifest(manifest, objectSeverityIcon(manifest), 3);
+            outputManifest(manifest, severityStatusIcon(manifest.severity), 3);
             outputErrors(manifest, 6);
         }
 
@@ -47,7 +45,6 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
     if (!params.skipSummary)
     {
         outputLintSummary(result);
-        print();
     }
 
     if (!params.skipResult)
@@ -58,34 +55,28 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
 
 export function outputLintResult(result: LintManifestsResult)
 {
-    if (result.success)
-    {
-        print(`${emoji.get('white_check_mark')} Lint Succeeded.`);
-    }
-    else
-    {
-        print(`${emoji.get('x')} Lint Failed`);
-    }
+    printProcessStatus(result.success, 'Lint');
 }
 
 export function outputLintSummary(result: LintManifestsResult)
 {
-    print(chalk.underline('Lint Summary'));
+    printSectionTitle('Lint Summary');
+
 
     print(`Sources: ${result.counters.sources.total}`, 4);
-    print(`${severityStatusIcon('fail')} Sources with Errors: ${result.counters.sources.withErrors}`, 8);
+    printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', result.counters.sources.withErrors);
 
     print(`Manifests: ${result.counters.manifests.total}`, 4);
-    print(`${severityStatusIcon('pass')} Manifests Passed: ${result.counters.manifests.passed}`, 8);
-    print(`${severityStatusIcon('fail')} Manifests with Errors: ${result.counters.manifests.withErrors}`, 8);
-    print(`${severityStatusIcon('warning')} Manifests with Warnings: ${result.counters.manifests.withWarnings}`, 8);
+    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', result.counters.manifests.passed);
+    printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', result.counters.manifests.withErrors);
+    printSummaryCounter(STATUS_ICONS.warning, 'Manifests With Warnings', result.counters.manifests.withWarnings);
 }
 
 export function outputSource(source: LintSourceResult, indent?: number)
 {
     const parts : string[] = [];
 
-    parts.push(objectSeverityIcon(source));
+    parts.push(severityStatusIcon(source.severity).get());
 
     parts.push(produceSourceLine(source));
     
@@ -98,19 +89,19 @@ export function produceSourceLine(source: ManifestSourceId)
 
     if (source.kind === 'file')
     {
-        parts.push(emoji.get('page_facing_up'));
+        parts.push(SOURCE_ICONS.file.get());
     }
     else if (source.kind === 'web')
     {
-        parts.push(emoji.get('globe_with_meridians'));
+        parts.push(SOURCE_ICONS.web.get());
     }
     else if (source.kind === 'stream')
     {
-        parts.push(emoji.get('aquarius'));
+        parts.push(SOURCE_ICONS.stream.get());
     }
     else if (source.kind === 'k8s')
     {
-        parts.push('☸️ ');
+        parts.push(SOURCE_ICONS.k8s.get());
     }
 
     parts.push(`${source.kind.toUpperCase()}:`);
@@ -120,7 +111,7 @@ export function produceSourceLine(source: ManifestSourceId)
     return parts.join(' ');
 }
 
-export function outputManifest(manifest: K8sObjectId, icon: string, indent: number)
+export function outputManifest(manifest: K8sObjectId, icon: IconDefinition, indent: number)
 {
     const namingParts : string[] = [];
 
@@ -131,65 +122,32 @@ export function outputManifest(manifest: K8sObjectId, icon: string, indent: numb
     namingParts.push(`Kind: ${manifest.kind}`);
     namingParts.push(`Name: ${manifest.name}`);
 
-    const parts : string[] = [];
-    parts.push(icon);
+    const line = namingParts.join(', ')
 
-    parts.push(namingParts.join(', '));
-
-    print(parts.join(' '), indent);
+    print(`${icon.get()} ${line}`, indent);
 }
 
 function outputErrors(obj: ErrorStatus, indent?: number)
 {
     if (!obj.success) {
-        if (obj.errors) {
-            for(const msg of obj.errors)
-            {
-                const line = `${severityStatusIcon('fail')} ${msg}`;
-                print(line, indent);
-            }
-        }
+        printErrors(obj.errors, indent);
     }
 
-    if (obj.warnings) {
-        for(const msg of obj.warnings)
-        {
-            const line = `${severityStatusIcon('warning')} ${msg}`;
-            print(line, indent);
-        }
-    }
+    printWarnings(obj.warnings, indent);
 }
 
-function objectSeverityIcon(obj: LintStatus)
-{
-    return severityStatusIcon(obj.severity);
-}
 
-export function severityStatusIcon(severity: LintSeverity)
+function severityStatusIcon(severity: LintSeverity)
 {
-    let iconName = 'question';
     if (severity === 'pass') {
-        iconName = 'white_check_mark';
+        return STATUS_ICONS.passed;
     }
     else if (severity === 'fail') {
-        iconName = 'x';
+        return STATUS_ICONS.failed;
     }
     else if (severity === 'warning') {
-        return `${emoji.get('warning')} `;
+        return STATUS_ICONS.warning;
     }
-    return `${emoji.get(iconName)}`;
+    return STATUS_ICONS.question;
 }
 
-
-export function indentify(str: string, count?: number) : string
-{
-    const prefix = ' '.repeat(count ?? 0);
-    let lines = str.split('\n');
-    lines = lines.map(x => `${prefix}${x}`);
-    return lines.join('\n');
-}
-
-export function print(str?: string, indent?: number)
-{
-    console.log(indentify(str ?? "", indent));
-}

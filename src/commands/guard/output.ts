@@ -1,9 +1,8 @@
-import chalk from 'chalk';
-import emoji from 'node-emoji';
-
 import { GuardResult } from "./types";
 import { output as lintOutput, outputLintResult, outputLintSummary, produceSourceLine } from '../lint/output'
-import { outputManifest, print, severityStatusIcon } from '../lint/output'
+import { outputManifest } from '../lint/output'
+import { OBJECT_ICONS, print, printErrors, printFailLine, printPassLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarnings, STATUS_ICONS } from '../../screen';
+
 
 export function output(result: GuardResult)
 {
@@ -19,79 +18,60 @@ export function output(result: GuardResult)
         {
             if (rule.namespace)
             {
-                print(`${emoji.get('scroll')} [${rule.kind}] Namespace: ${rule.namespace}, ${rule.rule}`);
+                print(`${OBJECT_ICONS.rule.get()} [${rule.kind}] Namespace: ${rule.namespace}, ${rule.rule}`);
             }
             else
             {
-                print(`${emoji.get('scroll')} [${rule.kind}] ${rule.rule}`);
+                print(`${OBJECT_ICONS.rule.get()} [${rule.kind}] ${rule.rule}`);
             }
 
             print(produceSourceLine(rule.source), 3);
             
             if (!rule.compiled)
             {
-                print(`${severityStatusIcon('fail')} Failed to compile`, 3);
+                printFailLine(`Failed to compile`, 3);
             }
 
-            if (rule.errors)
-            {
-                for(const error of rule.errors)
-                {
-                    print(`${emoji.get(':red_circle:')} ${error}`, 6);
-                } 
-            }
+            printErrors(rule.errors, 6);
 
             if (rule.pass && rule.compiled)
             {
                 if (rule.passed.length > 0)
                 {
-                    print(`${severityStatusIcon('pass')} Rule passed`, 3);
+                    printPassLine('Rule passed', 3);
                 }
                 else
                 {
-                    print(`${severityStatusIcon('pass')} Rule passed. No manifests found to check.`, 3);
+                    printPassLine('Rule passed. No manifests found to check.', 3);
                 }
             }
 
             if (!rule.pass)
             {
-                print(`${severityStatusIcon('fail')} Rule failed`, 3);
+                printFailLine('Rule failed', 3)
             }
-
-            // print(`${emoji.get('page_with_curl')} Rule: ${rule.rule}`);
 
             if (rule.passed.length > 0)
             {
-                print(chalk.underline('Passed:'), 3);
+                printSectionTitle('Passed:', 3);
                 for(const manifest of rule.passed)
                 {
-                    outputManifest(manifest.manifest, severityStatusIcon('pass'), 6);
+                    outputManifest(manifest.manifest, STATUS_ICONS.passed, 6);
                     print(produceSourceLine(manifest.source), 9);
                 } 
             }
 
             if (rule.violations)
             {
-                print(chalk.underline('Violations:'), 3);
+                printSectionTitle('Violations:', 3);
 
                 for(const violation of rule.violations)
                 {
-                    outputManifest(violation.manifest, severityStatusIcon('fail'), 6);
+                    outputManifest(violation.manifest, STATUS_ICONS.failed, 6);
                     print(produceSourceLine(violation.source), 9);
-                    if (violation.errors)
-                    {
-                        for(const error of violation.errors)
-                        {
-                            print(`${emoji.get(':red_circle:')} ${error}`, 9);
-                        }
-                    }
-                    if (violation.warnings)
-                    {
-                        for(const warn of violation.warnings)
-                        {
-                            print(`${severityStatusIcon('warning')} ${warn}`, 9);
-                        }
-                    }
+
+                    printErrors(violation.errors, 9);
+                    printWarnings(violation.warnings, 9);
                 } 
             }
 
@@ -105,34 +85,26 @@ export function output(result: GuardResult)
     print();
 
     outputGuardSummary(result);
-    print();
 
     outputLintResult(result.lintResult);
-    print();
 
-    if (result.success)
-    {
-        print(`${emoji.get('white_check_mark')} Guard Succeeded.`);
-    }
-    else
-    {
-        print(`${emoji.get('x')} Guard Failed`);
-    }
+    printProcessStatus(result.success, 'Guard');
 }
+
 
 export function outputGuardSummary(result: GuardResult)
 {
-    print(chalk.underline('Guard Summary'));
+    printSectionTitle('Guard Summary');
 
     print(`Rules: ${result.counters.rules.total}`, 4);
-    print(`${severityStatusIcon('pass')} Rules Passed: ${result.counters.rules.passed}`, 8);
-    print(`${emoji.get(':red_circle:')} Rules Failed: ${result.counters.rules.failed}`, 8);
-    print(`${severityStatusIcon('fail')} Rules With Errors: ${result.counters.rules.withErrors}`, 8);
-    print(`${severityStatusIcon('warning')} Rules With Warnings: ${result.counters.rules.withWarnings}`, 8);
-
+    printSummaryCounter(STATUS_ICONS.passed, 'Rules Passed', result.counters.rules.passed);
+    printSummaryCounter(STATUS_ICONS.failed, 'Rules Failed', result.counters.rules.failed);
+    printSummaryCounter(STATUS_ICONS.error, 'Rules With Errors', result.counters.rules.withErrors);
+    printSummaryCounter(STATUS_ICONS.warning, 'Rules With Warnings', result.counters.rules.withWarnings);
+    
     print(`Manifests: ${result.counters.manifests.total}`, 4);
-    print(`${emoji.get('page_facing_up')} Manifests Processed: ${result.counters.manifests.processed}`, 8);
-    print(`${severityStatusIcon('pass')} Manifests Passed: ${result.counters.manifests.passed}`, 8);
-    print(`${severityStatusIcon('fail')} Manifests with Errors: ${result.counters.manifests.withErrors}`, 8);
-    print(`${severityStatusIcon('warning')} Manifests with Warnings: ${result.counters.manifests.withWarnings}`, 8);
+    printSummaryCounter(OBJECT_ICONS.manifest, 'Manifests Processed', result.counters.manifests.processed);
+    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', result.counters.manifests.passed);
+    printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', result.counters.manifests.withErrors);
+    printSummaryCounter(STATUS_ICONS.warning, 'Manifests With Warnings', result.counters.manifests.withWarnings);
 }
