@@ -2,10 +2,9 @@
 
 
 # Kubevious CLI
-Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguration. It works as a stand-alone tool and can be easily integrated into CI/CD processes. 
+**Kubevious CLI** is an app-centric assurance and validation tool for Kubernetes. It helps modern teams rapidly release cloud-native applications without disasters, costly outages, and compliance violations by validating changes before they even reach the clusters. Kubevious CLI detects and prevents errors(*typos, misconfigurations, conflicts, inconsistencies*) and violations of best practices. Our secret sauce is based on the ability to validate across multiple manifests, regardless if they are already in the K8s clusters or are yet to be applied. Kubevious CLI can be used as a standalone tool during the active development of YAML manifests and can also be easily integrated into GitOps processes and CI/CD pipelines to validate changes toward live Kubernetes clusters. Kubevious CLI was created based on the experience and the lessons learned from the [Kubevous Dashboard](https://github.com/kubevious/kubevious) project and uses the evolution of its rules framework.
 
 - [✨ Key Capabilities](#-key-capabilities)
-- [🔮 Coming Soon](#-coming-soon)
 - [📥 Installation](#-installation)
   - [👇 NPM Package](#-option-1-npm-package)
   - [👇 Precompiled Binaries](#-option-2-precompiled-binaries)
@@ -13,21 +12,31 @@ Kubevious CLI helps validate Kubernetes manifests for issues and misconfiguratio
 - [🃏 Usage Examples](#-usage-examples)
 
 ## ✨ Key Capabilities
-- Validate from sources:
-   - files & directories
-   - search pattern
-   - web URL
-   - stdin pipe
-- Validate YAML structure
-- Validate Kubernetes manifest syntax
-- Validate for the specified K8s version
-- Validate towards a live running K8s cluster
-- Validate CRs and CRDs
-- Validate configurator packages such as Helm, Kustomize, etc.
 
-## 🔮 Coming Soon
-- Cross-manifest validation using [Kubevious Validators](https://github.com/kubevious/kubevious#-validate).
-- Integration with [Kubevius Guard](https://github.com/kubevious/kubevious#-guard) to validate custom rules.
+### Validation Sources
+Kubevous CLI can validate manifests from a variety of sources:
+- files & directories
+- search patterns
+- web URLs
+- stdin pipe - used to validate package managers such as Helm, Kustomize, etc.
+- manifests already present in the Kubernetes cluster
+
+### Manifest Validation
+- Validate YAML syntax
+- Validate manifest API correctness
+- Validate towards a custom K8s version, or live K8s cluster version
+
+### CRDs and Custom Resources
+- Validate CRD definitions
+- Validate Custom Resources against CRDs in the file system
+- Validate Custom Resources against CRDs in the live K8s cluster
+
+### Validation Best Practices
+- Community driven [Rules Library](https://github.com/kubevious/rules-library)
+- Your own rules in the file system
+- Rules defined in the live cluster. Can be cluster and namespace scoped.
+
+
 
 ## 📥 Installation
 
