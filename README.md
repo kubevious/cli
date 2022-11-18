@@ -59,17 +59,18 @@ Download from here:
 ### 👇 Option 3: (In a Docker container)
 Run in a container:
 ```sh
-$ docker run kubevious/cli --help
+$ docker run --rm kubevious/cli --help
 ```
 
 Validate the entire manifests directory:
 ```sh
-$ docker run -v ${PWD}/samples:/src kubevious/cli lint /src
+$ docker run --rm -v ${PWD}/samples:/src kubevious/cli lint /src
 ```
 
 Validate Helm Chart or any manifests from pipe stream:
 ```sh
-$ helm template traefik/traefik | docker run -i kubevious/cli lint
+$ helm template traefik/traefik | docker run --rm -i kubevious/cli lint --stream
+$ kustomize build config/default | docker run --rm -i kubevious/cli lint --stream
 ```
 
 ## 🃏 Usage Examples
@@ -157,7 +158,7 @@ $ kubevious lint cr-good.yaml crd.yaml
 ### Validate Helm Charts
 ```sh
 $ helm repo add traefik https://helm.traefik.io/traefik
-$ helm template traefik/traefik | kubevious lint
+$ helm template traefik/traefik | kubevious lint --stream
 ℹ️  Linting against Kubernetes Version: 1.25.2
 
 ❌ ♒ STREAM: stream
