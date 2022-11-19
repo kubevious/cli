@@ -1,4 +1,5 @@
 import { ExecutionContext } from '../../execution/execution-context';
+import { BaseTargetQuery, TargetQueryKind } from '../../query-spec/base';
 import { Scope, ScopeQueryKind } from '../../scope'
 
 
@@ -31,25 +32,26 @@ export interface ScopeK8sQuery
     filter: K8sTargetFilter
 }
 
-export class K8sTargetBuilder
+export class K8sTargetBuilder implements BaseTargetQuery
 {
-    protected _scope : Scope;
+    private _kind = TargetQueryKind.K8s;
     protected _executionContext: ExecutionContext;
     protected _builderContext : K8sTargetBuilderContext;
 
-    private _data : K8sTargetFilter = {
+    _data : K8sTargetFilter = {
         isApiVersion: true,
         nameFilters: [],
         labelFilters: [],
     }
 
-    constructor(scope : Scope, executionContext: ExecutionContext, builderContext: K8sTargetBuilderContext)
+    constructor(executionContext: ExecutionContext, builderContext: K8sTargetBuilderContext)
     {
-        this._scope = scope;
         this._executionContext = executionContext;
         this._builderContext = builderContext;
+    }
 
-        scope.registerFinalizer(this._finalize.bind(this));
+    get kind() {
+        return this._kind;
     }
 
     ApiVersion(apiVersion: string)
@@ -107,47 +109,15 @@ export class K8sTargetBuilder
         return this
     }
 
-    private _finalize()
-    {
-        if (!this._data.kind) {
-            console.log("No Kind");
-            return;
-        }
-
-        const apiVersion = this._data.isApiVersion ? this._data.apiVersion : 
-            (this._data.apiOrNone ? `${this._data.apiOrNone}/${this._data.version}` : this._data.version);
-        if (!apiVersion) {
-            console.log("No ApiVersion");
-            return;
-        }
-
-        const query : ScopeK8sQuery = {
-            kind: ScopeQueryKind.K8s,
-            filter: {
-                isApiVersion: true,
-                apiVersion: apiVersion,
-                kind: this._data.kind,
-                namespace: this._data.namespace,
-                isAllNamespaces: this._data.isAllNamespaces,
-            
-                nameFilters: this._data.nameFilters,
-                labelFilters: this._data.labelFilters,
-            }
-        }
-
-        this._scope.setupQuery(query);
-    }
 
 }
 
 export class K8sTarget
 {
-    protected _scope : Scope;
     protected _executionContext: ExecutionContext;
     
-    constructor(scope: Scope, executionContext: ExecutionContext)
+    constructor(executionContext: ExecutionContext)
     {
-        this._scope = scope;
         this._executionContext = executionContext;
     }
 
@@ -167,7 +137,7 @@ export class K8sTarget
 
     protected _makeTargetBuilder()
     {
-        return new K8sTargetBuilder(this._scope, this._executionContext, {});
+        return new K8sTargetBuilder(this._executionContext, {});
     }
 
 }

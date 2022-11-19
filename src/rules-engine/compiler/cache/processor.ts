@@ -1,11 +1,10 @@
 import _ from 'the-lodash'
 import { Promise, Resolvable } from 'the-promise'
-import { buildQueryableTargetScope } from '../../query/queryable-scope-builder'
-import { RootScopeBuilder } from '../../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
 import { TopLevelQuery } from '../target/types';
 import { ILogger } from 'the-logger/dist';
+import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -109,13 +108,12 @@ export class CacheProcessor
 
     private _setupQueryBuilders(valueMap: Record<string, any>, namespace: string | null)
     {
-        const rootScopeBuilder : RootScopeBuilder = {
-            setup: (name: string, func: any) => {
-                valueMap[name] = func;
-            }
+        // TODO: USE NAMESPACE
+        const queryScope = buildQueryableScope(this._executionContext);
+        for(const key of _.keys(queryScope))
+        {
+            valueMap[key] = queryScope[key];
         }
-
-        buildQueryableTargetScope(rootScopeBuilder, namespace, this._executionContext);
     }
 
     private _addError(list: string[], msg: string) {
