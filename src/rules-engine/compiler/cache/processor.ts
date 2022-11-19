@@ -2,9 +2,9 @@ import _ from 'the-lodash'
 import { Promise, Resolvable } from 'the-promise'
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
-import { TopLevelQuery } from '../target/types';
 import { ILogger } from 'the-logger/dist';
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
+import { TopLevelQuery } from '../../query-spec/base';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -43,6 +43,8 @@ export class CacheProcessor
             })
             .catch((reason) => {
                 result.success = false;
+                this._logger.info("[prepare] error: %s", reason?.message);
+                // this._logger.info("[prepare] error: ", reason);
                 this._addError(result.messages, reason.message);
                 // this._logger.info("[prepare] %s", reason);
             })

@@ -103,7 +103,7 @@ export class RuleRuntime
             })
             .catch(reason => {
                 this._logger.error("Failed to execute the rule %s", this._ruleObject.name, reason);
-                this._compiler.reportScriptErrors('rule', reason.message);
+                this._compiler.reportScriptErrors('rule', [reason.message]);
                 return [];
             });
     }

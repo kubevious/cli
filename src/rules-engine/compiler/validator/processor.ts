@@ -4,8 +4,8 @@ import { Promise, Resolvable } from 'the-promise'
 import { ScriptItem } from '../../script-item'
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
-import { TopLevelQuery } from '../target/types';
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
+import { TopLevelQuery } from '../../query-spec/base';
 
 export interface ValidationProcessorResult {
     success: boolean
@@ -89,6 +89,10 @@ export class ValidationProcessor {
     private _validate() {}
 
     execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult> {
+
+        this._logger.info("[execute] item: %s", item.manifest.idKey);
+        this._logger.info("[execute] item: %s", item.manifest.idKey);
+
         const result: ValidationProcessorResult = {
             success: false,
             messages: [],

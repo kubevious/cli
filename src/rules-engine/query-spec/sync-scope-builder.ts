@@ -8,7 +8,7 @@ export type SyncTargetQueryFunc = (...args : any[]) => SyncBaseTargetQuery;
 
 export function buildQueryableScope(executionContext : ExecutionContext, limiter: QueryScopeLimiter) : Record<string, SyncTargetQueryFunc>
 {
-    const queryBuildersDict = buildQueryScopes(executionContext);
+    const queryBuildersDict = buildQueryScopes();
 
     const syncQueryBuilder : Record<string, SyncTargetQueryFunc> = {};
 

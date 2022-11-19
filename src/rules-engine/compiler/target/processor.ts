@@ -102,7 +102,7 @@ export class TargetProcessor {
 
     private _setupQueryBuilders(rootScopeBuilder : RootScopeBuilder)
     {
-        const queryScope = buildQueryScopes(this._executionContext);
+        const queryScope = buildQueryScopes();
         for(const key of _.keys(queryScope))
         {
             rootScopeBuilder.setup(key, queryScope[key]);

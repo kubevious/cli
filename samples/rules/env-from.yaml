@@ -1,0 +1,46 @@
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRule
+metadata:
+  name: deployment-env-from-check
+spec:
+  target: |
+    Union(
+      Transform(
+        ApiVersion('apps/v1')
+          .Kind("Deployment")
+      ).To(item => {
+        return {
+          synthetic: true,
+          apiVersion: 'v1',
+          kind: 'PodSpec',
+          metadata: item.config.spec?.template?.metadata,
+          spec: item.config.spec?.template?.spec
+        }
+      }),
+    )  
+  cache: |
+    cache.configMaps = [];
+    
+    for(const configMap of ApiVersion('v1')
+                       .Kind("ConfigMap")
+                       .many())
+    {
+      cache.configMaps[configMap.name] = true;
+    }
+  rule: |
+    for(const container of config.spec?.containers ?? [])
+    {
+      for(const envFrom of container.envFrom ?? [])
+      {
+        if (envFrom.configMapRef)
+        {
+          if (!cache.configMaps[envFrom.configMapRef.name])
+          {
+            if (!envFrom.configMapRef.optional)
+            {
+              error(`Could not find ConfigMap ${envFrom.configMapRef.name}`);
+            }
+          }
+        }
+      }
+    }

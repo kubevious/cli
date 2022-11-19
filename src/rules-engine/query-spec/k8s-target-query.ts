@@ -1,14 +1,7 @@
-import { ExecutionContext } from '../execution/execution-context';
 import { BaseTargetQuery, TargetQueryKind } from './base';
-
 
 export interface KeyValueDict {
     [name: string]: string
-}
-
-export interface K8sTargetBuilderContext
-{
-    namespace? : string;
 }
 
 export interface K8sTargetFilter
@@ -28,19 +21,11 @@ export interface K8sTargetFilter
 export class K8sTargetQuery implements BaseTargetQuery
 {
     private _kind = TargetQueryKind.K8s;
-    protected _executionContext: ExecutionContext;
-    protected _builderContext : K8sTargetBuilderContext;
 
     _data : K8sTargetFilter = {
         isApiVersion: true,
         nameFilters: [],
         labelFilters: [],
-    }
-
-    constructor(executionContext: ExecutionContext, builderContext: K8sTargetBuilderContext)
-    {
-        this._executionContext = executionContext;
-        this._builderContext = builderContext;
     }
 
     get kind() {

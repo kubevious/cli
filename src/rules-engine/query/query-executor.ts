@@ -3,6 +3,7 @@ import { ExecutionContext } from "../execution/execution-context";
 import { BaseTargetQuery, QueryScopeLimiter, TargetQueryKind } from "../query-spec/base";
 import { IQueryExecutor, QueryResult } from "./base";
 import { K8sQueryExecutor } from "./k8s-query-executor";
+import { TransformQueryExecutor } from "./transform-query-executor";
 import { UnionQueryExecutor } from "./union-query-executor";
 
 export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
@@ -23,6 +24,7 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
     {
         this._resolvers[TargetQueryKind.K8s] = new K8sQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Union] = new UnionQueryExecutor(this._executionContext);
+        this._resolvers[TargetQueryKind.Transform] = new TransformQueryExecutor(this._executionContext);
     }
 
     execute(query: BaseTargetQuery, limiter: QueryScopeLimiter) : QueryResult
