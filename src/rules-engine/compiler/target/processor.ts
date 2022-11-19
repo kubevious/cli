@@ -7,7 +7,7 @@ import { ExecutionContext } from '../../execution/execution-context'
 import { RuleApplicationScope } from '../../registry/types';
 import { RuleOverrideValues } from '../../spec/rule-spec';
 import { buildQueryScopes } from '../../query-spec/scope-builder';
-import { BaseTargetQuery } from '../../query-spec/base';
+import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
 import { ILogger } from 'the-logger/dist';
 
 export class TargetProcessor {
@@ -40,9 +40,12 @@ export class TargetProcessor {
             .then((runnable) => runnable.run())
             .then(() => {
                 this._validate();
-                result.success = result.messages.length == 0
+                result.success = (result.messages.length == 0);
             })
             .catch((reason) => {
+                this._logger.info("[prepare] error: %s", reason?.message);
+                // this._logger.info("[prepare] error: ", reason);
+                // this._logger.info("[prepare] error. Rule Source: ", this._src);
                 result.success = false
                 this._addError(reason.message)
             })
@@ -53,7 +56,9 @@ export class TargetProcessor {
         // const rootScope : CompilerScopeDict = {};
         // rootScope['values'] = values ?? {};
 
-        // TODO: use applicationScope
+        const limiter: QueryScopeLimiter = {
+            namespace: applicationScope.namespace
+        }
 
         return Promise.resolve()
             .then(() => {
@@ -62,14 +67,9 @@ export class TargetProcessor {
                     return [];
                 }
 
-                const result = this._executionContext.queryExecutor.execute(queryTarget);
+                const result = this._executionContext.queryExecutor.execute(queryTarget, limiter);
                 return result.items ?? [];
-            })
-
-
-        // const fetcher = new QueryFetcher(this._executionContext, this._scope);
-        // const result = fetcher.execute(applicationScope);
-        // return Promise.resolve(result.items);
+            });
     }
 
     private _loadModule() {

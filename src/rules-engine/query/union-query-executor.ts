@@ -6,6 +6,7 @@ import { ExecutionContext } from '../execution/execution-context';
 import { QueryResult } from './base';
 import { IQueryExecutor } from './base';
 import { UnionTargetQuery } from '../query-spec/union-target-query';
+import { QueryScopeLimiter } from '../query-spec/base';
 
 export class UnionQueryExecutor implements IQueryExecutor<UnionTargetQuery>
 {
@@ -18,13 +19,13 @@ export class UnionQueryExecutor implements IQueryExecutor<UnionTargetQuery>
         this._logger = executionContext.logger.sublogger("UnionQueryExecutor");
     }
 
-    execute(query: UnionTargetQuery) : QueryResult
+    execute(query: UnionTargetQuery, limiter: QueryScopeLimiter) : QueryResult
     {
         const _dict : Record<string, ScriptItem> = {};
 
         for(const innerQuery of query._inner)
         {
-            const innerResult = this._executionContext.queryExecutor.execute(innerQuery);
+            const innerResult = this._executionContext.queryExecutor.execute(innerQuery, limiter);
 
             if (innerResult.items)
             {

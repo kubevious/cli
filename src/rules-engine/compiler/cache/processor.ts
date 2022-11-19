@@ -109,7 +109,7 @@ export class CacheProcessor
     private _setupQueryBuilders(valueMap: Record<string, any>, namespace: string | null)
     {
         // TODO: USE NAMESPACE
-        const queryScope = buildQueryableScope(this._executionContext);
+        const queryScope = buildQueryableScope(this._executionContext, { namespace: namespace });
         for(const key of _.keys(queryScope))
         {
             valueMap[key] = queryScope[key];

@@ -4,8 +4,10 @@ metadata:
   name: service-selector-v2
 spec:
   target: |
-    ApiVersion('v1')
-      .Kind('Service')
+    Union(
+      ApiVersion('v1')
+        .Kind('Service')
+    )
   cache: |
     cache.apps = [];
 
@@ -16,7 +18,7 @@ spec:
       )
       .many()
       ;
-      
+
     for(const app of items)
     {
       cache.apps.push({

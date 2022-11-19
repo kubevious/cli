@@ -147,7 +147,7 @@ export class ValidationProcessor {
 
     private _setupQueryBuilders(valueMap: Record<string, any>, item: ScriptItem)
     {
-        const queryScope = buildQueryableScope(this._executionContext);
+        const queryScope = buildQueryableScope(this._executionContext, { namespace: item.namespace });
         for(const key of _.keys(queryScope))
         {
             valueMap[key] = queryScope[key];

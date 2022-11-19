@@ -1,6 +1,6 @@
 import { ILogger } from "the-logger";
 import { ExecutionContext } from "../execution/execution-context";
-import { BaseTargetQuery, TargetQueryKind } from "../query-spec/base";
+import { BaseTargetQuery, QueryScopeLimiter, TargetQueryKind } from "../query-spec/base";
 import { IQueryExecutor, QueryResult } from "./base";
 import { K8sQueryExecutor } from "./k8s-query-executor";
 import { UnionQueryExecutor } from "./union-query-executor";
@@ -25,7 +25,7 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
         this._resolvers[TargetQueryKind.Union] = new UnionQueryExecutor(this._executionContext);
     }
 
-    execute(query: BaseTargetQuery) : QueryResult
+    execute(query: BaseTargetQuery, limiter: QueryScopeLimiter) : QueryResult
     {
         this._logger.info("[execute] %s", query.kind);
 
@@ -41,6 +41,6 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
             };
         }
         
-        return resolver.execute(query);
+        return resolver.execute(query, limiter);
     }
 }

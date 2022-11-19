@@ -18,3 +18,7 @@ export enum TargetQueryKind
     Union = 'Union',
 }
 
+export interface QueryScopeLimiter
+{
+    namespace?: string | null | undefined;
+}

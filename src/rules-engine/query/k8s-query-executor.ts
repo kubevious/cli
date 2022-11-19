@@ -3,12 +3,13 @@ import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution/execution-context';
-import { K8sTargetBuilder, K8sTargetFilter } from '../query-spec/k8s-target-query';
+import { K8sTargetQuery, K8sTargetFilter } from '../query-spec/k8s-target-query';
 import { QueryResult } from './base';
 import { IQueryExecutor } from './base';
+import { QueryScopeLimiter } from '../query-spec/base';
 
 
-export class K8sQueryExecutor implements IQueryExecutor<K8sTargetBuilder>
+export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
 {
     private _logger : ILogger;
     private _executionContext : ExecutionContext;
@@ -16,10 +17,10 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetBuilder>
     constructor(executionContext : ExecutionContext)
     {
         this._executionContext = executionContext;
-        this._logger = executionContext.logger.sublogger("QueryFetcher");
+        this._logger = executionContext.logger.sublogger("K8sQueryExecutor");
     }
 
-    execute(query: K8sTargetBuilder) : QueryResult
+    execute(query: K8sTargetQuery, limiter: QueryScopeLimiter) : QueryResult
     {
         this._logger.info("[execute] RUNNING QUERY....");
 
@@ -56,13 +57,12 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetBuilder>
         }
 
 
-        // targetScope = targetScope ?? {};
-
+        // TODO: Handle Clustered Case Properly.
         const isAllNamespaces = k8sQueryFilter.isAllNamespaces ?? false;
         if (!isAllNamespaces) {
-            // if (targetScope.namespace) {
-        //         k8sQuery.filter.namespace = targetScope.namespace;
-            // }
+            if (limiter.namespace) {
+                k8sQueryFilter.namespace = limiter.namespace;
+            }
         }
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQueryFilter);

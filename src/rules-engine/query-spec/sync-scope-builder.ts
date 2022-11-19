@@ -1,12 +1,12 @@
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger/dist';
 import { ExecutionContext } from '../execution/execution-context';
-import { BaseTargetQuery, SyncBaseTargetQuery } from './base';
+import { BaseTargetQuery, QueryScopeLimiter, SyncBaseTargetQuery } from './base';
 import { buildQueryScopes, TargetQueryFunc } from './scope-builder';
 
 export type SyncTargetQueryFunc = (...args : any[]) => SyncBaseTargetQuery;
 
-export function buildQueryableScope(executionContext : ExecutionContext) : Record<string, SyncTargetQueryFunc>
+export function buildQueryableScope(executionContext : ExecutionContext, limiter: QueryScopeLimiter) : Record<string, SyncTargetQueryFunc>
 {
     const queryBuildersDict = buildQueryScopes(executionContext);
 
@@ -17,7 +17,7 @@ export function buildQueryableScope(executionContext : ExecutionContext) : Recor
         const builder = queryBuildersDict[key];
         const syncQuery = new SyncQueryBuilder(executionContext, builder);
 
-        syncQueryBuilder[key] = syncQuery.wrap();
+        syncQueryBuilder[key] = syncQuery.wrap(limiter);
     }
 
     return syncQueryBuilder;
@@ -36,22 +36,22 @@ class SyncQueryBuilder
         this._logger = this._executionContext.logger.sublogger("SyncQueryBuilder");
     }
 
-    wrap()
+    wrap(limiter: QueryScopeLimiter)
     {
         const wrapper = (...args : any[]) => {
 
             const queryTarget = this._queryBuilder.apply(null, args) as SyncBaseTargetQuery;
 
             queryTarget.many = () => {
-                return this._executeQuery(queryTarget);
+                return this._executeQuery(queryTarget, limiter);
             };
 
             queryTarget.single = () => {
-                return _.head(this._executeQuery(queryTarget)) ?? null;
+                return _.head(this._executeQuery(queryTarget, limiter)) ?? null;
             };
 
             queryTarget.count = () => {
-                return this._executeQuery(queryTarget).length;
+                return this._executeQuery(queryTarget, limiter).length;
             };
 
             return queryTarget;
@@ -60,9 +60,9 @@ class SyncQueryBuilder
         return wrapper;
     }
 
-    private _executeQuery(queryTarget: BaseTargetQuery)
+    private _executeQuery(queryTarget: BaseTargetQuery, limiter: QueryScopeLimiter)
     {
-        const result = this._executionContext.queryExecutor.execute(queryTarget);
+        const result = this._executionContext.queryExecutor.execute(queryTarget, limiter);
         return result.items ?? [];
     }
 }
