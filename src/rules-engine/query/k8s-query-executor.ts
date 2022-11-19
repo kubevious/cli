@@ -3,7 +3,7 @@ import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
 import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution/execution-context';
-import { K8sTargetBuilder, K8sTargetFilter } from '../compiler/target/k8s-target-builder';
+import { K8sTargetBuilder, K8sTargetFilter } from '../query-spec/k8s-target-query';
 import { QueryResult } from './base';
 import { IQueryExecutor } from './base';
 

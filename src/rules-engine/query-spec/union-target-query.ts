@@ -4,7 +4,7 @@ export class UnionTargetQuery implements BaseTargetQuery
 {
     private _kind = TargetQueryKind.Union;
 
-    private _inner: BaseTargetQuery[];
+    _inner: BaseTargetQuery[];
 
     constructor(...inner: BaseTargetQuery[])
     {

@@ -1,6 +1,5 @@
-import { ExecutionContext } from '../../execution/execution-context';
-import { BaseTargetQuery, TargetQueryKind } from '../../query-spec/base';
-import { Scope, ScopeQueryKind } from '../../scope'
+import { ExecutionContext } from '../execution/execution-context';
+import { BaseTargetQuery, TargetQueryKind } from './base';
 
 
 export interface KeyValueDict {
@@ -26,13 +25,7 @@ export interface K8sTargetFilter
     labelFilters?: KeyValueDict[],
 }
 
-export interface ScopeK8sQuery
-{
-    kind: ScopeQueryKind.K8s,
-    filter: K8sTargetFilter
-}
-
-export class K8sTargetBuilder implements BaseTargetQuery
+export class K8sTargetQuery implements BaseTargetQuery
 {
     private _kind = TargetQueryKind.K8s;
     protected _executionContext: ExecutionContext;
@@ -107,37 +100,6 @@ export class K8sTargetBuilder implements BaseTargetQuery
     labels(value: KeyValueDict) {
         this._data.labelFilters!.push(value)
         return this
-    }
-
-
-}
-
-export class K8sTarget
-{
-    protected _executionContext: ExecutionContext;
-    
-    constructor(executionContext: ExecutionContext)
-    {
-        this._executionContext = executionContext;
-    }
-
-    ApiVersion(apiVersion: string)
-    {
-        const builder = this._makeTargetBuilder();
-        builder.ApiVersion(apiVersion);
-        return builder;
-    }
-
-    Api(apiOrNone?: string)
-    {
-        const builder = this._makeTargetBuilder();
-        builder.Api(apiOrNone);
-        return builder;
-    }
-
-    protected _makeTargetBuilder()
-    {
-        return new K8sTargetBuilder(this._executionContext, {});
     }
 
 }
