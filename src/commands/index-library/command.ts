@@ -19,7 +19,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         ignoreUnknown: true,
         ignoreNonK8s: true,
         stream: false,
-        skipApplyCrds: true,
+        skipApplyCrds: false,
         liveK8s: false,
 
         includeRemoteTargets: false,
