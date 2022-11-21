@@ -1,4 +1,4 @@
-import { BaseTargetQuery, TargetQueryKind } from './base';
+import { BaseTargetQuery, TargetQueryKind } from '../base';
 
 export class UnionTargetQuery implements BaseTargetQuery
 {

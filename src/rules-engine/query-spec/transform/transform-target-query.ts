@@ -1,6 +1,6 @@
-import { K8sObject } from '../../types/k8s';
-import { ScriptItem } from '../script-item';
-import { BaseTargetQuery, TargetQueryKind } from './base';
+import { K8sObject } from '../../../types/k8s';
+import { ScriptItem } from '../../script-item';
+import { BaseTargetQuery, TargetQueryKind } from '../base';
 
 export type TransformerFunc = (item: ScriptItem) => K8sObject;
 

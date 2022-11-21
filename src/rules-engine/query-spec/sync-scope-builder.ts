@@ -2,19 +2,17 @@ import _ from 'the-lodash'
 import { ILogger } from 'the-logger/dist';
 import { ExecutionContext } from '../execution/execution-context';
 import { BaseTargetQuery, QueryScopeLimiter, SyncBaseTargetQuery } from './base';
-import { buildQueryScopes, TargetQueryFunc } from './scope-builder';
+import { TargetQueryFunc, TARGET_QUERY_BUILDER_DICT } from './scope-builder';
 
 export type SyncTargetQueryFunc = (...args : any[]) => SyncBaseTargetQuery;
 
 export function buildQueryableScope(executionContext : ExecutionContext, limiter: QueryScopeLimiter) : Record<string, SyncTargetQueryFunc>
 {
-    const queryBuildersDict = buildQueryScopes();
-
     const syncQueryBuilder : Record<string, SyncTargetQueryFunc> = {};
 
-    for(const key of _.keys(queryBuildersDict))
+    for(const key of _.keys(TARGET_QUERY_BUILDER_DICT))
     {
-        const builder = queryBuildersDict[key];
+        const builder = TARGET_QUERY_BUILDER_DICT[key];
         const syncQuery = new SyncQueryBuilder(executionContext, builder);
 
         syncQueryBuilder[key] = syncQuery.wrap(limiter);

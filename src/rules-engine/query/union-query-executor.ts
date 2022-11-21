@@ -5,7 +5,7 @@ import { ScriptItem } from '../script-item';
 import { ExecutionContext } from '../execution/execution-context';
 import { QueryResult } from './base';
 import { IQueryExecutor } from './base';
-import { UnionTargetQuery } from '../query-spec/union-target-query';
+import { UnionTargetQuery } from '../query-spec/union/union-target-query';
 import { QueryScopeLimiter } from '../query-spec/base';
 
 export class UnionQueryExecutor implements IQueryExecutor<UnionTargetQuery>

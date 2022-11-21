@@ -6,9 +6,8 @@ import { ExecutionContext } from '../execution/execution-context';
 import { QueryResult } from './base';
 import { IQueryExecutor } from './base';
 import { QueryScopeLimiter } from '../query-spec/base';
-import { TransformTargetQuery } from '../query-spec/transform-target-query';
+import { TransformTargetQuery } from '../query-spec/transform/transform-target-query';
 import { K8sManifest } from '../../manifests/k8s-manifest';
-import { Script } from 'vm';
 
 export class TransformQueryExecutor implements IQueryExecutor<TransformTargetQuery>
 {

@@ -6,7 +6,7 @@ import { ScriptItem } from '../../script-item'
 import { ExecutionContext } from '../../execution/execution-context'
 import { RuleApplicationScope } from '../../registry/types';
 import { RuleOverrideValues } from '../../spec/rule-spec';
-import { buildQueryScopes } from '../../query-spec/scope-builder';
+import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
 import { ILogger } from 'the-logger/dist';
 
@@ -44,7 +44,7 @@ export class TargetProcessor {
             })
             .catch((reason) => {
                 this._logger.info("[prepare] error: %s", reason?.message);
-                // this._logger.info("[prepare] error: ", reason);
+                this._logger.info("[prepare] error: ", reason);
                 // this._logger.info("[prepare] error. Rule Source: ", this._src);
                 result.success = false
                 this._addError(reason.message)
@@ -102,10 +102,9 @@ export class TargetProcessor {
 
     private _setupQueryBuilders(rootScopeBuilder : RootScopeBuilder)
     {
-        const queryScope = buildQueryScopes();
-        for(const key of _.keys(queryScope))
+        for(const key of _.keys(TARGET_QUERY_BUILDER_DICT))
         {
-            rootScopeBuilder.setup(key, queryScope[key]);
+            rootScopeBuilder.setup(key, TARGET_QUERY_BUILDER_DICT[key]);
         }
     }
 

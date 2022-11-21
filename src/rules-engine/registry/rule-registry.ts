@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import { ApplicatorRule, ClusterRule, NamespaceRule, RuleKind, RuleObject } from './types';
 import { RegistryQueryExecutor } from '../query-executor';
 import { ClusterRuleK8sSpec, LibraryK8sSpec, LibraryRuleRefK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from '../spec/rule-spec';
-import { K8sTargetFilter } from '../query-spec/k8s-target-query';
+import { K8sTargetFilter } from '../query-spec/k8s/k8s-target-query';
 import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { ManifetsLoader } from '../../manifests/manifests-loader';
