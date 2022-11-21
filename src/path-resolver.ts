@@ -22,5 +22,13 @@ export class PathResolver
             return Path.join(this.assetsDir, 'k8s-api-json-schema');
         }
     }
+
+    get cliCrdsDir() {
+        if(process.env.KUBEVIOUS_CRDS_DIR) {
+            return process.env.KUBEVIOUS_CRDS_DIR;
+        } else {
+            return Path.join(this.assetsDir, 'crds');
+        }
+    }
     
 }

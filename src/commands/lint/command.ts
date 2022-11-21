@@ -9,6 +9,7 @@ import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
 import { ManifetsLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 import { ManifestPackage } from '../../manifests/manifest-package';
+import { PathResolver } from '../../path-resolver';
 
 const myLogger = logger.sublogger('LintCommand');
 
@@ -21,6 +22,12 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
     const loader = new ManifetsLoader(logger, manifestPackage, {
         ignoreNonK8s: options.ignoreNonK8s
     });
+
+    {
+        const pathResolver = new PathResolver();
+        await loader.load([pathResolver.cliCrdsDir]);
+    }
+
     await loader.load(path);
 
     if (options.stream) {
