@@ -5,6 +5,7 @@ import { ExecutionContext } from '../../execution/execution-context'
 import { ILogger } from 'the-logger/dist';
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
 import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
+import { RULE_HELPERS } from '../../helpers/rule-helpers';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -56,7 +57,8 @@ export class CacheProcessor
             const compilerValues: CompilerScopeDict = {
                 namespace: null,
                 cache: null,
-                values: null
+                values: null,
+                helpers: null,
             }
 
             for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
@@ -89,7 +91,8 @@ export class CacheProcessor
                 const valueMap : Record<string, any> = {
                     namespace: namespace,
                     cache: result.cache,
-                    values: values
+                    values: values,
+                    helpers: RULE_HELPERS,
                 }
                 
                 this._setupQueryBuilders(valueMap, namespace);

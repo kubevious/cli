@@ -6,6 +6,7 @@ import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/co
 import { ExecutionContext } from '../../execution/execution-context'
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
 import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
+import { RULE_HELPERS } from '../../helpers/rule-helpers';
 
 export interface ValidationProcessorResult {
     success: boolean
@@ -70,6 +71,7 @@ export class ValidationProcessor {
                 error: null,
                 warning: null,
                 mark: null,
+                helpers: null,
             }
 
             for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
@@ -112,6 +114,7 @@ export class ValidationProcessor {
                     values: values,
                     config: item.config,
                     cache: cache,
+                    helpers: RULE_HELPERS,
                     error: (msg: string) => {
                         result.validation.hasErrors = true
                         if (msg) {

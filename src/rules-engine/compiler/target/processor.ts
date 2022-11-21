@@ -9,6 +9,7 @@ import { RuleOverrideValues } from '../../spec/rule-spec';
 import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
 import { ILogger } from 'the-logger/dist';
+import { RULE_HELPERS } from '../../helpers/rule-helpers';
 
 export class TargetProcessor {
     private _src: string;
@@ -76,7 +77,8 @@ export class TargetProcessor {
         
         const rootScope : CompilerScopeDict = {
             _query: this._queryTarget,
-            values: null
+            values: null,
+            helpers: RULE_HELPERS,
         };
 
         const rootScopeBuilder : RootScopeBuilder = {

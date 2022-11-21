@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/google-samples/microservices-demo/emailservice:v0.3.6
+        image: gcr.io/google-samples/microservices-demo/emailservice
         ports:
         - containerPort: 8080
         env:

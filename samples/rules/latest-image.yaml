@@ -6,4 +6,7 @@ spec:
   target: |
     Shortcut("ContainerSpec")  
   rule: |
-    error(`BAD IMAGE: ${config.spec.image}`);
+    if (helpers.parseImage(config.spec.image).tag === 'latest') {
+      error(`Latest Image Tags not allowed: ${config.spec.image}`);
+    }
+    
