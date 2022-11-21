@@ -52,6 +52,11 @@ export class LabelLookupDict
         return found;
     }
 
+    matchesSelector(selector: Record<string, string> | undefined) : boolean
+    {
+        return this.resolveSelector(selector).length > 0;
+    }
+
     private _matchesDict(labelItem: LabelItem, selectorLookupKeys : string[])
     {
         for(const lookupKey of selectorLookupKeys)

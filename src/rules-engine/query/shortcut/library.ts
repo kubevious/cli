@@ -47,6 +47,23 @@ export function setup(executor: ShortcutQueryExecutor)
             }))
         );
 
+    executor.setup('DaemonSetPodSpec',
+        () => 
+            Transform(
+                ApiVersion('apps/v1')
+                    .Kind("DaemonSet")
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `DaemonSet-${item.config.metadata?.name}`
+                },
+                spec: item.config.spec?.template?.spec
+            }))
+        );
+
     executor.setup('JobPodSpec',
         () => 
             Transform(
@@ -93,6 +110,7 @@ export function setup(executor: ShortcutQueryExecutor)
             Union(
                 Shortcut('DeploymentPodSpec'),
                 Shortcut('StatefulSetPodSpec'),
+                Shortcut('DaemonSetPodSpec'),
                 Shortcut('JobPodSpec'),
                 Shortcut('CronJobPodSpec'),
             )

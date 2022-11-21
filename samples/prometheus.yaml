@@ -100,6 +100,21 @@ data:
       receiver: default-receiver
       repeat_interval: 3h
 ---
+# Source: prometheus/templates/alertmanager/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    component: "alertmanager"
+    app: prometheus
+    release: release-name
+    chart: prometheus-15.16.1
+    heritage: Helm
+  name: release-name-prometheus
+  namespace: default
+data:
+  foo: bar
+---
 # Source: prometheus/templates/server/cm.yaml
 apiVersion: v1
 kind: ConfigMap
@@ -1126,10 +1141,49 @@ spec:
       volumes:
         - name: config-volume
           configMap:
+            name: release-name-prometheus-alertmanagerX
+        - name: config-volume-alert-man
+          configMap:
             name: release-name-prometheus-alertmanager
-        - name: storage-volume
+            items:
+              - key: alertmanager.yml
+                path: xxx
+              - key: alertmanager.ymlX
+                path: yyy        
+        - name: my-secret
+          secret:
+            name: release-name-prometheus
+        - name: my-secret-x
+          secret:
+            name: release-name-prometheus-x
+        - name: my-secret-itemized
+          secret:
+            name: release-name-prometheus
+            items:
+              - key: foo
+                path: xxx
+              - key: bar
+                path: yyy
+        - name: storage-volume-good
           persistentVolumeClaim:
             claimName: release-name-prometheus-alertmanager
+        - name: storage-volume-bad
+          persistentVolumeClaim:
+            claimName: release-name-prometheus-alertmanagerX
+        - name: complex-projection
+          projected:
+            sources:
+              - configMap: 
+                  name: myconfigmap
+                  items:
+                    - key: config
+                      path: my-group/my-config
+                      mode: 0777      
+              - secret:
+                  name: mysecret 
+                  items:
+                    - key: username
+                      path: my-group/my-username                            
 ---
 # Source: prometheus/templates/pushgateway/deploy.yaml
 apiVersion: apps/v1

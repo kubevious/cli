@@ -27,7 +27,42 @@ spec:
           value: "1"
         - name: DISABLE_PROFILER
           value: "1"
+        - name: MISSING_CONFIG_MAP_REF
+          valueFrom:
+            configMapKeyRef:
+              name: some-missing-config
+              key: foo
+        - name: MISSING_CONFIG_MAP_KEY_REF
+          valueFrom:
+            configMapKeyRef:
+              name: test-config
+              key: bar
+        - name: GOOD_CONFIG_MAP_KEY_REF
+          valueFrom:
+            configMapKeyRef:
+              name: test-config
+              key: foo
+        - name: OPTIONAL_MISSING_CONFIG_MAP_REF
+          valueFrom:
+            configMapKeyRef:
+              name: some-missing-config
+              key: foo
+              optional: true
+        - name: OPTIONAL_MISSING_CONFIG_MAP_KEY_REF
+          valueFrom:
+            configMapKeyRef:
+              name: test-config
+              key: bar
+              optional: true
+        - name: OPTIONAL_GOOD_CONFIG_MAP_KEY_REF
+          valueFrom:
+            configMapKeyRef:
+              name: test-config
+              key: foo
+              optional: true
         envFrom:
+        - configMapRef:
+            name: test-config
         - configMapRef:
             name: some-missing-config
         readinessProbe:
