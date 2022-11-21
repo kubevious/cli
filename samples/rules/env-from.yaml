@@ -4,20 +4,7 @@ metadata:
   name: deployment-env-from-check
 spec:
   target: |
-    Union(
-      Transform(
-        ApiVersion('apps/v1')
-          .Kind("Deployment")
-      ).To(item => {
-        return {
-          synthetic: true,
-          apiVersion: 'v1',
-          kind: 'PodSpec',
-          metadata: item.config.spec?.template?.metadata,
-          spec: item.config.spec?.template?.spec
-        }
-      }),
-    )  
+    Shortcut("PodSpec")  
   cache: |
     cache.configMaps = [];
     

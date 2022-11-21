@@ -1,12 +1,12 @@
 
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
-import { ScriptItem } from '../script-item';
-import { ExecutionContext } from '../execution/execution-context';
-import { K8sTargetQuery, K8sTargetFilter } from '../query-spec/k8s/k8s-target-query';
-import { QueryResult } from './base';
-import { IQueryExecutor } from './base';
-import { QueryScopeLimiter } from '../query-spec/base';
+import { ScriptItem } from '../../script-item';
+import { ExecutionContext } from '../../execution/execution-context';
+import { K8sTargetQuery, K8sTargetFilter } from '../../query-spec/k8s/k8s-target-query';
+import { QueryResult } from '../base';
+import { IQueryExecutor } from '../base';
+import { QueryScopeLimiter } from '../../query-spec/base';
 
 
 export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>

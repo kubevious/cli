@@ -5,7 +5,7 @@ import { ScriptItem } from '../../script-item'
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
-import { TopLevelQuery } from '../../query-spec/base';
+import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 
 export interface ValidationProcessorResult {
     success: boolean
@@ -72,7 +72,7 @@ export class ValidationProcessor {
                 mark: null,
             }
 
-            for(const x of _.keys(TopLevelQuery))
+            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
             {
                 compilerValues[x] = null;
             }

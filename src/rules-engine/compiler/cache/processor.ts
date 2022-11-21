@@ -4,7 +4,7 @@ import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/co
 import { ExecutionContext } from '../../execution/execution-context'
 import { ILogger } from 'the-logger/dist';
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
-import { TopLevelQuery } from '../../query-spec/base';
+import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -59,7 +59,7 @@ export class CacheProcessor
                 values: null
             }
 
-            for(const x of _.keys(TopLevelQuery))
+            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
             {
                 compilerValues[x] = null;
             }

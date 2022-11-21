@@ -1,0 +1,50 @@
+import { TARGET_QUERY_BUILDER_OBJ } from "../../query-spec/scope-builder";
+import { ShortcutQueryExecutor } from "./shortcut-query-executor";
+
+export function setup(executor: ShortcutQueryExecutor)
+{
+    const {
+        Shortcut,
+        ApiVersion,
+        Api,
+        Union,
+        Transform
+    } = TARGET_QUERY_BUILDER_OBJ;
+
+    executor.setup('DeploymentPodSpec',
+        () =>
+            Transform(
+                ApiVersion('apps/v1')
+                  .Kind("Deployment")
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: item.config.spec?.template?.metadata,
+                spec: item.config.spec?.template?.spec
+            }))
+        );
+
+    executor.setup('StatefulSetPodSpec',
+        () => 
+            Transform(
+                ApiVersion('apps/v1')
+                    .Kind("StatefulSet")
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: item.config.spec?.template?.metadata,
+                spec: item.config.spec?.template?.spec
+            }))
+        );
+    
+    executor.setup('PodSpec',
+        () => 
+            Union(
+                Shortcut('DeploymentPodSpec'),
+                Shortcut('StatefulSetPodSpec')
+            )
+        );
+
+}

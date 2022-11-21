@@ -1,13 +1,13 @@
 
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
-import { ScriptItem } from '../script-item';
-import { ExecutionContext } from '../execution/execution-context';
-import { QueryResult } from './base';
-import { IQueryExecutor } from './base';
-import { QueryScopeLimiter } from '../query-spec/base';
-import { TransformTargetQuery } from '../query-spec/transform/transform-target-query';
-import { K8sManifest } from '../../manifests/k8s-manifest';
+import { ScriptItem } from '../../script-item';
+import { ExecutionContext } from '../../execution/execution-context';
+import { QueryResult } from '../base';
+import { IQueryExecutor } from '../base';
+import { QueryScopeLimiter } from '../../query-spec/base';
+import { TransformTargetQuery } from '../../query-spec/transform/transform-target-query';
+import { K8sManifest } from '../../../manifests/k8s-manifest';
 
 export class TransformQueryExecutor implements IQueryExecutor<TransformTargetQuery>
 {

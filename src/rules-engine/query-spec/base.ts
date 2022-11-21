@@ -14,16 +14,9 @@ export interface SyncBaseTargetQuery extends BaseTargetQuery
 
 export enum TargetQueryKind
 {
+    Shortcut = 'Shortcut',
+
     K8s = 'K8s',
-    Union = 'Union',
-    Transform = 'Transform',
-}
-
-export enum TopLevelQuery
-{
-    ApiVersion = 'ApiVersion',
-    Api = 'Api',
-
     Union = 'Union',
     Transform = 'Transform',
 }
