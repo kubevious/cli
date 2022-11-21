@@ -20,6 +20,7 @@ export enum TargetQueryKind
 
     Union = 'Union',
     Transform = 'Transform',
+    TransformMany = 'TransformMany',
     Filter = 'Filter',
 }
 

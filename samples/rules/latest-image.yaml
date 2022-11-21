@@ -1,0 +1,9 @@
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRule
+metadata:
+  name: container-image-check
+spec:
+  target: |
+    Shortcut("ContainerSpec")  
+  rule: |
+    error(`BAD IMAGE: ${config.spec.image}`);

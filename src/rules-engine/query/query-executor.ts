@@ -5,6 +5,7 @@ import { IQueryExecutor, QueryResult } from "./base";
 import { FilterQueryExecutor } from "./filter/filter-query-executor";
 import { K8sQueryExecutor } from "./k8s/k8s-query-executor";
 import { ShortcutQueryExecutor } from "./shortcut/shortcut-query-executor";
+import { TransformManyQueryExecutor } from "./transform-many/transform-many-query-executor";
 import { TransformQueryExecutor } from "./transform/transform-query-executor";
 import { UnionQueryExecutor } from "./union/union-query-executor";
 
@@ -28,6 +29,7 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
         this._resolvers[TargetQueryKind.K8s] = new K8sQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Union] = new UnionQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Transform] = new TransformQueryExecutor(this._executionContext);
+        this._resolvers[TargetQueryKind.TransformMany] = new TransformManyQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Filter] = new FilterQueryExecutor(this._executionContext);
     }
 

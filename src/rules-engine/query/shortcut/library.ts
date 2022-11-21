@@ -9,6 +9,7 @@ export function setup(executor: ShortcutQueryExecutor)
         Api,
         Union,
         Transform,
+        TransformMany,
         Filter
     } = TARGET_QUERY_BUILDER_OBJ;
 
@@ -21,7 +22,10 @@ export function setup(executor: ShortcutQueryExecutor)
                 synthetic: true,
                 apiVersion: 'v1',
                 kind: 'PodSpec',
-                metadata: item.config.spec?.template?.metadata,
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `Deployment-${item.config.metadata?.name}`
+                },
                 spec: item.config.spec?.template?.spec
             }))
         );
@@ -35,7 +39,10 @@ export function setup(executor: ShortcutQueryExecutor)
                 synthetic: true,
                 apiVersion: 'v1',
                 kind: 'PodSpec',
-                metadata: item.config.spec?.template?.metadata,
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `StatefulSet-${item.config.metadata?.name}`
+                },
                 spec: item.config.spec?.template?.spec
             }))
         );
@@ -56,7 +63,10 @@ export function setup(executor: ShortcutQueryExecutor)
                 synthetic: true,
                 apiVersion: 'v1',
                 kind: 'PodSpec',
-                metadata: item.config.spec?.template?.metadata,
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `Job-${item.config.metadata?.name}`
+                },
                 spec: item.config.spec?.template?.spec
             }))
         );
@@ -70,7 +80,10 @@ export function setup(executor: ShortcutQueryExecutor)
                 synthetic: true,
                 apiVersion: 'v1',
                 kind: 'PodSpec',
-                metadata: item.config.spec?.jobTemplate?.spec?.template?.metadata,
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `CronJob-${item.config.metadata?.name}`
+                },
                 spec: item.config.spec?.jobTemplate?.spec?.template?.spec
             }))
         );
@@ -84,5 +97,41 @@ export function setup(executor: ShortcutQueryExecutor)
                 Shortcut('CronJobPodSpec'),
             )
         );
+
+    executor.setup('ContainerSpec',
+        () => 
+            TransformMany(
+                Shortcut('PodSpec')
+            ).To(item => {
+                const results = [];
+                for(const cont of item?.config.spec?.containers ?? [])
+                {
+                    results.push({
+                        synthetic: true,
+                        apiVersion: 'v1',
+                        kind: 'ContainerSpec',
+                        metadata: {
+                            ...item.config.spec?.template?.metadata ?? {},
+                            name: `${item.config.metadata?.name}-Cont-${cont.name}`
+                        },
+                        spec: cont
+                    });
+                }
+                for(const cont of item?.config.spec?.initContainers ?? [])
+                {
+                    results.push({
+                        synthetic: true,
+                        apiVersion: 'v1',
+                        kind: 'ContainerSpec',
+                        metadata: {
+                            ...item.config.spec?.template?.metadata ?? {},
+                            name: `${item.config.metadata?.name}-InitCont-${cont.name}`
+                        },
+                        spec: cont
+                    });
+                }
+                return results;
+            })
+        );        
 
 }

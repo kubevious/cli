@@ -1,14 +1,15 @@
+import { K8sObject } from '../../../types/k8s';
 import { ScriptItem } from '../../script-item';
 import { BaseTargetQuery, TargetQueryKind } from '../base';
 
-export type FilterFunc = (item: ScriptItem) => boolean;
+export type TransformerManyFunc = (item: ScriptItem) => K8sObject[];
 
-export class FilterTargetQuery implements BaseTargetQuery
+export class TransformManyTargetQuery implements BaseTargetQuery
 {
-    private _kind = TargetQueryKind.Filter;
+    private _kind = TargetQueryKind.TransformMany;
 
     _inner: BaseTargetQuery;
-    _func?: FilterFunc;
+    _func?: TransformerManyFunc;
 
     constructor(inner: BaseTargetQuery)
     {
@@ -19,7 +20,7 @@ export class FilterTargetQuery implements BaseTargetQuery
         return this._kind;
     }
 
-    Criteria(func: FilterFunc)
+    To(func: TransformerManyFunc)
     {
         this._func = func;
         return this;
