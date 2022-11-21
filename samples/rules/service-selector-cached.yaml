@@ -7,41 +7,20 @@ spec:
     ApiVersion('v1')
       .Kind('Service')
   cache: |
-    cache.apps = [];
+    cache.apps = helpers.newLabelLookupDict();
     
     for(const app of ApiVersion('apps/v1')
                        .Kind("Deployment")
                        .many())
     {
-      cache.apps.push({
-        kind: app.kind,
-        name: app.name,
-        labels: app.config.spec.template.metadata.labels ?? {}
-      });
+      cache.apps.add(app, app.config.spec?.template?.metadata?.labels);
     }
   rule: |
     if (!config.spec.selector) {
       return;
     }
 
-    for(const app of cache.apps)
+    if (cache.apps.resolveSelector(config.spec.selector).length == 0)
     {
-      if (matchesDict(config.spec.selector, app.labels))
-      {
-        return;  
-      }
-    }
-
-    error("Could not find Applications for Service");
-
-    function matchesDict(selector, labels)
-    {
-        for(const key of Object.keys(selector))
-        {
-            if (selector[key] !== labels[key])
-            {
-                return false;
-            }
-        }
-        return true;
+      error("Could not find Applications for Service");
     }

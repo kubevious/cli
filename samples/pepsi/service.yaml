@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: orderservice
-  name: orderservice
+    app: emailservice
+  name: emailservice
   namespace: pepsi
 spec:
   type: ClusterIP
@@ -12,5 +12,5 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: orderservice
+    app: emailservice
   
