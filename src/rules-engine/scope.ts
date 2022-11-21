@@ -10,22 +10,22 @@ export class Scope {
         return this._query;
     }
 
-    registerFinalizer(finalizer: ScopeFinalizer)
-    {
-        this._finalizers.push(finalizer);
-    }
+    // registerFinalizer(finalizer: ScopeFinalizer)
+    // {
+    //     this._finalizers.push(finalizer);
+    // }
 
-    finalize() {
-        for(const finalizer of this._finalizers)
-        {
-            finalizer();
-        }
-    }
+    // finalize() {
+    //     for(const finalizer of this._finalizers)
+    //     {
+    //         finalizer();
+    //     }
+    // }
 
-    setupQuery(query: BaseScopeQuery)
-    {
-        this._query = query;
-    }
+    // setupQuery(query: BaseScopeQuery)
+    // {
+    //     this._query = query;
+    // }
 
 }
 

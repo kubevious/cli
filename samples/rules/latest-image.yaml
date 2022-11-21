@@ -1,0 +1,12 @@
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRule
+metadata:
+  name: container-image-check
+spec:
+  target: |
+    Shortcut("ContainerSpec")  
+  rule: |
+    if (helpers.parseImage(config.spec.image).tag === 'latest') {
+      error(`Latest Image Tags not allowed: ${config.spec.image}`);
+    }
+    

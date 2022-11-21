@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { K8sTargetFilter } from '../rules-engine/compiler/target/k8s-target-builder';
+import { K8sTargetFilter } from '../rules-engine/query-spec/k8s/k8s-target-query';
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
 import { K8sManifest } from '../manifests/k8s-manifest';
 

@@ -1,11 +1,11 @@
 import _ from 'the-lodash'
 import { Promise, Resolvable } from 'the-promise'
-import { buildQueryableTargetScope } from '../../query/queryable-scope-builder'
-import { RootScopeBuilder } from '../../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
-import { TopLevelQuery } from '../target/types';
 import { ILogger } from 'the-logger/dist';
+import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
+import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
+import { RULE_HELPERS } from '../../helpers/rule-helpers';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -44,6 +44,8 @@ export class CacheProcessor
             })
             .catch((reason) => {
                 result.success = false;
+                this._logger.info("[prepare] error: %s", reason?.message);
+                // this._logger.info("[prepare] error: ", reason);
                 this._addError(result.messages, reason.message);
                 // this._logger.info("[prepare] %s", reason);
             })
@@ -55,10 +57,11 @@ export class CacheProcessor
             const compilerValues: CompilerScopeDict = {
                 namespace: null,
                 cache: null,
-                values: null
+                values: null,
+                helpers: null,
             }
 
-            for(const x of _.keys(TopLevelQuery))
+            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
             {
                 compilerValues[x] = null;
             }
@@ -88,7 +91,8 @@ export class CacheProcessor
                 const valueMap : Record<string, any> = {
                     namespace: namespace,
                     cache: result.cache,
-                    values: values
+                    values: values,
+                    helpers: RULE_HELPERS,
                 }
                 
                 this._setupQueryBuilders(valueMap, namespace);
@@ -109,13 +113,12 @@ export class CacheProcessor
 
     private _setupQueryBuilders(valueMap: Record<string, any>, namespace: string | null)
     {
-        const rootScopeBuilder : RootScopeBuilder = {
-            setup: (name: string, func: any) => {
-                valueMap[name] = func;
-            }
+        // TODO: USE NAMESPACE
+        const queryScope = buildQueryableScope(this._executionContext, { namespace: namespace });
+        for(const key of _.keys(queryScope))
+        {
+            valueMap[key] = queryScope[key];
         }
-
-        buildQueryableTargetScope(rootScopeBuilder, namespace, this._executionContext);
     }
 
     private _addError(list: string[], msg: string) {

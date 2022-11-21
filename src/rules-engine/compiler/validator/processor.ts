@@ -1,11 +1,12 @@
 import _ from 'the-lodash'
+import { ILogger } from 'the-logger';
 import { Promise, Resolvable } from 'the-promise'
 import { ScriptItem } from '../../script-item'
-import { buildQueryableTargetScope } from '../../query/queryable-scope-builder'
-import { RootScopeBuilder } from '../../scope-builders';
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
-import { TopLevelQuery } from '../target/types';
+import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
+import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
+import { RULE_HELPERS } from '../../helpers/rule-helpers';
 
 export interface ValidationProcessorResult {
     success: boolean
@@ -29,12 +30,14 @@ export interface ValidationProcessorResult {
 export class ValidationProcessor {
     private _runnable: null | Resolvable<any>;
     private _src: string;
+    private _logger : ILogger;
     private _executionContext : ExecutionContext;
 
     constructor(src: string, executionContext : ExecutionContext) {
         this._src = src;
         this._executionContext = executionContext;
         this._runnable = null;
+        this._logger = executionContext.logger.sublogger('ValidationProcessor');
     }
 
     prepare() {
@@ -68,9 +71,10 @@ export class ValidationProcessor {
                 error: null,
                 warning: null,
                 mark: null,
+                helpers: null,
             }
 
-            for(const x of _.keys(TopLevelQuery))
+            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
             {
                 compilerValues[x] = null;
             }
@@ -87,6 +91,10 @@ export class ValidationProcessor {
     private _validate() {}
 
     execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult> {
+
+        this._logger.info("[execute] item: %s", item.manifest.idKey);
+        this._logger.info("[execute] item: %s", item.manifest.idKey);
+
         const result: ValidationProcessorResult = {
             success: false,
             messages: [],
@@ -106,6 +114,7 @@ export class ValidationProcessor {
                     values: values,
                     config: item.config,
                     cache: cache,
+                    helpers: RULE_HELPERS,
                     error: (msg: string) => {
                         result.validation.hasErrors = true
                         if (msg) {
@@ -136,6 +145,7 @@ export class ValidationProcessor {
                 result.success = true
             })
             .catch((reason: Error) => {
+                this._logger.info("[execute] error: ", reason);
                 result.success = false
                 this._addError(result.messages!, reason.message)
             })
@@ -144,15 +154,11 @@ export class ValidationProcessor {
 
     private _setupQueryBuilders(valueMap: Record<string, any>, item: ScriptItem)
     {
-        const rootScopeBuilder : RootScopeBuilder = {
-            setup: (name: string, func: any) => {
-                valueMap[name] = func;
-            }
+        const queryScope = buildQueryableScope(this._executionContext, { namespace: item.namespace });
+        for(const key of _.keys(queryScope))
+        {
+            valueMap[key] = queryScope[key];
         }
-
-        buildQueryableTargetScope(rootScopeBuilder, 
-                                  item.config?.metadata?.namespace,
-                                  this._executionContext);
     }
 
     private _addError(list: string[], msg: string) {

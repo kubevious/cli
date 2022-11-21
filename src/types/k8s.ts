@@ -13,6 +13,7 @@ export interface K8sMetadata
 {
     namespace?: string;
     name?: string;
+    ownerReferences?: any[];
     [key : string] : any;
 }
 
