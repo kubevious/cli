@@ -4,7 +4,7 @@ metadata:
   name: container-image-check
 spec:
   target: |
-    Shortcut("ContainerSpec")  
+    Shortcut("ContainerSpec")
   rule: |
     if (helpers.parseImage(config.spec.image).tag === 'latest') {
       error(`Latest Image Tags not allowed: ${config.spec.image}`);

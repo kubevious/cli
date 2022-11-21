@@ -10,7 +10,7 @@ spec:
       app: backend-api
   template:
     metadata:
-      labels:k
+      labels:
           image: dev/backend-api:v1
           ports:
           - containerPort: 8000
