@@ -17,8 +17,10 @@ export enum TargetQueryKind
     Shortcut = 'Shortcut',
 
     K8s = 'K8s',
+
     Union = 'Union',
     Transform = 'Transform',
+    Filter = 'Filter',
 }
 
 export interface QueryScopeLimiter

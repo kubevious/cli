@@ -8,7 +8,8 @@ export function setup(executor: ShortcutQueryExecutor)
         ApiVersion,
         Api,
         Union,
-        Transform
+        Transform,
+        Filter
     } = TARGET_QUERY_BUILDER_OBJ;
 
     executor.setup('DeploymentPodSpec',
@@ -38,12 +39,49 @@ export function setup(executor: ShortcutQueryExecutor)
                 spec: item.config.spec?.template?.spec
             }))
         );
+
+    executor.setup('JobPodSpec',
+        () => 
+            Transform(
+                Filter(
+                    ApiVersion('batch/v1')
+                        .Kind("Job")
+                ).Criteria(item => {
+                    if (item.config.metadata?.ownerReferences) {
+                        return false;
+                    }
+                    return true;
+                })
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: item.config.spec?.template?.metadata,
+                spec: item.config.spec?.template?.spec
+            }))
+        );
     
+    executor.setup('CronJobPodSpec',
+        () => 
+            Transform(
+                ApiVersion('batch/v1')
+                    .Kind("CronJob")
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: item.config.spec?.jobTemplate?.spec?.template?.metadata,
+                spec: item.config.spec?.jobTemplate?.spec?.template?.spec
+            }))
+        );
+
     executor.setup('PodSpec',
         () => 
             Union(
                 Shortcut('DeploymentPodSpec'),
-                Shortcut('StatefulSetPodSpec')
+                Shortcut('StatefulSetPodSpec'),
+                Shortcut('JobPodSpec'),
+                Shortcut('CronJobPodSpec'),
             )
         );
 

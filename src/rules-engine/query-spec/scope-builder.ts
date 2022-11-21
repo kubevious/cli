@@ -4,6 +4,7 @@ import { UnionTargetQuery } from './union/union-target-query';
 import { TransformTargetQuery } from './transform/transform-target-query';
 import { BaseTargetQuery } from './base';
 import { ShortcutTargetQuery } from './shortcut/shortcut-target-query';
+import { FilterTargetQuery } from './filter/filter-target-query';
 
 export class TargetQueryBuilderDef
 {
@@ -39,6 +40,12 @@ export class TargetQueryBuilderDef
             return new TransformTargetQuery(inner);
         }
     }
+
+    get Filter() {
+        return (inner: BaseTargetQuery) => {
+            return new FilterTargetQuery(inner);
+        }
+    }
 }
 
 export const TARGET_QUERY_BUILDER_OBJ = new TargetQueryBuilderDef();
@@ -55,6 +62,7 @@ enum TopLevelQuery
 
     Union = 'Union',
     Transform = 'Transform',
+    Filter = 'Filter',
 }
 
 export const TARGET_QUERY_BUILDER_DICT : Record<string, TargetQueryFunc> = {
@@ -66,5 +74,8 @@ export const TARGET_QUERY_BUILDER_DICT : Record<string, TargetQueryFunc> = {
 
     [TopLevelQuery.Union]: TARGET_QUERY_BUILDER_OBJ.Union,
 
-    [TopLevelQuery.Transform]: TARGET_QUERY_BUILDER_OBJ.Transform
+    [TopLevelQuery.Transform]: TARGET_QUERY_BUILDER_OBJ.Transform,
+
+    [TopLevelQuery.Filter]: TARGET_QUERY_BUILDER_OBJ.Filter,
+
 }
