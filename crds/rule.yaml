@@ -20,6 +20,8 @@ spec:
             spec:
               type: object
               properties:
+                summary:
+                  type: string
                 description:
                   type: string
                 target:

@@ -11,7 +11,7 @@ export function formatResult({
     guardCommandData,
     rules,
     libraryPath,
-    libraryObject
+    library
     }: IndexLibraryCommandData) : IndexLibraryResult
 {
 
@@ -23,7 +23,7 @@ export function formatResult({
         guardResult: guardResult,
 
         libraryPath: libraryPath,
-        libraryRules: libraryObject.spec.rules,
+        library: library,
     }
 
     return result;

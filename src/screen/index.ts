@@ -114,6 +114,7 @@ export const STATUS_ICONS = {
 export const OBJECT_ICONS = {
     manifest: new IconDefinition(emoji.get(':page_facing_up:')),
     rule: new IconDefinition(emoji.get(':scroll:')),
+    ruleCategory: new IconDefinition(emoji.get(':open_file_folder:')),
 }
 
 export const SOURCE_ICONS = {

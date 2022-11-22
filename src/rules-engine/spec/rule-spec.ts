@@ -7,6 +7,7 @@ export interface ClusterRuleK8sSpec
     target: string,
     cache?: string,
     rule: string,
+    summary?: string,
     description?: string,
     disabled?: boolean,
     application?: ClusterRuleApplication,
@@ -28,6 +29,7 @@ export interface RuleK8sSpec
     target: string,
     cache?: string,
     rule: string,
+    summary?: string,
     description?: string,
     disabled?: boolean,
     values?: RuleOverrideValues
@@ -52,6 +54,8 @@ export interface LibraryRuleRefK8sSpec
 {
     name: string,
     path: string,
+    category: string,
+    summary: string,
 }
 
 export interface LibraryK8sObject

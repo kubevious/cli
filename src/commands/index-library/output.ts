@@ -12,11 +12,15 @@ export function output(result: IndexLibraryResult)
     printSectionTitle('Rule Library');
     print();
 
-    for(const rule of result.libraryRules)
+    for(const category of result.library.categories)
     {
-        print(`${OBJECT_ICONS.rule.get()} ${rule.name}`, 2);
-        print(`Path: ${rule.path}`, 5);
-        print();
+        print(`${OBJECT_ICONS.ruleCategory.get()} ${category.name}`, 2);
+        for(const rule of category.rules)
+        {
+            print(`${OBJECT_ICONS.rule.get()} ${rule.name}`, 5);
+            print(`Path: ${rule.path}`, 8);
+            print();
+        }
     }
 
     print(`Library Index: ${result.libraryPath}`);

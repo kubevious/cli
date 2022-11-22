@@ -29,6 +29,10 @@ spec:
                         type: string
                       path:
                         type: string
+                      category:
+                        type: string
+                      summary:
+                        type: string
                     required:
                       - name
                       - path
