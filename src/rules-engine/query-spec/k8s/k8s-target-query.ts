@@ -1,3 +1,4 @@
+import { parseApiVersion } from '../../../utils/k8s';
 import { BaseTargetQuery, TargetQueryKind } from '../base';
 
 export interface KeyValueDict {
@@ -6,9 +7,7 @@ export interface KeyValueDict {
 
 export interface K8sTargetFilter
 {
-    isApiVersion: boolean,
-    apiVersion?: string,
-    apiOrNone?: string,
+    apiName?: string,
     version?: string,
     kind?: string,
     namespace?: string,
@@ -23,7 +22,6 @@ export class K8sTargetQuery implements BaseTargetQuery
     private _kind = TargetQueryKind.K8s;
 
     _data : K8sTargetFilter = {
-        isApiVersion: true,
         nameFilters: [],
         labelFilters: [],
     }
@@ -34,15 +32,18 @@ export class K8sTargetQuery implements BaseTargetQuery
 
     ApiVersion(apiVersion: string)
     {
-        this._data.isApiVersion = true;
-        this._data.apiVersion = apiVersion;
+        const parsed = parseApiVersion(apiVersion);
+        if (!parsed) {
+            throw new Error(`Invalid apiVersion: ${apiVersion}`);
+        }
+        this._data.apiName = parsed.group;
+        this._data.version = parsed.version;
         return this;
     }
 
-    Api(apiOrNone?: string)
+    Api(apiName: string)
     {
-        this._data.isApiVersion = false;
-        this._data.apiOrNone = apiOrNone;
+        this._data.apiName = apiName;
         return this;
     }
 

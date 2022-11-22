@@ -92,8 +92,7 @@ export class RuleRegistry
         const spinner = spinOperation("Loading ClusterRules...", 2);
 
         const query: K8sTargetFilter = {
-            isApiVersion: false,
-            apiOrNone: KUBEVIOUS_API_NAME,
+            apiName: KUBEVIOUS_API_NAME,
             kind: KubeviousKinds.ClusterRule,
             isAllNamespaces: true,
         };
@@ -163,8 +162,7 @@ export class RuleRegistry
                 spinner.update(`Loading Rules from ${namespace}...`);
 
                 const query: K8sTargetFilter = {
-                    isApiVersion: false,
-                    apiOrNone: KUBEVIOUS_API_NAME,
+                    apiName: KUBEVIOUS_API_NAME,
                     kind: KubeviousKinds.Rule,
                     namespace: namespace,
                 };
@@ -182,8 +180,7 @@ export class RuleRegistry
         else
         {
             const query: K8sTargetFilter = {
-                isApiVersion: false,
-                apiOrNone: KUBEVIOUS_API_NAME,
+                apiName: KUBEVIOUS_API_NAME,
                 kind: KubeviousKinds.Rule,
                 isAllNamespaces: true,
             };
@@ -246,8 +243,7 @@ export class RuleRegistry
                 spinner.update(`Loading RuleApplicators from ${namespace}...`);
 
                 const query: K8sTargetFilter = {
-                    isApiVersion: false,
-                    apiOrNone: KUBEVIOUS_API_NAME,
+                    apiName: KUBEVIOUS_API_NAME,
                     kind: KubeviousKinds.RuleApplicator,
                     namespace: namespace
                 };
@@ -262,8 +258,7 @@ export class RuleRegistry
         else
         {
             const query: K8sTargetFilter = {
-                isApiVersion: false,
-                apiOrNone: KUBEVIOUS_API_NAME,
+                apiName: KUBEVIOUS_API_NAME,
                 kind: KubeviousKinds.RuleApplicator,
                 isAllNamespaces: true,
             };
@@ -317,8 +312,7 @@ export class RuleRegistry
         
         const spinner = spinOperation("Loading Libraries...", 2);
         const query: K8sTargetFilter = {
-            isApiVersion: false,
-            apiOrNone: KUBEVIOUS_API_NAME,
+            apiName: KUBEVIOUS_API_NAME,
             kind: KubeviousKinds.Library,
             isAllNamespaces: true,
         };

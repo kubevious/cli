@@ -27,27 +27,22 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
         const queryData = query._data;
 
         if (!queryData.kind) {
-            console.log("No Kind");
             return {
                 success: false,
                 messages: ['Kind not set'], 
             }
         }
 
-        const apiVersion = queryData.isApiVersion ? queryData.apiVersion : 
-            (queryData.apiOrNone ? `${queryData.apiOrNone}/${queryData.version}` : queryData.version);
-
-        if (!apiVersion) {
-            console.log("No ApiVersion");
+        if (_.isUndefined(queryData.apiName)) {
             return {
                 success: false,
-                messages: ['No ApiVersion not set'], 
+                messages: ['apiName not set'], 
             }
         }
 
         const k8sQueryFilter : K8sTargetFilter = {
-            isApiVersion: true,
-            apiVersion: apiVersion,
+            apiName: queryData.apiName,
+            version: queryData.version,
             kind: queryData.kind,
             namespace: queryData.namespace,
             isAllNamespaces: queryData.isAllNamespaces,
@@ -64,6 +59,8 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
                 k8sQueryFilter.namespace = limiter.namespace;
             }
         }
+
+        // this._logger.info("[execute] Filter: ", k8sQueryFilter);
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQueryFilter);
 

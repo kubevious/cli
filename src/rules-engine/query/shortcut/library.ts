@@ -68,7 +68,7 @@ export function setup(executor: ShortcutQueryExecutor)
         () => 
             Transform(
                 Filter(
-                    ApiVersion('batch/v1')
+                    Api('batch')
                         .Kind("Job")
                 ).Criteria(item => {
                     if (item.config.metadata?.ownerReferences) {
@@ -91,7 +91,7 @@ export function setup(executor: ShortcutQueryExecutor)
     executor.setup('CronJobPodSpec',
         () => 
             Transform(
-                ApiVersion('batch/v1')
+                Api('batch')
                     .Kind("CronJob")
             ).To(item => ({
                 synthetic: true,

@@ -40,22 +40,23 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
         let apiName : string | null | undefined = undefined;
         let version : string | undefined = undefined;
 
-        if (query.isApiVersion) {
-            const apiVersion = parseApiVersion(query.apiVersion!);
-
-            apiName = apiVersion?.group || null;
-            version = apiVersion?.version;
-        } else {
-            if (query.apiOrNone) {
-                apiName = query.apiOrNone;
-            } else {
+        if (!_.isUndefined(query.apiName))
+        {
+            if (query.apiName.length === 0)
+            {
                 apiName = null;
             }
-
-            if (query.version) {
-                version = query.version;
+            else
+            {
+                apiName = query.apiName;
             }
         }
+        else
+        {
+            throw new Error("apiName is not specified.");
+        }
+
+        version = query.version;
 
         this._logger.info("[query] apiName: %s", apiName);
         this._logger.info("[query] version: %s", version);

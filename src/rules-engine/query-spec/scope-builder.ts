@@ -24,9 +24,9 @@ export class TargetQueryBuilderDef
     }
 
     get Api() {
-        return (apiOrNone?: string) => {
+        return (apiName: string) => {
             const target = new K8sTargetQuery();
-            return target.Api(apiOrNone);
+            return target.Api(apiName);
         }
     }
 

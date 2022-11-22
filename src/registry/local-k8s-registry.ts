@@ -31,18 +31,20 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
     {
         let results = _.values(this._dict);
 
-        if (query.isApiVersion) {
-            results = results.filter(x => x.id.apiVersion === query.apiVersion);
-        } else {
-            if (query.apiOrNone) {
-                results = results.filter(x => x.id.api === query.apiOrNone);
-            } else {
+        if (!_.isUndefined(query.apiName))
+        {
+            if (query.apiName.length === 0)
+            {
                 results = results.filter(x => !x.id.api);
             }
-
-            if (query.version) {
-                results = results.filter(x => x.id.version === query.version);
+            else
+            {
+                results = results.filter(x => x.id.api === query.apiName);
             }
+        }
+
+        if (query.version) {
+            results = results.filter(x => x.id.version === query.version);
         }
 
         if (query.kind) {
