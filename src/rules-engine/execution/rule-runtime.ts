@@ -118,8 +118,6 @@ export class RuleRuntime
                 return this._processCache(item);
             })
             .then(result => {
-                this._logger.info("[_processCache] RESULT: ", result);
-
                 if (!result.success) {
                     return;
                 }

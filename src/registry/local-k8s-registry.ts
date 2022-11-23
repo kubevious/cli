@@ -3,8 +3,7 @@ import { ILogger } from 'the-logger';
 import { sanitizeDnPath } from '@kubevious/entity-meta';
 
 import { makeK8sKeyStr } from '../types/k8s';
-import { K8sTargetFilter } from '../rules-engine/query-spec/k8s/k8s-target-query';
-import { RegistryQueryExecutor } from '../rules-engine/query-executor';
+import { RegistryQueryExecutor, RegistryQueryOptions } from '../rules-engine/query-executor';
 import { ClientSideFiltering } from './client-side-filtering';
 import { K8sManifest } from '../manifests/k8s-manifest';
 
@@ -27,7 +26,7 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
         this._dict[globalKey] = manifest;
     }
 
-    query(query: K8sTargetFilter) : K8sManifest[]
+    query(query: RegistryQueryOptions) : K8sManifest[]
     {
         let results = _.values(this._dict);
 

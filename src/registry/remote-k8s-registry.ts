@@ -1,11 +1,9 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { K8sObject } from '../types/k8s';
-import { K8sTargetFilter } from '../rules-engine/query-spec/k8s/k8s-target-query';
-import { RegistryQueryExecutor } from '../rules-engine/query-executor';
+import { RegistryQueryExecutor, RegistryQueryOptions } from '../rules-engine/query-executor';
 import { K8sClusterConnector } from '../k8s-connector/k8s-cluster-connector';
 import { KubernetesClient, KubernetesObject } from 'k8s-super-client';
-import { parseApiVersion } from '../utils/k8s';
 import { ClientSideFiltering } from './client-side-filtering';
 import { K8sManifest, ManifestSource } from '../manifests/k8s-manifest';
 
@@ -33,7 +31,7 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
         this._client = k8sConnector.client!;
     }
 
-    query(query: K8sTargetFilter) : K8sManifest[]
+    query(query: RegistryQueryOptions) : K8sManifest[]
     {
         this._logger.info("[query] ", query);
 
@@ -90,14 +88,15 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
         }
         else
         {
-            // TODO: Try using label filter as an optimization:.
-            results = resourceClient.queryAllSync(query.namespace);
+            results = resourceClient.queryAllSync(query.namespace ?? undefined);
         }
 
         this._logger.info("[query] result count: %s", results.length);
 
 
         const manifests = results.map(x => this._makeManifest(x));
+
+        // TODO: Try using label filter as an optimization inside resourceClient
 
         const filtering = new ClientSideFiltering(manifests);
         filtering.applyLabelFilter(query.labelFilters);

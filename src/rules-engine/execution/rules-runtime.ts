@@ -61,6 +61,8 @@ export class RulesRuntime
 
     execute()
     {
+        this._logger.info("[execute] Begin. Count: %s", this._rules.length);
+
         this._spinner = spinOperation('Validating rules...');
 
         return Promise.serial(this._rules, x => this._executeRule(x))
@@ -81,6 +83,8 @@ export class RulesRuntime
         this._logger.info("[_initClusterRule] %s...", clusterRule.name);
 
         if (clusterRule.spec.disabled) {
+            this._logger.info("[_initClusterRule] skipping. Disabled: %s", clusterRule.name);
+
             this._clusterRules[clusterRule.name] = {
                 rule: clusterRule
             }
@@ -93,6 +97,9 @@ export class RulesRuntime
                     rule: clusterRule,
                     compiler: compiler,
                 }
+
+                this._logger.info("[_initClusterRule] clustered: %s", clusterRule.clustered);
+                this._logger.info("[_initClusterRule] useApplicator: %s", clusterRule.useApplicator);
 
                 if (clusterRule.clustered)
                 {
@@ -111,6 +118,8 @@ export class RulesRuntime
     
     private _setupClusterRuleApplication(clusterRule: ClusterRule, compiler: RuleCompiler)
     {
+        this._logger.info("[_setupClusterRuleApplication] %s...", clusterRule.name);
+
         let namespaces = this._namespaces;
         if (clusterRule.onlySelectedNamespaces)
         {
@@ -258,6 +267,8 @@ export class RulesRuntime
 
     private _executeRule(rule : RuleRuntime)
     {
+        this._logger.info("[_executeRule] %s...", rule.rule.name);
+
         return Promise.resolve()
             .then(() => rule.execute())
             ;

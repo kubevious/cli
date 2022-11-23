@@ -7,6 +7,7 @@ import { K8sTargetQuery, K8sTargetFilter } from '../../query-spec/k8s/k8s-target
 import { QueryResult } from '../base';
 import { IQueryExecutor } from '../base';
 import { QueryScopeLimiter } from '../../query-spec/base';
+import { RegistryQueryOptions } from '../../query-executor';
 
 
 export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
@@ -27,6 +28,7 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
         const queryData = query._data;
 
         if (!queryData.kind) {
+            // this._logger.info("[execute] Exiting. No Kind...");
             return {
                 success: false,
                 messages: ['Kind not set'], 
@@ -34,32 +36,27 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
         }
 
         if (_.isUndefined(queryData.apiName)) {
+            // this._logger.info("[execute] Exiting. No ApiName...");
             return {
                 success: false,
                 messages: ['apiName not set'], 
             }
         }
 
-        const k8sQueryFilter : K8sTargetFilter = {
+        const k8sQueryFilter : RegistryQueryOptions = {
             apiName: queryData.apiName,
             version: queryData.version,
             kind: queryData.kind,
-            namespace: queryData.namespace,
-            isAllNamespaces: queryData.isAllNamespaces,
         
             nameFilters: queryData.nameFilters,
             labelFilters: queryData.labelFilters,
         }
 
-
-        // TODO: Handle Clustered Case Properly.
-        const isAllNamespaces = k8sQueryFilter.isAllNamespaces ?? false;
-        if (!isAllNamespaces) {
-            if (limiter.namespace) {
-                k8sQueryFilter.namespace = limiter.namespace;
-            }
+        const isClusterScope = queryData.isClusterScope;
+        if (!isClusterScope)
+        {
+            k8sQueryFilter.namespace = (queryData.namespace ?? limiter.namespace) || undefined;
         }
-
         // this._logger.info("[execute] Filter: ", k8sQueryFilter);
 
         const manifests = this._executionContext.registryQueryExecutor.query(k8sQueryFilter);

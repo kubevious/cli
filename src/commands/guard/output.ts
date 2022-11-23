@@ -1,7 +1,7 @@
 import { GuardResult } from "./types";
 import { output as lintOutput, outputLintResult, outputLintSummary, produceSourceLine } from '../lint/output'
 import { outputManifest } from '../lint/output'
-import { OBJECT_ICONS, print, printErrors, printFailLine, printPassLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarnings, STATUS_ICONS } from '../../screen';
+import { OBJECT_ICONS, print, printErrors, printFailLine, printInactivePassLine, printPassLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarnings, STATUS_ICONS } from '../../screen';
 
 
 export function output(result: GuardResult)
@@ -42,7 +42,7 @@ export function output(result: GuardResult)
                 }
                 else
                 {
-                    printPassLine('Rule passed. No manifests found to check.', 3);
+                    printInactivePassLine('Rule passed. No manifests found to check.', 3);
                 }
             }
 

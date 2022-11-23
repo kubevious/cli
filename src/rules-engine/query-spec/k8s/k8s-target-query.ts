@@ -10,8 +10,9 @@ export interface K8sTargetFilter
     apiName?: string,
     version?: string,
     kind?: string,
-    namespace?: string,
+    namespace?: string | null,
     isAllNamespaces?: boolean,
+    isClusterScope?: boolean,
 
     nameFilters?: string[],
     labelFilters?: KeyValueDict[],
@@ -62,6 +63,12 @@ export class K8sTargetQuery implements BaseTargetQuery
     namespace(value: string)
     {
         this._data.namespace = value;
+        return this;
+    }
+
+    isClusterScope(value?: boolean)
+    {
+        this._data.isClusterScope = value ?? false;
         return this;
     }
 

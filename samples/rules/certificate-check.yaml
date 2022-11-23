@@ -1,7 +1,7 @@
 apiVersion: kubevious.io/v1alpha1
 kind: ClusterRule
 metadata:
-  name: certificate-check
+  name: cert-manager.certificate-check
 spec:
   values:
     domain: example.com

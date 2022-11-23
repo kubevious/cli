@@ -50,8 +50,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
     
     const rules = guardResult.localK8sRegistry.query({
         apiName: KUBEVIOUS_API_NAME,
-        kind: KubeviousKinds.ClusterRule,
-        isAllNamespaces: true,
+        kind: KubeviousKinds.ClusterRule
     });
 
     for(const rule of rules)

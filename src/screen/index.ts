@@ -24,6 +24,10 @@ export function printPassLine(str: string, indent?: number)
 {
     print(`${STATUS_ICONS.passed.get()} ${str}`, indent);
 }
+export function printInactivePassLine(str: string, indent?: number)
+{
+    print(`${STATUS_ICONS.passed.get(false)} ${str}`, indent);
+}
 export function printFailLine(str: string, indent?: number)
 {
     print(`${STATUS_ICONS.failed.get()} ${str}`, indent);

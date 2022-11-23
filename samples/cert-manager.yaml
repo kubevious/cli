@@ -29,3 +29,35 @@ spec:
     preferredChain: ''
     privateKeySecretRef:
       name: letsencrypt
+
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: demo-kubevious-tls-local
+  namespace: kubevious
+spec:
+  dnsNames:
+    - nonpresent.kubevious.io
+  issuerRef:
+    name: letsencrypt-local
+  secretName: demo-kubevious-tls-local
+
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-local
+  namespace: kubevious
+spec:
+  acme:
+    email: foo@bar.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+    preferredChain: ''
+    privateKeySecretRef:
+      name: letsencrypt
