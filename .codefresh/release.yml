@@ -88,7 +88,7 @@ steps:
       - source version.sh
       - cf_export PRODUCT_VERSION=${PRODUCT_VERSION}
       - cf_export DOCKER_TAG=${PRODUCT_VERSION}
-      - yq -i '.[].entry |= "kubevious/cli:'${DOCKER_TAG}'"' .pre-commit-hooks.yaml
+      - ./scripts/setup-pre-commit-hook-version.sh
       - git status
 
   prepare:
