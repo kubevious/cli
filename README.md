@@ -10,8 +10,8 @@
   - [👇 Precompiled Binaries](#-option-2-precompiled-binaries)
   - [👇 In Docker Container](#-option-3-in-a-docker-container)
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
-  - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#)
-  - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#)
+  - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#-guard---comprehensive-cross-manifest-semantical-validation)
+  - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#-lint---validation-of-yaml-syntax-k8s-schema-and-crdcr)
 
 
 ## ✨ Key Capabilities
@@ -221,9 +221,9 @@ $ kubevious lint cr-good.yaml crd.yaml
    ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.example.com
 ```
 
+### 🗂️ Other Usage Examples
 
-
-### Validate Helm Charts
+#### Validate Helm Charts
 
 ```sh
 $ helm repo add traefik https://helm.traefik.io/traefik
@@ -242,7 +242,7 @@ $ helm template traefik/traefik | kubevious lint --stream
 ❌ Lint Failed
 ```
 
-### Validate Entire Directory
+#### Validate Entire Directory
 ```sh
 $ kubevious lint *
 ℹ️  Linting against Kubernetes Version: 1.25.2
