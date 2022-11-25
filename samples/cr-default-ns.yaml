@@ -1,4 +1,4 @@
-apiVersion: contoso.com/v1alpha1
+apiVersion: example.com/v1alpha1
 kind: MyPlatform
 metadata:
   name: test-dotnet-app-2

@@ -2,24 +2,28 @@
 
 
 # Kubevious CLI
-**Kubevious CLI** is an app-centric assurance and validation tool for Kubernetes. It helps modern teams rapidly release cloud-native applications without disasters, costly outages, and compliance violations by validating changes before they even reach the clusters. Kubevious CLI detects and prevents errors(*typos, misconfigurations, conflicts, inconsistencies*) and violations of best practices. Our secret sauce is based on the ability to validate across multiple manifests, regardless if they are already in the K8s clusters or are yet to be applied. Kubevious CLI can be used as a standalone tool during the active development of YAML manifests and can also be easily integrated into GitOps processes and CI/CD pipelines to validate changes toward live Kubernetes clusters. Kubevious CLI was created based on the experience and the lessons learned from the [Kubevous Dashboard](https://github.com/kubevious/kubevious) project and uses the evolution of its rules framework.
+**Kubevious CLI** is an app-centric assurance and validation tool for Kubernetes. It helps modern teams rapidly release cloud-native applications without disasters, costly outages, and compliance violations by validating changes before they even reach the clusters. Kubevious CLI detects and prevents errors(*typos, misconfigurations, conflicts, inconsistencies*) and violations of best practices. Our secret sauce is based on the ability to validate across multiple manifests, regardless if they are already in the K8s clusters or are yet to be applied. Kubevious CLI can be used as a standalone tool during the active development of YAML manifests and can also be easily integrated into GitOps processes and CI/CD pipelines to validate changes toward live Kubernetes clusters. Kubevious CLI was created based on the experience, and the lessons learned from the [Kubevous Dashboard](https://github.com/kubevious/kubevious) project and uses the evolution of its rules framework.
 
 - [✨ Key Capabilities](#-key-capabilities)
 - [📥 Installation](#-installation)
   - [👇 NPM Package](#-option-1-npm-package)
   - [👇 Precompiled Binaries](#-option-2-precompiled-binaries)
   - [👇 In Docker Container](#-option-3-in-a-docker-container)
-- [🃏 Usage Examples](#-usage-examples)
+- [🃏 Usage and Use Cases](#-usage-and-use-cases)
+  - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#)
+  - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#)
+
 
 ## ✨ Key Capabilities
 
 ### Validation Sources
-Kubevous CLI can validate manifests from a variety of sources:
+Kubevous CLI validates manifests from a variety of sources:
 - files & directories
 - search patterns
 - web URLs
-- stdin pipe - used to validate package managers such as Helm, Kustomize, etc.
-- manifests already present in the Kubernetes cluster
+- stdin pipe - used to validate package managers such as Helm, Kustomize, Ytt, etc.
+- live manifests already present in the Kubernetes cluster
+- combination of all of the above
 
 ### Manifest Validation
 - Validate YAML syntax
@@ -32,10 +36,9 @@ Kubevous CLI can validate manifests from a variety of sources:
 - Validate Custom Resources against CRDs in the live K8s cluster
 
 ### Validation Best Practices
-- Community driven [Rules Library](https://github.com/kubevious/rules-library)
+- Community-driven [Rules Library](https://github.com/kubevious/rules-library)
 - Your own rules in the file system
 - Rules defined in the live cluster. Can be cluster and namespace scoped.
-
 
 
 ## 📥 Installation
@@ -47,11 +50,11 @@ $ npm install -g kubevious
 ```
 
 ```sh
-$ kubevious lint samples/
+$ kubevious guard samples/
 ```
 
 ### 👇 Option 2: (Precompiled Binaries)
-All-in-one executables for Linux, Alpine, Mac OS, and Windows and x64 and arm64 architectures.
+All-in-one executables for Linux, Alpine, Mac OS, and Windows, including x64 and arm64 architectures.
 Download from here:
 [https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0](https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0)
 
@@ -64,16 +67,16 @@ $ docker run --rm kubevious/cli --help
 
 Validate the entire manifests directory:
 ```sh
-$ docker run --rm -v ${PWD}/samples:/src kubevious/cli lint /src
+$ docker run --rm -v ${PWD}/samples:/src kubevious/cli guard /src
 ```
 
 Validate Helm Chart or any manifests from pipe stream:
 ```sh
-$ helm template traefik/traefik | docker run --rm -i kubevious/cli lint --stream
-$ kustomize build config/default | docker run --rm -i kubevious/cli lint --stream
+$ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream
+$ kustomize build config/default | docker run --rm -i kubevious/cli guard --stream
 ```
 
-## 🃏 Usage Examples
+## 🃏 Usage and Use Cases
 Try it yourself:
 
 ```sh
@@ -81,7 +84,83 @@ $ git clone https://github.com/kubevious/cli.git kubevious-cli.git
 $ cd kubevious-cli.git/samples
 ```
 
-### Validate single K8s manifest
+### 💂 Guard - Comprehensive Cross-Manifest Semantical Validation
+
+#### Validate single K8s manifest
+
+Will complain about not being able to find the corresponding application matching the label selector:
+
+```sh
+$ kubevious guard pepsi/service.yaml
+
+📜 [ClusterRule] service-selector-ref
+   🌐 WEB: https://raw.githubusercontent.com/kubevious/rules-library/master/k8s/service/service-selector-ref.yaml
+   ❌ Rule failed
+   Violations:
+      ❌ Namespace: pepsi, API: v1, Kind: Service, Name: emailservice
+         📄 FILE: pepsi/service.yaml
+         🔴 Could not find Applications for Service
+```
+
+#### Validate multiple K8s manifests
+
+Passing the Deployment along with the Service would help the validation pass:
+
+```sh
+$ kubevious guard pepsi/service.yaml pepsi/deployment.yaml
+
+📜 [ClusterRule] service-selector-ref
+   🌐 WEB: https://raw.githubusercontent.com/kubevious/rules-library/master/k8s/service/service-selector-ref.yaml
+   ✅ Rule passed
+   Passed:
+      ✅ Namespace: pepsi, API: v1, Kind: Service, Name: emailservice
+         📄 FILE: pepsi/service.yaml
+```
+
+#### Validate manifests toward live K8s cluster
+
+Alternatively, if the dependent Deployment is already present in the K8s cluster, the Service can be validated towards the live K8s cluster:
+
+```sh
+$ kubevious guard pepsi/service.yaml --live-k8s
+
+📜 [ClusterRule] service-selector-ref
+   🌐 WEB: https://raw.githubusercontent.com/kubevious/rules-library/master/k8s/service/service-selector-ref.yaml
+   ✅ Rule passed
+   Passed:
+      ✅ Namespace: pepsi, API: v1, Kind: Service, Name: emailservice
+         📄 FILE: pepsi/service.yaml
+```
+
+Although changing pod labels in *pepsi/deployment.yaml* would break the Service label selector, even though the correct Deployment is already in the K8s cluster:
+
+```yaml
+spec:
+  selector:
+    matchLabels:
+      app: emailserviceX      # label is inconsistent with Service label selector
+  template:
+    metadata:
+      labels:
+        app: emailserviceX    # label is inconsistent with Service label selector
+```
+
+```sh
+$ kubevious guard pepsi/service.yaml pepsi/deployment.yaml --live-k8s
+
+📜 [ClusterRule] service-selector-ref
+   🌐 WEB: https://raw.githubusercontent.com/kubevious/rules-library/master/k8s/service/service-selector-ref.yaml
+   ❌ Rule failed
+   Violations:
+      ❌ Namespace: pepsi, API: v1, Kind: Service, Name: emailservice
+         📄 FILE: pepsi/service.yaml
+         🔴 Could not find Applications for Service
+```
+
+### ✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR
+
+#### Checking for API correctness:
+
 ```sh
 $ kubevious lint invalid-service-1.yaml
 ℹ️  Linting against Kubernetes Version: 1.25.2
@@ -89,39 +168,30 @@ $ kubevious lint invalid-service-1.yaml
 ❌ 📄 FILE: invalid-service-1.yaml
    ❌ API: v1, Kind: Service, Name: db
       ❌ Required property "port" missing under "/spec/ports/0"
-
-❌ Lint Failed
 ```
 
-### Validate from Web URL
+#### Linting against particular K8s version
 ```sh
-$ kubevious lint https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/kubernetes-manifests/frontend.yaml
-ℹ️  Linting against Kubernetes Version: 1.25.2
-
-✅ 🌐 WEB: https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/kubernetes-manifests/frontend.yaml
-   ✅ API: v1, Kind: Service, Name: frontend
-   ✅ API: v1, Kind: Service, Name: frontend-external
-   ✅ API: apps/v1, Kind: Deployment, Name: frontend
-
-✅ Lint Succeeded.
-```
-
-### Specify K8s version
-```sh
-$ kubevious lint istio-gateway.yaml --k8s-version 1.21
+$ kubevious lint hpa.yaml --k8s-version 1.21
 ℹ️  Linting against Kubernetes Version: 1.21.14
 
-❌ 📄 FILE: istio-gateway.yaml
-   ❌ Namespace: hipster, API: networking.istio.io/v1alpha3, Kind: Gateway, Name: frontend-gateway
-      ❌ Unknown API Resource. apiVersion: networking.istio.io/v1alpha3, kind: Gateway.
-
-❌ Lint Failed
+❌ 📄 FILE: hpa.yaml
+   ❌ Namespace: ordering, API: autoscaling/v2, Kind: HorizontalPodAutoscaler, Name: orderservice
+      🔴 Unknown API Resource. apiVersion: autoscaling/v2, kind: HorizontalPodAutoscaler.
 ```
 
-### Ignore unknown resources
+```sh
+$ kubevious lint hpa.yaml --k8s-version 1.23
+ℹ️  Linting against Kubernetes Version: 1.23.12
+
+✅ 📄 FILE: hpa.yaml
+   ✅ Namespace: ordering, API: autoscaling/v2, Kind: HorizontalPodAutoscaler, Name: orderservice
+```
+
+#### Ignoring unknown resources
+
 ```sh
 $ kubevious lint istio-gateway.yaml --ignore-unknown
-ℹ️  Linting against Kubernetes Version: 1.25.2
 
 ⚠️  📄 FILE: istio-gateway.yaml
    ⚠️  Namespace: hipster, API: networking.istio.io/v1alpha3, Kind: Gateway, Name: frontend-gateway
@@ -130,32 +200,31 @@ $ kubevious lint istio-gateway.yaml --ignore-unknown
 ✅ Lint Succeeded.
 ```
 
-### Validate against live K8s cluster with CRDs
+#### Validate against live K8s cluster with CRDs
 ```sh
 $ kubevious lint istio-gateway.yaml --live-k8s
 ℹ️  Linting against Kubernetes Version: v1.24.0
 
 ✅ 📄 FILE: data/istio-gateway.yaml
    ✅ Namespace: hipster, API: networking.istio.io/v1alpha3, Kind: Gateway, Name: frontend-gateway
-
-✅ Lint Succeeded.
 ```
 
-### Validate Custom Resource and corresponding CRD
+#### Validate Custom Resource and corresponding CRD
 ```sh
 $ kubevious lint cr-good.yaml crd.yaml
 ℹ️  Linting against Kubernetes Version: 1.25.2
 
 ✅ 📄 FILE: cr-good.yaml
-   ✅ API: contoso.com/v1alpha1, Kind: MyPlatform, Name: test-dotnet-app
+   ✅ Namespace: coke, API: example.com/v1alpha1, Kind: MyPlatform, Name: test-dotnet-app
 
 ✅ 📄 FILE: crd.yaml
-   ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.contoso.com
-
-✅ Lint Succeeded.
+   ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.example.com
 ```
 
+
+
 ### Validate Helm Charts
+
 ```sh
 $ helm repo add traefik https://helm.traefik.io/traefik
 $ helm template traefik/traefik | kubevious lint --stream
