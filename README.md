@@ -12,6 +12,8 @@
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
   - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#-guard---comprehensive-cross-manifest-semantical-validation)
   - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#-lint---validation-of-yaml-syntax-k8s-schema-and-crdcr)
+  - [🕹 Input from a Variety of Sources](#--input-from-a-variety-of-sources)
+  - [🪝 Git Pre-Commit Hook](#--git-pre-commit-hook)
 
 
 ## ✨ Key Capabilities
@@ -86,6 +88,8 @@ $ cd kubevious-cli.git/samples
 
 ### 💂 Guard - Comprehensive Cross-Manifest Semantical Validation
 
+The **guard** command performs **linting** of YAML syntax & API correctness and checks for violations of best-practices rules. 
+
 #### Validate single K8s manifest
 
 Will complain about not being able to find the corresponding application matching the label selector:
@@ -159,6 +163,8 @@ $ kubevious guard pepsi/service.yaml pepsi/deployment.yaml --live-k8s
 
 ### ✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR
 
+The **guard** command performs **linting** underneath, so the guard users don't need to run lint separately.
+
 #### Checking for API correctness:
 
 ```sh
@@ -221,114 +227,127 @@ $ kubevious lint cr-good.yaml crd.yaml
    ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.example.com
 ```
 
-### 🗂️ Other Usage Examples
+### 🕹 Input from a Variety of Sources
 
-#### Validate Helm Charts
+#### Multiple Directories
+
+```sh
+$ kubevious guard sveltos/ pepsi/
+```
+
+#### Stream Input
+
+Primary usage is to validate template outputs such as Helm Charts, Kuztomize, Carvel, etc.
 
 ```sh
 $ helm repo add traefik https://helm.traefik.io/traefik
-$ helm template traefik/traefik | kubevious lint --stream
-ℹ️  Linting against Kubernetes Version: 1.25.2
+$ helm template traefik/traefik | kubevious guard --stream
 
 ❌ ♒ STREAM: stream
-   ✅ API: v1, Kind: Service, Name: release-name-traefik
-   ✅ API: v1, Kind: ServiceAccount, Name: release-name-traefik
-   ✅ API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
+   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
+   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ❌ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
+      🔴 Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
+   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
    ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
    ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
-   ❌ API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
-      ❌ Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
-
-❌ Lint Failed
 ```
 
-#### Validate Entire Directory
+Also can pass additional manifests, such as CRDs, Rules, etc, for validation along with the steam input.
+
 ```sh
-$ kubevious lint *
-ℹ️  Linting against Kubernetes Version: 1.25.2
+$ helm template traefik/traefik | kubevious guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
 
-❌ 📄 FILE: bad-json.json
-   ❌ Unexpected token x in JSON at position 49
+✅ ♒ STREAM: stream
+   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
+   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
+   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ✅ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
+   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+```
 
-❌ 📄 FILE: bad-yaml.yaml
-   ❌ bad indentation of a mapping entry (6:3)
-   
-    3 | metadata:
-    4 |    labels:
-    5 |     app: db
-    6 |   name: db
-   -------^
-    7 | spec:
-    8 |   type: ClusterIP
+### 📦 Running Inside a Container
 
-✅ 📄 FILE: cr-good.yaml
-   ✅ API: contoso.com/v1alpha1, Kind: MyPlatform, Name: test-dotnet-app
+#### Validate entire directory
 
-❌ 📄 FILE: cr-invalid.yaml
-   ❌ API: contoso.com/v1alpha1, Kind: MyPlatform, Name: test-dotnet-app
-      ❌ Unknown enum value provided in "/spec/environmentType". Allowed values are: dev, test, prod.
+Mount a local directory to */src* in the container. The rest of the arguments are the same.
 
-❌ 📄 FILE: cr-unknown.yaml
-   ❌ API: example.com/v1, Kind: MyResource, Name: test-dotnet-app
-      ❌ Unknown API Resource. apiVersion: example.com/v1, kind: MyResource.
+```sh
+$ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src
+❌ Guard Failed
+```
 
-❌ 📄 FILE: crd-invalid.yaml
-   ❌ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatformanothers.contoso.com
-      ❌ schema is invalid: data/definitions/com.contoso.v1alpha1.MyPlatformAnother/properties/spec/properties/appId/type must be equal to one of the allowed values, data/definitions/com.contoso.v1alpha1.MyPlatformAnother/properties/spec/properties/appId/type must be array, data/definitions/com.contoso.v1alpha1.MyPlatformAnother/properties/spec/properties/appId/type must match a schema in anyOf
+#### Validate files
 
-✅ 📄 FILE: crd.yaml
-   ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.contoso.com
+To validate invididual files the directory has to  be mounter to */src* in the container. Can pass file names in the command line arguments.
 
-✅ 📄 FILE: deployment.yaml
-   ✅ API: apps/v1, Kind: Deployment, Name: emailservice
+```sh
+$ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src/service.yaml /src/deployment.yaml
+✅ Guard Succeeded.
+```
 
-❌ 📄 FILE: empty.yaml
-   ❌ Contains no manifests
+#### Stream Input
 
-❌ 📄 FILE: invalid-service-1.yaml
-   ❌ API: v1, Kind: Service, Name: db
-      ❌ Required property "port" missing under "/spec/ports/0"
+Don't forget the **-i** argument.
 
-❌ 📄 FILE: invalid-service-2.yaml
-   ❌ API: v1, Kind: Service, Name: db
-      ❌ Unknown property "portish" under "/spec"
+```sh
+$ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream
 
-❌ 📄 FILE: invalid-service-3.yaml
-   ❌ API: v1, Kind: Service, Name: db
-      ❌ Unknown enum value provided in "/spec/ports/0/protocol". Allowed values are: SCTP, TCP, UDP.
+❌ ♒ STREAM: stream
+   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
+   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
+   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ❌ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
+      🔴 Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
+   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+```
 
-❌ 📄 FILE: invalid-service-4.yaml
-   ❌ API: v1, Kind: Service, Name: db
-      ❌ Invalid type under "/spec/ports/0/port". Must be integer.
+Passing CRDs as input would fix the issue:
 
-❌ 📄 FILE: invalid-service-5.yaml
-   ❌ API: v1, Kind: Service, Name: db
-      ❌ Invalid type under "/spec/ports/0/name". Must be string.
+```sh
+$ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
 
-❌ 📄 FILE: istio-gateway.yaml
-   ❌ Namespace: hipster, API: networking.istio.io/v1alpha3, Kind: Gateway, Name: frontend-gateway
-      ❌ Unknown API Resource. apiVersion: networking.istio.io/v1alpha3, kind: Gateway.
+✅ ♒ STREAM: stream
+   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
+   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
+   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
+   ✅ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
+   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
+   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+```
 
-✅ 📄 FILE: multiple-manifests.yaml
-   ✅ API: v1, Kind: Service, Name: checkoutservice
-   ✅ API: v1, Kind: Service, Name: emailservice
-   ✅ API: apps/v1, Kind: Deployment, Name: checkoutservice
+### 🪝 Git Pre-Commit Hook
 
-✅ 📄 FILE: network-policy.yaml
-   ✅ API: networking.k8s.io/v1, Kind: NetworkPolicy, Name: adservice
+You can get **guard** and **lint** commands to execute whenever changes to the GitOps repo is made. Kubevious uses the [pre-commit](https://pre-commit.com/) project to set up and pre-commit hooks. For convenience there are commands to install hooks:
 
-❌ 📄 FILE: payload-pod.json
-   ❌ API: v1, Kind: Pod, Name: undefined
-      ❌ Unknown enum value provided in "/spec/containers/0/ports/0/protocol". Allowed values are: SCTP, TCP, UDP.
+```sh
+$ kubevious install-git-hook guard
+   ℹ️  Repository: /Users/django/example.git
+   ℹ️  PreCommit Config File: /Users/django/example.git/.pre-commit-config.yaml
+   ℹ️  Hook Repo: https://github.com/kubevious/cli
+   ℹ️  Hook ID: kubevious-guard
 
-❌ 📄 FILE: payload-service.json
-   ❌ API: v1, Kind: Service, Name: undefined
-      ❌ Required property "port" missing under "/spec/ports/0"
+✅ Install Git Hook Succeeded.
+   Now you can run: 
+     $> cd /Users/django/example.git
+     $> git add .pre-commit-config.yaml
+     $> pre-commit autoupdate
+```
 
-❌ Lint Failed
+or
+
+```sh
+$ kubevious install-git-hook lint
 ```
 
 ## 🔭 Kubevious Project
+
 Learn more about the Kubevious project in the root repository: https://github.com/kubevious/kubevious
 
 ## 💬 Slack
