@@ -12,8 +12,8 @@
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
   - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#-guard---comprehensive-cross-manifest-semantical-validation)
   - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#-lint---validation-of-yaml-syntax-k8s-schema-and-crdcr)
-  - [🕹 Input from a Variety of Sources](#--input-from-a-variety-of-sources)
-  - [🪝 Git Pre-Commit Hook](#--git-pre-commit-hook)
+  - [🕹 Input from a Variety of Sources](#-running-inside-a-container)
+  - [🪝 Git Pre-Commit Hook](#-git-pre-commit-hook)
 
 
 ## ✨ Key Capabilities
