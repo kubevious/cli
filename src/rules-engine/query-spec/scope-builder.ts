@@ -10,9 +10,9 @@ import { TransformManyTargetQuery } from './transform-many/transform-many-target
 export class TargetQueryBuilderDef
 {
     get Shortcut() {
-        return (name: string) => {
+        return (name: string, ...args: any[]) => {
             const target = new ShortcutTargetQuery();
-            return target.Shortcut(name);
+            return target.Shortcut(name, ...args);
         }
     }
 

@@ -152,4 +152,12 @@ export function setup(executor: ShortcutQueryExecutor)
             })
         );        
 
+
+    executor.setup('Secret',
+        (name: string) =>
+            ApiVersion('v1')
+                .Kind("Secret")
+                .name(name)
+    );
+
 }
