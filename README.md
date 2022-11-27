@@ -123,7 +123,7 @@ $ kubevious guard pepsi/service.yaml pepsi/deployment.yaml
 
 #### Validate manifests toward live K8s cluster
 
-Alternatively, if the dependent Deployment is already present in the K8s cluster, the Service can be validated towards the live K8s cluster:
+Alternatively, if the dependent Deployment is already present in the K8s cluster, the Service can be validated against the live K8s cluster:
 
 ```sh
 $ kubevious guard pepsi/service.yaml --live-k8s
@@ -254,7 +254,7 @@ $ helm template traefik/traefik | kubevious guard --stream
    ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
 ```
 
-Also can pass additional manifests, such as CRDs, Rules, etc, for validation along with the steam input.
+Also can pass additional manifests, such as CRDs, Rules, etc., for validation along with the steam input.
 
 ```sh
 $ helm template traefik/traefik | kubevious guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
@@ -282,7 +282,7 @@ $ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src
 
 #### Validate files
 
-To validate invididual files the directory has to  be mounter to */src* in the container. Can pass file names in the command line arguments.
+The directory must be mounted to */src* in the container to validate individual files. Can pass file names in the command line arguments.
 
 ```sh
 $ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src/service.yaml /src/deployment.yaml
@@ -324,7 +324,7 @@ $ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --strea
 
 ### 🪝 Git Pre-Commit Hook
 
-You can get **guard** and **lint** commands to execute whenever changes to the GitOps repo is made. Kubevious uses the [pre-commit](https://pre-commit.com/) project to set up and pre-commit hooks. For convenience there are commands to install hooks:
+You can get **guard** and **lint** commands to execute whenever changes to the GitOps repo are made. Kubevious uses the [pre-commit](https://pre-commit.com/) project to set up pre-commit hooks. For convenience, there are commands to install hooks:
 
 ```sh
 $ kubevious install-git-hook guard
