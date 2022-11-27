@@ -23,7 +23,7 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
 
     execute(query: K8sTargetQuery, limiter: QueryScopeLimiter) : QueryResult
     {
-        this._logger.info("[execute] RUNNING QUERY....");
+        // this._logger.info("[execute] RUNNING QUERY....");
 
         const queryData = query._data;
 
@@ -66,7 +66,7 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
             items: manifests.map(x => new ScriptItem(x))
         };
 
-        this._logger.info("[execute]     RESULT COUNT: %s", result.items!.length);
+        // this._logger.info("[execute]     RESULT COUNT: %s", result.items!.length);
     
         return result;
     }
