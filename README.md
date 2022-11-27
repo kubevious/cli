@@ -18,29 +18,36 @@
 
 ## ✨ Key Capabilities
 
-### Validation Sources
+### 🔘 Best Practices Validation
+
+- Community-driven [Rules Library](https://github.com/kubevious/rules-library).
+  - Validates K8s native manifests and the popular project uses such as CertManager, Traefik, Istio, etc.
+- Your own custom validation rules:
+  - from the file system
+  - from live Kubernetes cluster
+  - Scoped at the cluster level or within the namespace
+- Learn more about writing your own validation rules using [Kubik](https://github.com/kubevious/kubik).
+
+### 🔘 Manifest Validation
+- Validate YAML syntax
+- Validate manifest API correctness
+- Validate towards a custom K8s version, or live K8s cluster version
+
+### 🔘 CRDs and Custom Resources
+- Validate CRD definitions
+- Validate Custom Resources against CRDs in the file system
+- Validate Custom Resources against CRDs in the live K8s cluster
+
+### 🔘 Validation Sources
+
 Kubevous CLI validates manifests from a variety of sources:
+
 - files & directories
 - search patterns
 - web URLs
 - stdin pipe - used to validate package managers such as Helm, Kustomize, Ytt, etc.
 - live manifests already present in the Kubernetes cluster
 - combination of all of the above
-
-### Manifest Validation
-- Validate YAML syntax
-- Validate manifest API correctness
-- Validate towards a custom K8s version, or live K8s cluster version
-
-### CRDs and Custom Resources
-- Validate CRD definitions
-- Validate Custom Resources against CRDs in the file system
-- Validate Custom Resources against CRDs in the live K8s cluster
-
-### Validation Best Practices
-- Community-driven [Rules Library](https://github.com/kubevious/rules-library)
-- Your own rules in the file system
-- Rules defined in the live cluster. Can be cluster and namespace scoped.
 
 
 ## 📥 Installation
@@ -90,7 +97,7 @@ $ cd kubevious-cli.git/samples
 
 The **guard** command performs **linting** of YAML syntax & API correctness and checks for violations of best-practices rules. 
 
-#### Validate single K8s manifest
+#### 🔘 Validate single K8s manifest
 
 Will complain about not being able to find the corresponding application matching the label selector:
 
@@ -106,7 +113,7 @@ $ kubevious guard pepsi/service.yaml
          🔴 Could not find Applications for Service
 ```
 
-#### Validate multiple K8s manifests
+#### 🔘 Validate multiple K8s manifests
 
 Passing the Deployment along with the Service would help the validation pass:
 
@@ -121,7 +128,7 @@ $ kubevious guard pepsi/service.yaml pepsi/deployment.yaml
          📄 FILE: pepsi/service.yaml
 ```
 
-#### Validate manifests toward live K8s cluster
+#### 🔘 Validate manifests toward live K8s cluster
 
 Alternatively, if the dependent Deployment is already present in the K8s cluster, the Service can be validated against the live K8s cluster:
 
@@ -165,7 +172,7 @@ $ kubevious guard pepsi/service.yaml pepsi/deployment.yaml --live-k8s
 
 The **guard** command performs **linting** underneath, so the guard users don't need to run lint separately.
 
-#### Checking for API correctness:
+#### 🔘 Checking for API correctness:
 
 ```sh
 $ kubevious lint invalid-service-1.yaml
@@ -176,7 +183,7 @@ $ kubevious lint invalid-service-1.yaml
       ❌ Required property "port" missing under "/spec/ports/0"
 ```
 
-#### Linting against particular K8s version
+#### 🔘 Linting against particular K8s version
 ```sh
 $ kubevious lint hpa.yaml --k8s-version 1.21
 ℹ️  Linting against Kubernetes Version: 1.21.14
@@ -194,7 +201,7 @@ $ kubevious lint hpa.yaml --k8s-version 1.23
    ✅ Namespace: ordering, API: autoscaling/v2, Kind: HorizontalPodAutoscaler, Name: orderservice
 ```
 
-#### Ignoring unknown resources
+#### 🔘 Ignoring unknown resources
 
 ```sh
 $ kubevious lint istio-gateway.yaml --ignore-unknown
@@ -206,7 +213,7 @@ $ kubevious lint istio-gateway.yaml --ignore-unknown
 ✅ Lint Succeeded.
 ```
 
-#### Validate against live K8s cluster with CRDs
+#### 🔘 Validate Against Live K8s Cluster with CRDs
 ```sh
 $ kubevious lint istio-gateway.yaml --live-k8s
 ℹ️  Linting against Kubernetes Version: v1.24.0
@@ -215,7 +222,7 @@ $ kubevious lint istio-gateway.yaml --live-k8s
    ✅ Namespace: hipster, API: networking.istio.io/v1alpha3, Kind: Gateway, Name: frontend-gateway
 ```
 
-#### Validate Custom Resource and corresponding CRD
+#### 🔘 Validate Custom Resource and Corresponding CRD
 ```sh
 $ kubevious lint cr-good.yaml crd.yaml
 ℹ️  Linting against Kubernetes Version: 1.25.2
@@ -229,13 +236,13 @@ $ kubevious lint cr-good.yaml crd.yaml
 
 ### 🕹 Input from a Variety of Sources
 
-#### Multiple Directories
+#### 🔘 Multiple Directories
 
 ```sh
 $ kubevious guard sveltos/ pepsi/
 ```
 
-#### Stream Input
+#### 🔘 Stream Input
 
 Primary usage is to validate template outputs such as Helm Charts, Kuztomize, Carvel, etc.
 
@@ -271,7 +278,7 @@ $ helm template traefik/traefik | kubevious guard --stream https://raw.githubuse
 
 ### 📦 Running Inside a Container
 
-#### Validate entire directory
+#### 🔘 Validate Entire Directory
 
 Mount a local directory to */src* in the container. The rest of the arguments are the same.
 
@@ -280,7 +287,7 @@ $ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src
 ❌ Guard Failed
 ```
 
-#### Validate files
+#### 🔘 Validate Files
 
 The directory must be mounted to */src* in the container to validate individual files. Can pass file names in the command line arguments.
 
@@ -289,7 +296,7 @@ $ docker run --rm -v ${PWD}/pepsi:/src kubevious/cli guard /src/service.yaml /sr
 ✅ Guard Succeeded.
 ```
 
-#### Stream Input
+#### 🔘 Stream Input
 
 Don't forget the **-i** argument.
 
