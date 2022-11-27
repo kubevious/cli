@@ -278,7 +278,7 @@ $ helm template traefik/traefik | kubevious guard --stream https://raw.githubuse
 
 ### 📦 Running Inside a Container
 
-#### 🔘 Validate Entire Directory
+#### 🔘 Validate the Entire Directory
 
 Mount a local directory to */src* in the container. The rest of the arguments are the same.
 
@@ -353,9 +353,9 @@ or
 $ kubevious install-git-hook lint
 ```
 
-## 🔭 Kubevious Project
+## ✍️ Writing Custom Rules
 
-Learn more about the Kubevious project in the root repository: https://github.com/kubevious/kubevious
+Kubevious rules are expressed in a domain-specific language called [Kubik](https://github.com/kubevious/kubik). A great way to start writing your own rules is to learn from the [community-driven rules library](https://github.com/kubevious/rules-library).
 
 ## 💬 Slack
 Join the [Kubevious Slack workspace](https://kubevious.io/slack) to chat with Kubevious developers and users. This is a good place to learn about Kubevious, ask questions, and share your experiences.
@@ -369,5 +369,8 @@ The Kubevious project is created by [AUTHORS](https://github.com/kubevious/kubev
 ## 🚀 Roadmap
 Kubevious maintains a public [roadmap](https://github.com/kubevious/kubevious/blob/master/ROADMAP.md), which provides priorities and future capabilities we are planning on adding to Kubevious.
 
-# 📜 License
+## 🔭 Kubevious Project
+Learn more about the Kubevious projects in the root repository: https://github.com/kubevious/kubevious
+
+## 📜 License
 Kubevious CLI is an open-source project licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0). 
