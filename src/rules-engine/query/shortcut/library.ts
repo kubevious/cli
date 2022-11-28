@@ -11,7 +11,7 @@ export function setup(executor: ShortcutQueryExecutor)
         Transform,
         TransformMany,
         Filter,
-        Manual
+        First
     } = TARGET_QUERY_BUILDER_OBJ;
 
     executor.setup('DeploymentPodSpec',
@@ -156,38 +156,21 @@ export function setup(executor: ShortcutQueryExecutor)
 
     executor.setup('Secret',
         (name: string) =>
-            Manual(
-                ({ single }) => {
-                    let secret = single(
-                        ApiVersion('v1')
-                            .Kind("Secret")
-                            .name(name)
-                    );
-                    if (secret) {
-                        return [secret];
-                    }
-
-                    secret = single(
-                        Transform(
-                            Api('bitnami.com')
-                            .Kind("SealedSecret")
-                            .name(name)
-                        ).To(item => ({
-                            synthetic: true,
-                            apiVersion: 'v1',
-                            kind: 'Secret',
-                            metadata: item.config.metadata,
-                            data: item.config.spec?.encryptedData ?? {}
-                        }))
-                    );
-                    if (secret) {
-                        return [
-                            secret
-                        ];
-                    }
-
-                    return [];
-                }
+            First(
+                ApiVersion('v1')
+                    .Kind("Secret")
+                    .name(name),
+                Transform(
+                    Api('bitnami.com')
+                    .Kind("SealedSecret")
+                    .name(name)
+                ).To(item => ({
+                    synthetic: true,
+                    apiVersion: 'v1',
+                    kind: 'Secret',
+                    metadata: item.config.metadata,
+                    data: item.config.spec?.encryptedData ?? {}
+                }))
             )
     );
 

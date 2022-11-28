@@ -3,6 +3,7 @@ import { ExecutionContext } from "../execution/execution-context";
 import { BaseTargetQuery, QueryScopeLimiter, TargetQueryKind } from "../query-spec/base";
 import { IQueryExecutor, QueryResult } from "./base";
 import { FilterQueryExecutor } from "./filter/filter-query-executor";
+import { FirstQueryExecutor } from "./first/first-query-executor";
 import { K8sQueryExecutor } from "./k8s/k8s-query-executor";
 import { ManualQueryExecutor } from "./manual/manual-query-executor";
 import { ShortcutQueryExecutor } from "./shortcut/shortcut-query-executor";
@@ -32,6 +33,7 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
         this._resolvers[TargetQueryKind.Transform] = new TransformQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.TransformMany] = new TransformManyQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Filter] = new FilterQueryExecutor(this._executionContext);
+        this._resolvers[TargetQueryKind.First] = new FirstQueryExecutor(this._executionContext);
         this._resolvers[TargetQueryKind.Manual] = new ManualQueryExecutor(this._executionContext);
     }
 

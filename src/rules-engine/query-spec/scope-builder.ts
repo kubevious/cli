@@ -7,6 +7,7 @@ import { ShortcutTargetQuery } from './shortcut/shortcut-target-query';
 import { FilterTargetQuery } from './filter/filter-target-query';
 import { TransformManyTargetQuery } from './transform-many/transform-many-target-query';
 import { ManualQueryFunc, ManualTargetQuery } from './manual/manual-target-query';
+import { FirstTargetQuery } from './first/first-target-query';
 
 export class TargetQueryBuilderDef
 {
@@ -53,6 +54,12 @@ export class TargetQueryBuilderDef
         return (inner: BaseTargetQuery) => {
             return new FilterTargetQuery(inner);
         }
+    }
+
+    get First() {
+        return (...inner: BaseTargetQuery[]) => {
+            return new FirstTargetQuery(...inner);
+        }   
     }
 
     get Manual() {
