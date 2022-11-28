@@ -158,23 +158,28 @@ export function setup(executor: ShortcutQueryExecutor)
         (name: string) =>
             Manual(
                 ({ single }) => {
-
                     let secret = single(
                         ApiVersion('v1')
                             .Kind("Secret")
                             .name(name)
                     );
-
                     if (secret) {
                         return [secret];
                     }
 
                     secret = single(
-                        ApiVersion('v1')
-                            .Kind("Secret")
-                            .name(name + 'x')
+                        Transform(
+                            Api('bitnami.com')
+                            .Kind("SealedSecret")
+                            .name(name)
+                        ).To(item => ({
+                            synthetic: true,
+                            apiVersion: 'v1',
+                            kind: 'Secret',
+                            metadata: item.config.metadata,
+                            data: item.config.spec?.encryptedData ?? {}
+                        }))
                     );
-
                     if (secret) {
                         return [
                             secret
@@ -182,8 +187,7 @@ export function setup(executor: ShortcutQueryExecutor)
                     }
 
                     return [];
-
-                } 
+                }
             )
     );
 

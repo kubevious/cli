@@ -7,6 +7,8 @@ import { ExecutionContext } from '../../execution/execution-context'
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
 import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 import { RULE_HELPERS } from '../../helpers/rule-helpers';
+import { QueryExecutorScope } from '../../query/query-executor-scope';
+import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
 
 export interface ValidationProcessorResult {
     success: boolean
@@ -154,11 +156,21 @@ export class ValidationProcessor {
 
     private _setupQueryBuilders(valueMap: Record<string, any>, item: ScriptItem)
     {
-        const queryScope = buildQueryableScope(this._executionContext, { namespace: item.namespace });
-        for(const key of _.keys(queryScope))
+        const limiter: QueryScopeLimiter = { namespace: item.namespace };
+
+        const syncQueryScope = buildQueryableScope(this._executionContext, limiter);
+        for(const key of _.keys(syncQueryScope))
         {
-            valueMap[key] = queryScope[key];
+            valueMap[key] = syncQueryScope[key];
         }
+
+        {
+            const queryScope = new QueryExecutorScope(this._executionContext, limiter);
+            valueMap.many = (innerQuery: BaseTargetQuery) => queryScope.many(innerQuery);
+            valueMap.single = (innerQuery: BaseTargetQuery) => queryScope.single(innerQuery);
+            valueMap.count = (innerQuery: BaseTargetQuery) => queryScope.count(innerQuery);
+        }
+
     }
 
     private _addError(list: string[], msg: string) {
