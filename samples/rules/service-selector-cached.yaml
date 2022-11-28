@@ -22,5 +22,5 @@ spec:
 
     if (cache.apps.resolveSelector(config.spec.selector).length == 0)
     {
-      error("Could not find Applications for Service");
+      error(`Could not find Applications for Service. Selector: ${helpers.labelsToString(config.spec.selector)}`);
     }
