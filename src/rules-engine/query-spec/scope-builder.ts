@@ -6,6 +6,7 @@ import { BaseTargetQuery } from './base';
 import { ShortcutTargetQuery } from './shortcut/shortcut-target-query';
 import { FilterTargetQuery } from './filter/filter-target-query';
 import { TransformManyTargetQuery } from './transform-many/transform-many-target-query';
+import { ManualQueryFunc, ManualTargetQuery } from './manual/manual-target-query';
 
 export class TargetQueryBuilderDef
 {
@@ -53,6 +54,13 @@ export class TargetQueryBuilderDef
             return new FilterTargetQuery(inner);
         }
     }
+
+    get Manual() {
+        return (func: ManualQueryFunc) => {
+            return new ManualTargetQuery(func);
+        }
+    }
+
 }
 
 export const TARGET_QUERY_BUILDER_OBJ = new TargetQueryBuilderDef();
@@ -71,6 +79,8 @@ enum TopLevelQuery
     Transform = 'Transform',
     TransformMany = 'TransformMany',
     Filter = 'Filter',
+    
+    Manual = 'Manual',
 }
 
 export const TARGET_QUERY_BUILDER_DICT : Record<string, TargetQueryFunc> = {
@@ -86,5 +96,7 @@ export const TARGET_QUERY_BUILDER_DICT : Record<string, TargetQueryFunc> = {
     [TopLevelQuery.TransformMany]: TARGET_QUERY_BUILDER_OBJ.TransformMany,
 
     [TopLevelQuery.Filter]: TARGET_QUERY_BUILDER_OBJ.Filter,
+
+    [TopLevelQuery.Manual]: TARGET_QUERY_BUILDER_OBJ.Manual,
 
 }

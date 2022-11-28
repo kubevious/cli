@@ -1,7 +1,8 @@
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger/dist';
 import { ExecutionContext } from '../execution/execution-context';
-import { BaseTargetQuery, QueryScopeLimiter, SyncBaseTargetQuery } from './base';
+import { QueryExecutorScope } from '../query/query-executor-scope';
+import { QueryScopeLimiter, SyncBaseTargetQuery } from './base';
 import { TargetQueryFunc, TARGET_QUERY_BUILDER_DICT } from './scope-builder';
 
 export type SyncTargetQueryFunc = (...args : any[]) => SyncBaseTargetQuery;
@@ -36,31 +37,27 @@ class SyncQueryBuilder
 
     wrap(limiter: QueryScopeLimiter)
     {
+        const queryExecutorScope = new QueryExecutorScope(this._executionContext, limiter);
+
         const wrapper = (...args : any[]) => {
 
             const queryTarget = this._queryBuilder.apply(null, args) as SyncBaseTargetQuery;
 
             queryTarget.many = () => {
-                return this._executeQuery(queryTarget, limiter);
+                return queryExecutorScope.many(queryTarget);
             };
 
             queryTarget.single = () => {
-                return _.head(this._executeQuery(queryTarget, limiter)) ?? null;
+                return queryExecutorScope.single(queryTarget);
             };
 
             queryTarget.count = () => {
-                return this._executeQuery(queryTarget, limiter).length;
+                return queryExecutorScope.count(queryTarget);
             };
 
             return queryTarget;
         };
 
         return wrapper;
-    }
-
-    private _executeQuery(queryTarget: BaseTargetQuery, limiter: QueryScopeLimiter)
-    {
-        const result = this._executionContext.queryExecutor.execute(queryTarget, limiter);
-        return result.items ?? [];
     }
 }

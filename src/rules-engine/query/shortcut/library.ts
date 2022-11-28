@@ -10,7 +10,8 @@ export function setup(executor: ShortcutQueryExecutor)
         Union,
         Transform,
         TransformMany,
-        Filter
+        Filter,
+        Manual
     } = TARGET_QUERY_BUILDER_OBJ;
 
     executor.setup('DeploymentPodSpec',
@@ -155,9 +156,35 @@ export function setup(executor: ShortcutQueryExecutor)
 
     executor.setup('Secret',
         (name: string) =>
-            ApiVersion('v1')
-                .Kind("Secret")
-                .name(name)
+            Manual(
+                ({ single }) => {
+
+                    let secret = single(
+                        ApiVersion('v1')
+                            .Kind("Secret")
+                            .name(name)
+                    );
+
+                    if (secret) {
+                        return [secret];
+                    }
+
+                    secret = single(
+                        ApiVersion('v1')
+                            .Kind("Secret")
+                            .name(name + 'x')
+                    );
+
+                    if (secret) {
+                        return [
+                            secret
+                        ];
+                    }
+
+                    return [];
+
+                } 
+            )
     );
 
 }
