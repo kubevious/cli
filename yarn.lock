@@ -73,10 +73,10 @@
   dependencies:
     the-lodash "^2.0.9"
 
-"@kubevious/kubik@^1.0.25":
-  version "1.0.25"
-  resolved "https://registry.yarnpkg.com/@kubevious/kubik/-/kubik-1.0.25.tgz#346109238787c5f33436be2b0465750b7d8bae53"
-  integrity sha512-apWI+NXITXVE2kt3a/eSy7pU8Pyr8RzENm+HTRKtTgqFhw4J19dwp+aKIgjaZhQtuG9WY5EDpTY9dujVMX5Sgw==
+"@kubevious/kubik@^1.0.26":
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/@kubevious/kubik/-/kubik-1.0.26.tgz#cd3937942137daee53284399ee1d5c8593db468d"
+  integrity sha512-EaCTtwc+l5opKPolBbeReALeT2cEthh5dqxCpDcwuQNc+ozS/3b5Vpctc3+1gtpNtBNpPX8OapjuW8mPfokdHw==
   dependencies:
     "@kubevious/entity-meta" "^1.0.80"
     "@kubevious/state-registry" "^1.0.17"

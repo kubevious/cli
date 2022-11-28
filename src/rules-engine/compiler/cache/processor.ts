@@ -6,6 +6,8 @@ import { ILogger } from 'the-logger/dist';
 import { buildQueryableScope } from '../../query-spec/sync-scope-builder';
 import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 import { RULE_HELPERS } from '../../helpers/rule-helpers';
+import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
+import { QueryExecutorScope } from '../../query/query-executor-scope';
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -113,10 +115,19 @@ export class CacheProcessor
 
     private _setupQueryBuilders(valueMap: Record<string, any>, namespace: string | null)
     {
-        const queryScope = buildQueryableScope(this._executionContext, { namespace: namespace });
+        const limiter: QueryScopeLimiter = { namespace: namespace };
+
+        const queryScope = buildQueryableScope(this._executionContext, limiter);
         for(const key of _.keys(queryScope))
         {
             valueMap[key] = queryScope[key];
+        }
+
+        {
+            const queryScope = new QueryExecutorScope(this._executionContext, limiter);
+            valueMap.many = (innerQuery: BaseTargetQuery) => queryScope.many(innerQuery);
+            valueMap.single = (innerQuery: BaseTargetQuery) => queryScope.single(innerQuery);
+            valueMap.count = (innerQuery: BaseTargetQuery) => queryScope.count(innerQuery);
         }
     }
 

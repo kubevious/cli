@@ -22,6 +22,9 @@ export enum TargetQueryKind
     Transform = 'Transform',
     TransformMany = 'TransformMany',
     Filter = 'Filter',
+    First = 'First',
+
+    Manual = 'Manual',
 }
 
 export interface QueryScopeLimiter

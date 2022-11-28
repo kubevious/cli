@@ -9,7 +9,7 @@ import { ShortcutTargetQuery } from '../../query-spec/shortcut/shortcut-target-q
 import { TARGET_QUERY_BUILDER_OBJ } from '../../query-spec/scope-builder';
 import { setup } from './library';
 
-export type ShortcutFunc = () => BaseTargetQuery;
+export type ShortcutFunc = (...args: any[]) => BaseTargetQuery;
 
 export class ShortcutQueryExecutor implements IQueryExecutor<ShortcutTargetQuery>
 {
@@ -36,7 +36,7 @@ export class ShortcutQueryExecutor implements IQueryExecutor<ShortcutTargetQuery
             }
         }
 
-        const shortcut = shortcutFunc();
+        const shortcut = shortcutFunc(...query._args);
         return this._executionContext.queryExecutor.execute(shortcut, limiter);
     }
 
