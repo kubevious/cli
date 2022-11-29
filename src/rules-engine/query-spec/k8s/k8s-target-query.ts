@@ -10,6 +10,7 @@ export interface K8sTargetFilter
     apiName?: string,
     version?: string,
     kind?: string,
+    
     namespace?: string | null,
     isAllNamespaces?: boolean,
     isClusterScope?: boolean,
@@ -23,6 +24,11 @@ export class K8sTargetQuery implements BaseTargetQuery
     private _kind = TargetQueryKind.K8s;
 
     _data : K8sTargetFilter = {
+        
+        namespace: null,
+        isAllNamespaces : false,
+        isClusterScope: false,
+
         nameFilters: [],
         labelFilters: [],
     }

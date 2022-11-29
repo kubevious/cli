@@ -55,7 +55,10 @@ export class K8sQueryExecutor implements IQueryExecutor<K8sTargetQuery>
         const isClusterScope = queryData.isClusterScope;
         if (!isClusterScope)
         {
-            k8sQueryFilter.namespace = (queryData.namespace ?? limiter.namespace) || undefined;
+            if (!queryData.isAllNamespaces)
+            {
+                k8sQueryFilter.namespace = (queryData.namespace ?? limiter.namespace) || undefined;
+            }
         }
         // this._logger.info("[execute] Filter: ", k8sQueryFilter);
 
