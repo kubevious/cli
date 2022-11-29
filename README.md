@@ -16,6 +16,7 @@
   - [🪝 Git Pre-Commit Hook](#-git-pre-commit-hook)
 - [✍️ Writing Custom Rules](#%EF%B8%8F-writing-custom-rules)
 
+![Kubevious CLI Video](https://raw.githubusercontent.com/kubevious/media/master/cli/intro/demo_light.svg)
 
 ## ✨ Key Capabilities
 
