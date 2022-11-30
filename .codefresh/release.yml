@@ -25,6 +25,9 @@ steps:
       - export CICD_REPO_NAME=cicd
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
+      - export HOMEBREW_TAP_REPO_NAME=homebrew-cli
+      - cf_export HOMEBREW_TAP_REPO_NAME=${HOMEBREW_TAP_REPO_NAME}
+      - cf_export HOMEBREW_TAP_REPO_PATH=/codefresh/volume/${HOMEBREW_TAP_REPO_NAME}.git      
       - cf_export CF_REPO_OWNER=kubevious
       - export PRODUCT_NAME=cli
       - export IMAGE_NAME=kubevious/${PRODUCT_NAME}
@@ -68,11 +71,26 @@ steps:
     commands:
       - pwd
       - ls -la
-      - rm -rf ${{MOCK_DATA_REPO_PATH}}
-      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MOCK_DATA_REPO_NAME}}.git ${{MOCK_DATA_REPO_PATH}}"
+      - rm -rf ${{HOMEBREW_TAP_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{HOMEBREW_TAP_REPO_NAME}}.git ${{HOMEBREW_TAP_REPO_PATH}}"
       - ls -la
       - cd ${{MOCK_DATA_REPO_PATH}}
       - ls -la
+
+  clone_homebrew_tap:
+    title: Clone Homebrew Tap Repo
+    stage: clone
+    image: "alpine/git:latest"
+    working_directory: "/codefresh/volume"
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{CICD_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CICD_REPO_NAME}}.git ${{CICD_REPO_PATH}}"
+      - ls -la
+      - cd ${{CICD_REPO_PATH}}
+      - ls -la
+
 
   inject_version:
     title: Inject Version
@@ -175,3 +193,17 @@ steps:
     commands:
       - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
       - npm publish
+
+  release_homebrew_tap:
+    title: Release Homebrew Tap
+    stage: release
+    image: kubevious/cicd_deployer:v2
+    shell: bash
+    working_directory: "${{CICD_REPO_PATH}}"
+    commands:
+      - pwd
+      - source ${{MAIN_REPO_PATH}}/version.sh
+      - echo "VERSION: ${PRODUCT_VERSION}"
+      - curl https://registry.npmjs.org/kubevious/${PRODUCT_VERSION}
+      - curl https://registry.npmjs.org/kubevious/latest
+      # - ./cli/tasks/release-homebrew-tap.sh

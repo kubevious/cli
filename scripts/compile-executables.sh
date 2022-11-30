@@ -9,12 +9,9 @@ rm -rf ${BINARY_DIR}/*
 
 mkdir ${BINARY_DIR}
 
-jq ".version" -r package.json > ${BINARY_DIR}/version
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-  echo "Failed to fetch and store Binary Version"
-  exit 1;
-fi
+source version.sh
+
+echo "${PRODUCT_VERSION}" > ${BINARY_DIR}/version
 
 docker run \
     -it \
