@@ -206,4 +206,4 @@ steps:
       - 'echo "VERSION: ${PRODUCT_VERSION}"'
       - curl https://registry.npmjs.org/kubevious/${PRODUCT_VERSION}
       - curl https://registry.npmjs.org/kubevious/latest
-      # - ./cli/tasks/release-homebrew-tap.sh
+      - ./cli/tasks/release-homebrew-tap.sh
