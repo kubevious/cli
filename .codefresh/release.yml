@@ -3,8 +3,9 @@ version: "1.0"
 stages:
   - "clone"
   - "build"
-  - "test"
   - "package"
+  - "testprep"
+  - "test"  
   - "publish"
   - "release"
 
@@ -25,6 +26,10 @@ steps:
       - export CICD_REPO_NAME=cicd
       - cf_export CICD_REPO_NAME=${CICD_REPO_NAME}
       - cf_export CICD_REPO_PATH=/codefresh/volume/${CICD_REPO_NAME}.git
+      - export DEMOS_REPO_NAME=demos
+      - cf_export DEMOS_REPO_NAME=${DEMOS_REPO_NAME}
+      - cf_export DEMOS_REPO_PATH=/codefresh/volume/${DEMOS_REPO_NAME}.git
+      - cf_export SAMPLES_PATH=/codefresh/volume/samples
       - export HOMEBREW_TAP_REPO_NAME=homebrew-cli
       - cf_export HOMEBREW_TAP_REPO_NAME=${HOMEBREW_TAP_REPO_NAME}
       - cf_export HOMEBREW_TAP_REPO_PATH=/codefresh/volume/${HOMEBREW_TAP_REPO_NAME}.git      
@@ -77,6 +82,20 @@ steps:
       - cd ${{MOCK_DATA_REPO_PATH}}
       - ls -la
 
+  clone_demos:
+    title: Clone Demos Repo
+    stage: clone
+    image: 'alpine/git:latest'
+    working_directory: "/codefresh/volume"
+    commands:
+      - pwd
+      - ls -la
+      - rm -rf ${{DEMOS_REPO_PATH}}
+      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{DEMOS_REPO_NAME}}.git ${{DEMOS_REPO_PATH}}'
+      - ls -la
+      - cd ${{DEMOS_REPO_PATH}}
+      - ls -la
+
   clone_homebrew_tap:
     title: Clone Homebrew Tap Repo
     stage: clone
@@ -126,16 +145,6 @@ steps:
       - ./scripts/prepare-package.sh
       - npm run build
 
-  # run_unit_test:
-  #   title: Run Unit Tests
-  #   stage: test
-  #   image: 'kubevious/node-builder:14'
-  #   working_directory: "${{MAIN_REPO_PATH}}"
-  #   commands:
-  #     - pwd
-  #     - ls -la
-  #     - npm test
-
   package_npm:
     title: Package NPM
     stage: package
@@ -153,6 +162,117 @@ steps:
     tag: "${{DOCKER_TAG}}"
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
+
+  prepare_chart_traefik:
+    title: Prepare Traefik Charts
+    stage: testprep
+    image: kubevious/cicd_deployer:latest
+    working_directory: ${{SAMPLES_PATH}}
+    commands:
+      - helm version
+      - helm repo add traefik https://traefik.github.io/charts
+      - ls -la
+      - rm -rf traefik
+      - mkdir traefik
+      - helm template traefik/traefik --include-crds > traefik/traefik.yaml
+
+  prepare_chart_prometheus:
+    title: Prepare Prometheus Charts
+    stage: testprep
+    image: kubevious/cicd_deployer:latest
+    working_directory: ${{SAMPLES_PATH}}
+    commands:
+      - helm version
+      - helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      - ls -la
+      - rm -rf prometheus
+      - mkdir prometheus
+      - helm template prometheus-community/prometheus > prometheus/prometheus.yaml
+
+  prepare_chart_grafana:
+    title: Prepare Grafana Charts
+    stage: testprep
+    image: kubevious/cicd_deployer:latest
+    working_directory: ${{SAMPLES_PATH}}
+    commands:
+      - helm version
+      - helm repo add grafana https://grafana.github.io/helm-charts
+      - ls -la
+      - rm -rf grafana
+      - mkdir grafana
+      - helm template grafana/grafana --namespace grafana --set persistence.enabled=true > grafana/grafana.yaml
+
+  prepare_chart_kubeflow:
+    title: Prepare Kubeflow Charts
+    stage: testprep
+    image: kubevious/cicd_deployer:latest
+    working_directory: ${{SAMPLES_PATH}}
+    commands:
+      - ls -la
+      - rm -rf kubeflow
+      - rm -rf kubeflow-pipelines.git
+      - mkdir kubeflow
+      - git clone https://github.com/kubeflow/pipelines.git kubeflow-pipelines.git
+      - kustomize build kubeflow-pipelines.git/manifests/kustomize/cluster-scoped-resources > kubeflow/cluster-scoped-resources.yaml
+      - kustomize build kubeflow-pipelines.git/manifests/kustomize/env/platform-agnostic > kubeflow/env-platform-agnostic.yaml
+      - |
+        cat >kubeflow/webhook-server-tls.yaml <<EOL
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: webhook-server-tls
+          namespace: kubeflow
+        EOL
+
+  prepare_istio:
+    title: Prepare Kubeflow Charts
+    stage: testprep
+    image: kubevious/cicd_deployer:latest
+    working_directory: ${{SAMPLES_PATH}}
+    commands:
+      - ls -la
+      - rm -rf istio
+      - mkdir istio
+      - |
+        cat >istio/secret-gateway-api-admission.yaml <<EOL
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: gateway-api-admission
+          namespace: gateway-system
+        EOL
+
+  run_tests:
+    title: Run Tests
+    stage: test
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{DEMOS_REPO_PATH}}/guard"
+    commands:
+      - source ${{MAIN_REPO_PATH}}/version.sh
+      - npm install -g ${{MAIN_REPO_PATH}}/kubevious-${PRODUCT_VERSION}.tgz
+      - kubevious --version
+      - echo "Demo Apps:"
+      - ls -la
+      - echo "Samples Path:"
+      - ls -la ${{SAMPLES_PATH}}
+      - echo "Validating Hipster Shop..."
+      - kubevious guard 01-hipster-shop/hipster-chart/templates/
+      - kubevious guard 01-hipster-shop/hipster-chart/templates/ 01-hipster-shop/network-policies-chart/templates/
+      - kubevious guard 01-hipster-shop/hipster-chart/templates/ 01-hipster-shop/istio-chart/templates/ https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml
+      - echo "Validating Voter app..."
+      - kubevious guard 02-voter-app/voter-chart/templates/
+      - echo "Validating Traefik..."
+      - kubevious guard ${{SAMPLES_PATH}}/traefik.yaml
+      - echo "Validating KubeFlow..."
+      - kubevious guard ${{SAMPLES_PATH}}/kubeflow/cluster-scoped-resources.yaml ${{SAMPLES_PATH}}/kubeflow/env-platform-agnostic.yaml ${{SAMPLES_PATH}}/kubeflow/webhook-server-tls.yaml
+      - echo "Validating Prometheus..."
+      - kubevious guard ${{SAMPLES_PATH}}/prometheus/prometheus.yaml
+      - echo "Validating Grafana..."
+      - kubevious guard ${{SAMPLES_PATH}}/grafana/grafana.yaml
+      - echo "Validating Istio Classic..."
+      - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml 10-istio-bookinfo/istio-classic/destination-rule-all.yaml
+      - echo "Validating Istio Gateway API..."
+      - kubevious guard https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.5.1/standard-install.yaml ${{SAMPLES_PATH}}/istio/secret-gateway-api-admission.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/gateway-api/mock-gateway-class.yaml 10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml 10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
 
   # build_executables:
   #   title: Build Executables
