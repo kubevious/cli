@@ -203,7 +203,7 @@ steps:
     commands:
       - pwd
       - source ${{MAIN_REPO_PATH}}/version.sh
-      - echo "VERSION: ${PRODUCT_VERSION}"
+      - 'echo "VERSION: ${PRODUCT_VERSION}"'
       - curl https://registry.npmjs.org/kubevious/${PRODUCT_VERSION}
       - curl https://registry.npmjs.org/kubevious/latest
       # - ./cli/tasks/release-homebrew-tap.sh
