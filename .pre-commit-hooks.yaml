@@ -4,7 +4,7 @@
   types: [file, yaml]
   language: docker_image
   pass_filenames: false
-  entry: 'kubevious/cli:1.0.20'
+  entry: 'kubevious/cli:1.0.21'
   args: ['index-library', '/src']
 - id: kubevious-lint
   name: kubevious lint manifests
@@ -12,7 +12,7 @@
   types: [file, yaml]
   language: docker_image
   pass_filenames: false
-  entry: 'kubevious/cli:1.0.20'
+  entry: 'kubevious/cli:1.0.21'
   args: ['lint', '/src']
 - id: kubevious-guard
   name: kubevious gurad manifests
@@ -20,5 +20,5 @@
   types: [file, yaml]
   language: docker_image
   pass_filenames: false
-  entry: 'kubevious/cli:1.0.20'
+  entry: 'kubevious/cli:1.0.21'
   args: ['guard', '/src']
