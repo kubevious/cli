@@ -13,6 +13,7 @@
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
   - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#-guard---comprehensive-cross-manifest-semantical-validation)
   - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#-lint---validation-of-yaml-syntax-k8s-schema-and-crdcr)
+  - [🩻 Troubleshoot Live Cluster](#-troubleshoot-live-cluster)
   - [🕹 Input from a Variety of Sources](#-running-inside-a-container)
   - [🪝 Git Pre-Commit Hook](#-git-pre-commit-hook)
 - [✍️ Writing Custom Rules](#%EF%B8%8F-writing-custom-rules)
@@ -244,6 +245,12 @@ $ kubevious lint cr-good.yaml crd.yaml
 
 ✅ 📄 FILE: crd.yaml
    ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.example.com
+```
+
+### 🩻 Troubleshoot Live Cluster
+The tool can be used to troubleshoot existing clusters and manifests:
+```sh
+kubevious guard --live-k8s --include-remote-targets --namespace default
 ```
 
 ### 🕹 Input from a Variety of Sources
