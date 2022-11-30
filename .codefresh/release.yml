@@ -71,8 +71,8 @@ steps:
     commands:
       - pwd
       - ls -la
-      - rm -rf ${{HOMEBREW_TAP_REPO_PATH}}
-      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{HOMEBREW_TAP_REPO_NAME}}.git ${{HOMEBREW_TAP_REPO_PATH}}"
+      - rm -rf ${{MOCK_DATA_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{MOCK_DATA_REPO_NAME}}.git ${{MOCK_DATA_REPO_PATH}}"
       - ls -la
       - cd ${{MOCK_DATA_REPO_PATH}}
       - ls -la
@@ -85,10 +85,10 @@ steps:
     commands:
       - pwd
       - ls -la
-      - rm -rf ${{CICD_REPO_PATH}}
-      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CICD_REPO_NAME}}.git ${{CICD_REPO_PATH}}"
+      - rm -rf ${{HOMEBREW_TAP_REPO_PATH}}
+      - "git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{HOMEBREW_TAP_REPO_NAME}}.git ${{HOMEBREW_TAP_REPO_PATH}}"
       - ls -la
-      - cd ${{CICD_REPO_PATH}}
+      - cd ${{HOMEBREW_TAP_REPO_PATH}}
       - ls -la
 
 
