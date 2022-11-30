@@ -268,8 +268,9 @@ export class RulesRuntime
     private _executeRule(rule : RuleRuntime)
     {
         this._logger.info("[_executeRule] %s...", rule.rule.name);
+        this._spinner?.update(`Validating rule: ${rule.rule.name}...`);
 
-        return Promise.resolve()
+        return Promise.timeout(1)
             .then(() => rule.execute())
             ;
     }

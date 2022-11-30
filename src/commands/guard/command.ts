@@ -9,7 +9,8 @@ import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 import { command as lintCommand, determineLintSuccess, massageLintOptions } from '../lint/command';
 import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
-import { CombinedRegistry } from '../../registry/combined-registry';
+import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
+import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/master/index.yaml';
 
@@ -40,7 +41,8 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     let remoteRegistry: RegistryQueryExecutor | undefined;
     if (k8sConnector.isUsed)
     {
-        remoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
+        const myRemoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
+        remoteRegistry = new CachedK8sRegistry(logger, myRemoteRegistry);
     }
 
     const ruleRegistry = new RuleRegistry(logger, manifestPackage);
@@ -80,7 +82,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     let combinedRegistry : RegistryQueryExecutor = localK8sRegistry;
     if (remoteRegistry)
     {
-        combinedRegistry = new CombinedRegistry(logger, [localK8sRegistry, remoteRegistry]);
+        combinedRegistry = new CombinedK8sRegistry(logger, [localK8sRegistry, remoteRegistry]);
     }
 
     let targetQueryRegistry : RegistryQueryExecutor = localK8sRegistry;

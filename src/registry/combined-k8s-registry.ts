@@ -4,14 +4,14 @@ import { K8sTargetFilter } from '../rules-engine/query-spec/k8s/k8s-target-query
 import { RegistryQueryExecutor } from '../rules-engine/query-executor';
 import { K8sManifest } from '../manifests/k8s-manifest';
 
-export class CombinedRegistry implements RegistryQueryExecutor
+export class CombinedK8sRegistry implements RegistryQueryExecutor
 {
     private _logger: ILogger;
     private _innerRegistries: RegistryQueryExecutor[];
 
     constructor(logger: ILogger, innerRegistries: RegistryQueryExecutor[])
     {
-        this._logger = logger.sublogger('CombinedRegistry');
+        this._logger = logger.sublogger('CombinedK8sRegistry');
         this._innerRegistries = innerRegistries;
     }
 
