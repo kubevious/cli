@@ -25,7 +25,8 @@ export function setup(executor: ShortcutQueryExecutor)
                 kind: 'PodSpec',
                 metadata: {
                     ...item.config.spec?.template?.metadata ?? {},
-                    name: `Deployment-${item.config.metadata?.name}`
+                    name: `Deployment-${item.name}`,
+                    namespace: item.namespace
                 },
                 spec: item.config.spec?.template?.spec
             }))
@@ -42,7 +43,8 @@ export function setup(executor: ShortcutQueryExecutor)
                 kind: 'PodSpec',
                 metadata: {
                     ...item.config.spec?.template?.metadata ?? {},
-                    name: `StatefulSet-${item.config.metadata?.name}`
+                    name: `StatefulSet-${item.name}`,
+                    namespace: item.namespace
                 },
                 spec: item.config.spec?.template?.spec
             }))
@@ -59,7 +61,8 @@ export function setup(executor: ShortcutQueryExecutor)
                 kind: 'PodSpec',
                 metadata: {
                     ...item.config.spec?.template?.metadata ?? {},
-                    name: `DaemonSet-${item.config.metadata?.name}`
+                    name: `DaemonSet-${item.name}`,
+                    namespace: item.namespace
                 },
                 spec: item.config.spec?.template?.spec
             }))
@@ -83,7 +86,8 @@ export function setup(executor: ShortcutQueryExecutor)
                 kind: 'PodSpec',
                 metadata: {
                     ...item.config.spec?.template?.metadata ?? {},
-                    name: `Job-${item.config.metadata?.name}`
+                    name: `Job-${item.name}`,
+                    namespace: item.namespace
                 },
                 spec: item.config.spec?.template?.spec
             }))
@@ -100,7 +104,8 @@ export function setup(executor: ShortcutQueryExecutor)
                 kind: 'PodSpec',
                 metadata: {
                     ...item.config.spec?.template?.metadata ?? {},
-                    name: `CronJob-${item.config.metadata?.name}`
+                    name: `CronJob-${item.name}`,
+                    namespace: item.namespace
                 },
                 spec: item.config.spec?.jobTemplate?.spec?.template?.spec
             }))
@@ -131,7 +136,8 @@ export function setup(executor: ShortcutQueryExecutor)
                         kind: 'ContainerSpec',
                         metadata: {
                             ...item.config.spec?.template?.metadata ?? {},
-                            name: `${item.config.metadata?.name}-Cont-${cont.name}`
+                            name: `${item.name}-Cont-${cont.name}`,
+                            namespace: item.namespace
                         },
                         spec: cont
                     });
@@ -144,7 +150,8 @@ export function setup(executor: ShortcutQueryExecutor)
                         kind: 'ContainerSpec',
                         metadata: {
                             ...item.config.spec?.template?.metadata ?? {},
-                            name: `${item.config.metadata?.name}-InitCont-${cont.name}`
+                            name: `${item.name}-InitCont-${cont.name}`,
+                            namespace: item.namespace
                         },
                         spec: cont
                     });

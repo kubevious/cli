@@ -158,6 +158,8 @@ export class ValidationProcessor {
     {
         const limiter: QueryScopeLimiter = { namespace: item.namespace };
 
+        this._logger.debug("ITEM: %s::%s, LIMITER: ", item.kind, item.name, limiter)
+
         const syncQueryScope = buildQueryableScope(this._executionContext, limiter);
         for(const key of _.keys(syncQueryScope))
         {

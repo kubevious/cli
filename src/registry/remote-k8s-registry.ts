@@ -84,7 +84,7 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
                     results.push(item);
                 }
             }
-            results = results.filter(x => x.id.name && nameDict[x.id.name]);
+            results = results.filter(x => x.metadata?.name && nameDict[x.metadata?.name]);
         }
         else
         {
