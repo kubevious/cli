@@ -71,7 +71,7 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
             results = results.filter(x => x.id.name && nameDict[x.id.name]);
         }
 
-        this._logger.info("[query] 666 count: %s", results.length);
+        // this._logger.info("[query] 666 count: %s", results.length);
 
         const filtering = new ClientSideFiltering(results);
         filtering.applyLabelFilter(query.labelFilters);
