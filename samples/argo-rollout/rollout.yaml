@@ -2,6 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: app-1
+  namespace: argo-test
   labels:
     app: app-1
 spec:
