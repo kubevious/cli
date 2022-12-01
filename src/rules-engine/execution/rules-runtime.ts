@@ -199,26 +199,41 @@ export class RulesRuntime
         this._logger.info("[_initRuleApplicator] %s :: %s...", applicator.namespace, applicator.name);
 
         if (applicator.spec.disabled) {
+            this._logger.info("[_initRuleApplicator] Disabled: %s :: %s", applicator.namespace, applicator.name);
             return;
         }
 
         const clusterRefName = applicator.spec.clusterRuleRef.name;
         if (!clusterRefName) {
+            this._logger.info("[_initRuleApplicator] No clusterRefName: %s :: %s", applicator.namespace, applicator.name);
             return;
         }
 
         const clusterRuleInfo = this._clusterRules[clusterRefName];
         if (!clusterRuleInfo) {
+            this._logger.info("[_initRuleApplicator] Missing Cluster Rule: %s", clusterRefName);
+            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not found`);
             return;
         }
-        if (!clusterRuleInfo.compiler) {
-            return;
-        }
-
         if (!clusterRuleInfo.rule.useApplicator) {
+            this._logger.info("[_initRuleApplicator] Cluster Rule not using applicators: %s", clusterRefName);
+            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not using applicators`);
             return;
         }
         if (clusterRuleInfo.rule.spec.disabled) {
+            this._logger.info("[_initRuleApplicator] Cluster Rule disabled: %s", clusterRefName);
+            return;
+        }
+
+        if (!clusterRuleInfo.compiler) {
+            this._logger.info("[_initRuleApplicator] Cluster Rule not compiled: %s", clusterRefName);
+            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not compiled`);
+            return;
+        }
+
+        if (!clusterRuleInfo.compiler.isCompiled) {
+            this._logger.info("[_initRuleApplicator] Cluster Rule has compilation errors: %s", clusterRefName);
+            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} has compilation errors`);
             return;
         }
 

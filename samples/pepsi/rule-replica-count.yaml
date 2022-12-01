@@ -1,0 +1,13 @@
+---
+apiVersion: kubevious.io/v1alpha1
+kind: RuleApplicator
+metadata:
+  name: rule-replica-count
+  namespace: pepsi
+spec:
+  clusterRuleRef:
+    name: replica-count-check
+  # disabled: true
+  values:
+    minReplicas: 5
+    maxReplicas: 20

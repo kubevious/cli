@@ -349,6 +349,10 @@ export class RuleRegistry
     {
         const ruleManifests = await this._manifestsLoader.loadSingle(ruleRef.path, library.source);
 
+        if (ruleManifests.length === 0) {
+            this._logger.error("[_loadLibraryRule] target rule not found: ", ruleRef);
+        }
+
         for(const ruleManifest of ruleManifests)
         {
             await this._loadClusterRule(ruleManifest);

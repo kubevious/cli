@@ -111,6 +111,24 @@ export function setup(executor: ShortcutQueryExecutor)
             }))
         );
 
+    executor.setup('ArgoRolloutPodSpec',
+        () => 
+            Transform(
+                Api('argoproj.io')
+                    .Kind("Rollout")
+            ).To(item => ({
+                synthetic: true,
+                apiVersion: 'v1',
+                kind: 'PodSpec',
+                metadata: {
+                    ...item.config.spec?.template?.metadata ?? {},
+                    name: `ArgoRollout-${item.name}`,
+                    namespace: item.namespace
+                },
+                spec: item.config.spec?.template?.spec
+            }))
+        );        
+
     executor.setup('PodSpec',
         () => 
             Union(
@@ -119,6 +137,7 @@ export function setup(executor: ShortcutQueryExecutor)
                 Shortcut('DaemonSetPodSpec'),
                 Shortcut('JobPodSpec'),
                 Shortcut('CronJobPodSpec'),
+                Shortcut('ArgoRolloutPodSpec'),
             )
         );
 

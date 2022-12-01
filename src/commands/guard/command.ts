@@ -12,7 +12,7 @@ import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
 import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
 
-const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/master/index.yaml';
+const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/main/index.yaml';
 
 const myLogger = logger.sublogger('GuardCommand');
 
