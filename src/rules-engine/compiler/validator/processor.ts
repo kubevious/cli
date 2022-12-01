@@ -66,6 +66,7 @@ export class ValidationProcessor {
     private _loadModule() {
         return Promise.resolve().then(() => {
             const compilerValues: CompilerScopeDict = {
+                _: _,
                 item: null,
                 config: null,
                 cache: null,
@@ -112,6 +113,7 @@ export class ValidationProcessor {
             .then(() => {
 
                 const valueMap : Record<string, any> = {
+                    _: _,
                     item: item,
                     values: values,
                     config: item.config,

@@ -57,6 +57,7 @@ export class CacheProcessor
     private _loadModule() {
         return Promise.resolve().then(() => {
             const compilerValues: CompilerScopeDict = {
+                _: _,
                 namespace: null,
                 cache: null,
                 values: null,
@@ -91,6 +92,7 @@ export class CacheProcessor
             .then(() => {
 
                 const valueMap : Record<string, any> = {
+                    _: _,
                     namespace: namespace,
                     cache: result.cache,
                     values: values,

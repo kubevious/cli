@@ -76,6 +76,7 @@ export class TargetProcessor {
     private _loadModule() {
         
         const rootScope : CompilerScopeDict = {
+            _: _,
             _query: this._queryTarget,
             values: null,
             helpers: RULE_HELPERS,
