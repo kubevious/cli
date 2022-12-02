@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import Path from 'path';
 import { promises as fs, existsSync } from 'fs';
 
-import { IndexLibraryCommandData, IndexLibraryCommandOptions, LibraryResult, LibraryResultCategory } from './types';
+import { IndexLibraryCommandData, IndexLibraryCommandOptions, Library, LibraryCategory, LibraryRule } from './types';
 
 import { command as guardCommand } from '../guard/command';
 import { KubeviousKinds, KUBEVIOUS_API_NAME, KUBEVIOUS_API_VERSION } from '../../types/kubevious';
@@ -36,7 +36,62 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
     const manifestPackage = guardResult.manifestPackage;
 
-    const libraryFilePath = Path.join(dir, 'index.yaml');
+    
+    const rules = guardResult.localK8sRegistry.query({
+        apiName: KUBEVIOUS_API_NAME,
+        kind: KubeviousKinds.ClusterRule
+    });
+
+    const libraryCategoriesDict : Record<string, LibraryCategory> = {};
+
+    for(const rule of rules)
+    {
+        const ruleConfig = rule.config.spec as ClusterRuleK8sSpec;
+        
+        logger.info("LIBRARY RULE: %s", rule.idKey);
+
+        const name = rule.id.name!;
+        const summary = _.trim(ruleConfig.summary ?? "");
+
+        const libraryRule : LibraryRule = {
+            title: (summary.length > 0) ? summary : name,
+            name: name,
+            path: makeRelativePath(rule.source.source.path, dir),
+            category: makeRelativePath(Path.dirname(rule.source.source.path), dir),
+            summary: summary,
+            description: _.trim(ruleConfig.description ?? ""),
+        
+            ruleSpec: ruleConfig,
+        }
+
+        if (!libraryCategoriesDict[libraryRule.category]) {
+            libraryCategoriesDict[libraryRule.category] = {
+                name: libraryRule.category,
+                count: 0,
+                rules: []
+            }
+        }
+
+        libraryCategoriesDict[libraryRule.category].rules.push(libraryRule);
+        
+
+    }
+    
+    const library: Library = {
+        count: _.sum(_.values(libraryCategoriesDict).map(x => x.rules.length)),
+        categoryCount: _.keys(libraryCategoriesDict).length,
+        categories: 
+            _.chain(libraryCategoriesDict)
+                .values()
+                .orderBy(x => x.name)
+                .value()
+    }
+    for(const category of library.categories)
+    {
+        category.count = category.rules.length;
+        category.rules = _.orderBy(category.rules, x => x.name);
+    }
+
     const libraryObject : LibraryK8sObject = {
         apiVersion: `${KUBEVIOUS_API_NAME}/${KUBEVIOUS_API_VERSION}`,
         kind: KubeviousKinds.Library,
@@ -47,57 +102,21 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
             rules: []
         }
     }
-    
-    const rules = guardResult.localK8sRegistry.query({
-        apiName: KUBEVIOUS_API_NAME,
-        kind: KubeviousKinds.ClusterRule
-    });
-
-    for(const rule of rules)
+    for(const category of library.categories)
     {
-        const ruleConfig = rule.config.spec as ClusterRuleK8sSpec;
-        
-        logger.info("LIBRARY RULE: %s", rule.idKey);
-        const category = makeRelativePath(Path.dirname(rule.source.source.path), dir);
-        const rulePath = makeRelativePath(rule.source.source.path, dir);
-        
-        libraryObject.spec.rules.push({
-            name: rule.id.name!,
-            path: rulePath,
-            category: category,
-            summary: ruleConfig.summary ?? "",
-        });
+        for(const rule of category.rules)
+        {
+            libraryObject.spec.rules.push({
+                name: rule.name,
+                path: rule.path,
+                category: rule.category,
+                summary: rule.summary,
+            });
+        }
     }
-
     libraryObject.spec.rules = _.orderBy(libraryObject.spec.rules, [x => x.name, x => x.path]);
 
-    const libraryResult : LibraryResult = {
-        categories: []
-    }
-
-    {
-        const categoryDict : Record<string, LibraryResultCategory> = {};
-        for(const rule of libraryObject.spec.rules)
-        {
-            if (!categoryDict[rule.category]) {
-                categoryDict[rule.category] = {
-                    name: rule.category,
-                    rules: []
-                };
-            }
-            categoryDict[rule.category].rules.push(rule);
-        }
-        for(const category of _.values(categoryDict)) {
-            category.rules = _.orderBy(category.rules, x => x.name);
-        }
-
-        libraryResult.categories = 
-            _.chain(categoryDict)
-             .values()
-             .orderBy(x => x.name)
-             .value();
-    }
-
+    const libraryFilePath = Path.join(dir, 'index.yaml');
 
     if (guardResult.success)
     {
@@ -109,7 +128,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
                 }
             }));
 
-        await setupDocs(dir, libraryResult);
+        await setupDocs(dir, library);
     }
 
     const success = guardResult.success;
@@ -121,8 +140,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
         libraryDir: dir,
         libraryPath: libraryFilePath,
-        library: libraryResult,
-        rules,
+        library: library,
     }
 }
 
@@ -134,7 +152,7 @@ export function massageIndexOptions(options: Partial<IndexLibraryCommandOptions>
 
 const README_BEGIN = '[//]: # (BEGIN_RULES_DESCRIPTION)';
 const README_END = '[//]: # (END_RULES_DESCRIPTION)';
-async function setupDocs(dir: string, libraryResult : LibraryResult)
+async function setupDocs(dir: string, library : Library)
 {
     const readmePath = Path.join(dir, 'README.md');
     if (!existsSync(readmePath)) {
@@ -165,14 +183,14 @@ async function setupDocs(dir: string, libraryResult : LibraryResult)
     contents = 
         contents.substring(0, deleteStartIndex) +
         "\n" + 
-        generateMDDocs(libraryResult) +
+        generateMDDocs(library) +
         "\n" + 
         contents.substring(endIndex);
 
     await fs.writeFile(readmePath, contents);
 }
 
-function generateMDDocs(libraryResult : LibraryResult)
+function generateMDDocs(library : Library)
 {
     let contents = '';
 
@@ -183,19 +201,33 @@ function generateMDDocs(libraryResult : LibraryResult)
     contents += '[//]: # ($ kubevious install-git-hook rule-library .)\n'
     contents += '\n'
 
-    for(const category of libraryResult.categories)
+    contents += `Total Rules: ${library.count}`;
+    contents += '\n';
+
+    contents += `### Categories:`;
+    contents += '\n';
+    for(const category of library.categories)
     {
-        contents += `### ${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)}`;
+        contents += `- [${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)} (${category.count})](#-${makeMdLink(category.name)})`;
+        contents += '\n';
+    }
+
+    contents += `### Rules:`;
+    contents += '\n';
+
+    for(const category of library.categories)
+    {
+        contents += `#### ${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)}`;
         contents += '\n';
 
         for(const rule of category.rules)
         {
-            contents += `${OBJECT_ICONS.rule.get()} **[${rule.name}](${rule.path})**.`;
+            contents += `${OBJECT_ICONS.rule.get()} **[${rule.title}](${rule.path})**`;
             contents += '\n';
 
-            if (rule.summary.length > 0)
+            if (rule.description.length > 0)
             {
-                contents += rule.summary;
+                contents += rule.description;
                 contents += '\n';
             }
 
@@ -204,4 +236,12 @@ function generateMDDocs(libraryResult : LibraryResult)
     }
 
     return contents;
+}
+
+function makeMdLink(str: string)
+{
+    str = _.toLower(str);
+    str = str.replace(/\s/s, '-');
+    str = str.replace(/\//s, '-');
+    return str;
 }

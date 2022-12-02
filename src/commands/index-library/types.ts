@@ -1,6 +1,5 @@
-import { K8sManifest } from "../../manifests/k8s-manifest";
 import { ManifestPackage } from "../../manifests/manifest-package";
-import { LibraryRuleRefK8sSpec } from "../../rules-engine/spec/rule-spec";
+import { ClusterRuleK8sSpec, LibraryRuleRefK8sSpec } from "../../rules-engine/spec/rule-spec";
 import { GuardCommandData, GuardResult } from "../guard/types";
 
 export interface IndexLibraryCommandOptions  {
@@ -14,8 +13,7 @@ export interface IndexLibraryCommandData {
 
     libraryDir: string,
     libraryPath: string,
-    library: LibraryResult,
-    rules: K8sManifest[],
+    library: Library,
 }
 
 export interface IndexLibraryResult
@@ -25,16 +23,32 @@ export interface IndexLibraryResult
     guardResult: GuardResult;
 
     libraryPath: string,
-    library: LibraryResult,
+    library: Library,
 }
 
-export interface LibraryResult
+
+export interface LibraryRule
 {
-    categories: LibraryResultCategory[];
+    title: string,
+    name: string,
+    path: string,
+    category: string,
+    summary: string,
+    description: string,
+
+    ruleSpec: ClusterRuleK8sSpec,
 }
 
-export interface LibraryResultCategory
+export interface LibraryCategory
 {
     name: string;
-    rules: LibraryRuleRefK8sSpec[];
+    count: number;
+    rules: LibraryRule[];
+}
+
+export interface Library
+{
+    count: number;
+    categoryCount: number;
+    categories: LibraryCategory[];
 }

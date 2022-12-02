@@ -9,7 +9,6 @@ export function formatResult({
     success,
     manifestPackage,
     guardCommandData,
-    rules,
     libraryPath,
     library
     }: IndexLibraryCommandData) : IndexLibraryResult
