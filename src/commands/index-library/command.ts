@@ -150,8 +150,8 @@ export function massageIndexOptions(options: Partial<IndexLibraryCommandOptions>
     }
 }
 
-const README_BEGIN = '[//]: # (BEGIN_RULES_DESCRIPTION)';
-const README_END = '[//]: # (END_RULES_DESCRIPTION)';
+const README_BEGIN = '[//]: # "BEGIN_RULES_DESCRIPTION"';
+const README_END = '[//]: # "END_RULES_DESCRIPTION"';
 async function setupDocs(dir: string, library : Library)
 {
     const readmePath = Path.join(dir, 'README.md');
@@ -195,10 +195,10 @@ function generateMDDocs(library : Library)
     let contents = '';
 
     contents += '\n'
-    contents += '[//]: # (!!! DO NOT EDIT. AUTO-GENERATED WITH:)\n'
-    contents += '[//]: # ($ kubevious index-library .)\n'
-    contents += '[//]: # (OR PRE-COMMIT HOOK)\n'
-    contents += '[//]: # ($ kubevious install-git-hook rule-library .)\n'
+    contents += '[//]: # "!!! DO NOT EDIT. AUTO-GENERATED WITH:"\n'
+    contents += '[//]: # "$ kubevious index-library ."\n'
+    contents += '[//]: # "OR PRE-COMMIT HOOK"\n'
+    contents += '[//]: # "$ kubevious install-git-hook rule-library ."\n'
     contents += '\n'
 
     contents += `Total Rules: ${library.count}`;
@@ -206,8 +206,10 @@ function generateMDDocs(library : Library)
 
     contents += `### Categories:`;
     contents += '\n';
+
     for(const category of library.categories)
     {
+
         contents += `- [${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)} (${category.count})](#-${makeMdLink(category.name)})`;
         contents += '\n';
     }
@@ -241,7 +243,7 @@ function generateMDDocs(library : Library)
 function makeMdLink(str: string)
 {
     str = _.toLower(str);
-    str = str.replace(/\s/s, '-');
-    str = str.replace(/\//s, '-');
+    str = str.replace(/\s/g, '-');
+    str = str.replace(/\//g, '');
     return str;
 }

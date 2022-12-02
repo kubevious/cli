@@ -1,5 +1,5 @@
 import { ManifestPackage } from "../../manifests/manifest-package";
-import { ClusterRuleK8sSpec, LibraryRuleRefK8sSpec } from "../../rules-engine/spec/rule-spec";
+import { ClusterRuleK8sSpec } from "../../rules-engine/spec/rule-spec";
 import { GuardCommandData, GuardResult } from "../guard/types";
 
 export interface IndexLibraryCommandOptions  {
