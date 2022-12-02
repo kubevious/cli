@@ -58,8 +58,7 @@ Kubevous CLI validates manifests from a variety of sources:
 
 ### 👇 Option 1: (Homebrew)
 ```sh
-$ brew tap kubevious/cli
-$ brew install kubevious/cli/kubevious
+$ brew install kubevious
 ```
 
 ```sh
