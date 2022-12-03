@@ -95,15 +95,15 @@ steps:
       - ./scripts/prepare-package.sh
       - npm run build
 
-  # run_unit_test:
-  #   title: Run Unit Tests
-  #   stage: test
-  #   image: 'kubevious/node-builder:14'
-  #   working_directory: "${{MAIN_REPO_PATH}}"
-  #   commands:
-  #     - pwd
-  #     - ls -la
-  #     - npm test
+  run_unit_test:
+    title: Run Unit Tests
+    stage: build
+    image: 'kubevious/node-builder:14'
+    working_directory: "${{MAIN_REPO_PATH}}"
+    commands:
+      - pwd
+      - ls -la
+      - npm test
 
   package_npm:
     title: Package NPM
