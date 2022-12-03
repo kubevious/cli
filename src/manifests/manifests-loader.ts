@@ -166,13 +166,15 @@ export class ManifetsLoader
         .then(results => _.flatten(results))
     }
 
-    private _loadFile(path: string)
+    private _loadFile(path: string) : Promise<K8sManifest[]>
     {
         const source = this._manifestPackage.getSource("file", path);
 
         this._logger.info("[_loadFile] path: %s", path);
-        const contents = fs.readFileSync(path, { encoding: 'utf8' });
-        return this._parseContents(source, path, contents);
+
+        return Promise.resolve()
+            .then(() => fs.promises.readFile(path, { encoding: 'utf8' }))
+            .then(contents => this._parseContents(source, path, contents));
     }
 
     private _loadUrl(url: string) : Promise<K8sManifest[]>

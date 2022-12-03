@@ -1,5 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
+import { Promise as MyPromise } from 'the-promise';
 import { ApplicatorRule, ClusterRule, NamespaceRule, RuleKind, RuleObject } from './types';
 import { RegistryQueryExecutor } from '../query-executor';
 import { ClusterRuleK8sSpec, LibraryK8sSpec, LibraryRuleRefK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec } from '../spec/rule-spec';
@@ -339,10 +340,13 @@ export class RuleRegistry
 
         const ruleRefs = spec.rules ?? [];
         
-        for(const ruleRef of ruleRefs)
-        {
-            await this._loadLibraryRule(manifest, ruleRef);
-        }
+        await MyPromise.execute(ruleRefs, 
+            ruleRef => {
+                return MyPromise.resolve(this._loadLibraryRule(manifest, ruleRef));
+            },
+            {
+                concurrency: 10,
+            })
     }
 
     private async _loadLibraryRule(library: K8sManifest, ruleRef: LibraryRuleRefK8sSpec)
