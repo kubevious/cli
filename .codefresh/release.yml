@@ -282,7 +282,7 @@ steps:
       - echo "Validating Istio Classic..."
       - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml 10-istio-bookinfo/istio-classic/destination-rule-all.yaml
       - echo "Validating Istio Gateway API..."
-      - kubevious guard https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.5.1/standard-install.yaml ${{SAMPLES_PATH}}/istio/secret-gateway-api-admission.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/gateway-api/mock-gateway-class.yaml 10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml 10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
+      - kubevious guard crds/gateway-api/standard.yaml ${{SAMPLES_PATH}}/istio/secret-gateway-api-admission.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/gateway-api/mock-gateway-class.yaml 10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml 10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
 
   # build_executables:
   #   title: Build Executables
