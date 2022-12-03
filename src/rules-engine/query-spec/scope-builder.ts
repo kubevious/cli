@@ -86,6 +86,7 @@ enum TopLevelQuery
     Transform = 'Transform',
     TransformMany = 'TransformMany',
     Filter = 'Filter',
+    First = 'First',
     
     Manual = 'Manual',
 }
@@ -103,6 +104,7 @@ export const TARGET_QUERY_BUILDER_DICT : Record<string, TargetQueryFunc> = {
     [TopLevelQuery.TransformMany]: TARGET_QUERY_BUILDER_OBJ.TransformMany,
 
     [TopLevelQuery.Filter]: TARGET_QUERY_BUILDER_OBJ.Filter,
+    [TopLevelQuery.First]: TARGET_QUERY_BUILDER_OBJ.First,
 
     [TopLevelQuery.Manual]: TARGET_QUERY_BUILDER_OBJ.Manual,
 
