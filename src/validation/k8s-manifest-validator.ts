@@ -2,6 +2,7 @@ import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 
 import Ajv, { Options as AjvOptions, ErrorObject } from "ajv";
+
 import addFormats from "ajv-formats";
 
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
@@ -148,15 +149,16 @@ export class K8sManifestValidator
                 }
             }
             else if (_.isObject(node)) {
-                const propsSchema = schema.properties;
-                if (propsSchema)
+                if (schema.properties)
                 {
+                    this._preProcessClearEmptyRequiredStrings(node, schema);
+
                     for(const propName of _.keys(node))
                     {
                         // this._logger.info('[_preProcessNode] propName: %s', propName)
                         const propNode = (node as any)[propName];
 
-                        const propSchema = propsSchema[propName];
+                        const propSchema = schema.properties[propName];
                         if (propSchema)
                         {
                             this._preProcessNode(propNode, propSchema, node, propName);
@@ -185,6 +187,31 @@ export class K8sManifestValidator
             }
         }
 
+    }
+
+    private _preProcessClearEmptyRequiredStrings(node: any, schema: any) : void
+    {
+        if (schema.required) {
+            for(const propName of schema.required) {
+                const propSchema = schema.properties[propName];
+                if (propSchema && 
+                    propSchema.type == "string")
+                {
+                    const propNode = (node as any)[propName];
+                    if (_.isString(propNode) && (propNode.length === 0))
+                    {
+                        if (_.isNotNullOrUndefined(propSchema.default))
+                        {
+                            delete (node as any)[propName];
+                        }
+                        else
+                        {
+                            (node as any)[propName] = propSchema.default;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private _preProcessNodeRef(node: any, refName: string, parentNode: any, parentProp: any) : void

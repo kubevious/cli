@@ -12,6 +12,7 @@ import { getJsonSchemaResourceKey, isCRD } from '../utils/k8s';
 import { K8sOpenApiResource } from 'k8s-super-client';
 import { CrdSchemaToJsonSchemaConverter } from '../api-schema/crd-schema-to-json-schema-converter';
 import { K8sManifest } from '../manifests/k8s-manifest';
+import { SchemaObject } from 'ajv';
 
 export interface K8sPackageValidatorParams
 {
@@ -35,6 +36,8 @@ export class K8sPackageValidator
         this._manifestPackage = manifestPackage;
         this._params = params || {};
         this._k8sJsonSchema = this._makeSchemaClone();
+        
+        // this._postProcessSchemas();
     }
 
     get k8sJsonSchema() {
@@ -205,4 +208,48 @@ export class K8sPackageValidator
         }
         return newSchema;
     }
+
+    // private _postProcessSchemas()
+    // {
+    //     for(const def of _.values(this._k8sJsonSchema.definitions))
+    //     {
+    //         this._postProcessSchema(def);
+    //     }
+    // }
+
+    // private _postProcessSchema(schema: SchemaObject)
+    // {
+    //     if (schema["$ref"]) {
+    //         return;
+    //     }
+
+    //     if (schema.type === 'object')
+    //     {
+    //         if (schema.properties)
+    //         {
+    //             for(const key of schema.required ?? [])
+    //             {
+    //                 const childSchema = schema.properties[key];
+    //                 // if (childSchema) {
+    //                 //     childSchema[SCHEMA_NOT_EMPTY_STRING_KEYWORD] = true;
+    //                 // }
+    //             }
+
+    //             for(const childSchema of _.values(schema.properties))
+    //             {
+    //                 this._postProcessSchema(childSchema);
+    //             }
+    //         }
+    //     }
+    //     else if (schema.type === 'array')
+    //     {
+    //         if (schema.items)
+    //         {
+    //             for(const childSchema of schema.allOf ?? [])
+    //             {
+    //                 this._postProcessSchema([childSchema]);
+    //             }
+    //         }
+    //     }
+    // }
 }

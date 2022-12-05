@@ -13,6 +13,7 @@ import { readFromInputStream } from '../utils/stream';
 import { spinOperation } from '../screen/spinner';
 import { K8sManifest, ManifestSource } from './k8s-manifest';
 import { isWeb, joinPath } from '../utils/path';
+import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
 
 export interface ManifetsLoaderOptions
 {
@@ -76,7 +77,7 @@ export class ManifetsLoader
                 if (!manifests) {
                     try
                     {
-                        manifests = parseYaml(contents);
+                        manifests = this._parseYaml(contents);
                     }
                     catch(reason: any)
                     {
@@ -206,7 +207,7 @@ export class ManifetsLoader
             let configs : any[] | null = [];
             try
             {
-                configs = parseYaml(contents);    
+                configs = this._parseYaml(contents);    
             }
             catch(reason: any)
             {
@@ -275,7 +276,8 @@ export class ManifetsLoader
             return null;
         }
 
-        const k8sObject = config as K8sObject;
+        const k8sObject = this._sanitizeManifest(config as K8sObject);
+
         const errors = this._checkK8sManifest(k8sObject);
         if (errors.length > 0)
         {
@@ -323,24 +325,28 @@ export class ManifetsLoader
         return null;
     }
 
-}
+    private _parseYaml(contents: string) : any[] | null
+    {
+        // this._logger.info("[parseYaml] >>>>>>>>>>>>>>>. STR: ", contents);
 
-function parseYaml(contents: string) : any[] | null
-{
-    // console.log(">>>>>>>>>>>>>>>")
-    // console.log(contents);
-    // console.log("<<<<<<<<>>>>>>>>*")
+        const result = YAML.parseAllDocuments(contents, {
+        });
 
-    const result = YAML.parseAllDocuments(contents, {
-    });
-
-    if (!result) {
-        return [];
+        if (!result) {
+            return [];
+        }
+        
+        const jsons = result.map(x => x.toJS({ })); // emptySourceAsObject: false 
+        // for(const json of jsons)
+        // {
+        //     this._logger.info("[parseYaml] *************************** DATA: ", json);
+        // }
+        return jsons;
     }
-    
-    const jsons = result.map(x => x.toJS({ })); // emptySourceAsObject: false 
-    // console.log("***************************")
-    // console.log(jsons);
-    // console.log("***************************")
-    return jsons;
+
+    private _sanitizeManifest(obj: K8sObject) : K8sObject
+    {
+        return sanitizeYaml(obj);
+    }
+
 }
