@@ -56,6 +56,19 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                         required:
                           - name
+                dependencies:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      minVersion:
+                        type: string
+                      maxVersion:
+                        type: string
+                    required:
+                      - name
               required:
                 - target
                 - rule
