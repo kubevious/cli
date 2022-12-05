@@ -200,7 +200,7 @@ export class K8sManifestValidator
                     const propNode = (node as any)[propName];
                     if (_.isString(propNode) && (propNode.length === 0))
                     {
-                        if (_.isNotNullOrUndefined(propSchema.default))
+                        if (_.isNullOrUndefined(propSchema.default))
                         {
                             delete (node as any)[propName];
                         }
