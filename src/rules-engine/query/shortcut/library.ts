@@ -158,7 +158,9 @@ export function setup(executor: ShortcutQueryExecutor)
                             name: `${item.name}-Cont-${cont.name}`,
                             namespace: item.namespace
                         },
-                        spec: cont
+                        spec: cont,
+                        isInitContainer: false,
+                        podSpec: item?.config.spec
                     });
                 }
                 for(const cont of item?.config.spec?.initContainers ?? [])
@@ -172,7 +174,9 @@ export function setup(executor: ShortcutQueryExecutor)
                             name: `${item.name}-InitCont-${cont.name}`,
                             namespace: item.namespace
                         },
-                        spec: cont
+                        spec: cont,
+                        isInitContainer: true,
+                        podSpec: item?.config.spec
                     });
                 }
                 return results;
