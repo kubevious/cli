@@ -6,8 +6,8 @@
 
 - [✨ Key Capabilities](#-key-capabilities)
 - [📥 Installation](#-installation)
-  - [👇 Homebrew](#-option-1-homebrew)
-  - [👇 NPM Package](#-option-2-npm-package)
+  - [👇 NPM Package](#-option-1-npm-package)
+  - [👇 Homebrew](#-option-2-homebrew)
   - [👇 Precompiled Binaries](#-option-3-precompiled-binaries)
   - [👇 In Docker Container](#-option-4-in-a-docker-container)
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
@@ -56,16 +56,7 @@ Kubevous CLI validates manifests from a variety of sources:
 
 ## 📥 Installation
 
-### 👇 Option 1: (Homebrew)
-```sh
-$ brew install kubevious
-```
-
-```sh
-$ kubevious guard samples/
-```
-
-### 👇 Option 2: (NPM Package)
+### 👇 Option 1: (NPM Package)
 If you have Node.js v14 or higher:
 ```sh
 $ npm install -g kubevious
@@ -75,10 +66,19 @@ $ npm install -g kubevious
 $ kubevious guard samples/
 ```
 
+### 👇 Option 2: (Homebrew)
+```sh
+$ brew install kubevious
+```
+
+```sh
+$ kubevious guard samples/
+```
+
 ### 👇 Option 3: (Precompiled Binaries)
 All-in-one executables for Linux, Alpine, Mac OS, and Windows, including x64 and arm64 architectures.
 Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) or 
-[Google Drive](https://drive.google.com/drive/folders/1y2K6t5VVsU4EkiQnGt0e5SRkZgu-FbL0)
+[Binary Repo](https://github.com/kubevious/cli-releases)
 
 ### 👇 Option 4: (In a Docker container)
 Run in a container:
