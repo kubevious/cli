@@ -9,11 +9,22 @@ spec:
     ApiVersion('cert-manager.io/v1')
     .Kind('Certificate')
   rule: |
+    const issuerRef = config.spec?.issuerRef;
+    if (!issuerRef) {
+      error('issuerRef is not set');
+      return;
+    }
+    const issuerRefKind = issuerRef.kind ?? 'Issuer';
+    const issuerRefName = config.spec?.issuerRef?.name;
+    if (!issuerRefName) {
+      error('issuerRef.name is not set.');
+      return;
+    }
     const issuer = ApiVersion('cert-manager.io/v1')
-                .Kind(config.spec?.issuerRef?.kind)
-                .name(config.spec?.issuerRef?.name)
-                .allNamespaces()
-                .single();
+                    .Kind(issuerRefKind)
+                    .name(issuerRefName)
+                    .isClusterScope(issuerRefKind.startsWith('Cluster'))
+                    .single();
     if (!issuer) {
       error('Could not find the Certificate Issuer');
     } else {
@@ -22,8 +33,8 @@ spec:
         error(`Using not approved email: ${email}. Should be from ${values.domain} domain.`);
       }
     }
-  # application:
-  #   useApplicator: true
+  application:
+    useApplicator: true
     # onlySelectedNamespaces: true
   #   namespaces:
   #     - name: kubevious

@@ -6,7 +6,7 @@ metadata:
   namespace: kubevious
 spec:
   clusterRuleRef:
-    name: certificate-check
+    name: cert-manager.certificate-check
   # disabled: true
   values:
     domain: kubevious.io
