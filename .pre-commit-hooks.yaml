@@ -15,7 +15,7 @@
   entry: 'kubevious/cli:1.0.30'
   args: ['lint', '/src']
 - id: kubevious-guard
-  name: kubevious gurad manifests
+  name: kubevious guard manifests
   description: Guard Kuberentes manifests
   types: [file, yaml]
   language: docker_image
