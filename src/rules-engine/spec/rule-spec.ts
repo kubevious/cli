@@ -2,6 +2,16 @@ import { K8sMetadata } from "../../types/k8s";
 
 export type RuleOverrideValues = Record<string, any>;
 
+export interface RuleDependency
+{
+    name: string,
+    minVersion?: string,
+    maxVersion?: string,
+    range?: string,
+}
+
+export type RuleDependencies = RuleDependency[];
+
 export interface ClusterRuleK8sSpec
 {
     target: string,
@@ -11,7 +21,8 @@ export interface ClusterRuleK8sSpec
     description?: string,
     disabled?: boolean,
     application?: ClusterRuleApplication,
-    values?: RuleOverrideValues
+    values?: RuleOverrideValues,
+    dependencies?: RuleDependencies,
 }
 
 export interface ClusterRuleApplication {
@@ -32,7 +43,8 @@ export interface RuleK8sSpec
     summary?: string,
     description?: string,
     disabled?: boolean,
-    values?: RuleOverrideValues
+    values?: RuleOverrideValues,
+    dependencies?: RuleDependencies,
 }
 
 export interface RuleApplicatorK8sSpec
@@ -45,11 +57,6 @@ export interface RuleApplicatorK8sSpec
     values?: RuleOverrideValues
 }
 
-export interface LibraryK8sSpec
-{
-    rules: LibraryRuleRefK8sSpec[];
-}
-
 export interface LibraryRuleRefK8sSpec
 {
     name: string,
@@ -57,6 +64,12 @@ export interface LibraryRuleRefK8sSpec
     category: string,
     summary: string,
 }
+
+export interface LibraryK8sSpec
+{
+    rules: LibraryRuleRefK8sSpec[];
+}
+
 
 export interface LibraryK8sObject
 {

@@ -130,6 +130,7 @@ export class RuleRegistry
         const clustered = spec.application.clustered;
 
         this._clusterRules[name] = {
+            isDisabled: spec.disabled,
             manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.ClusterRule,
@@ -138,6 +139,8 @@ export class RuleRegistry
             cache: spec.cache,
             script: spec.rule,
             values: spec.values,
+            dependencies: spec.dependencies ?? [],
+            hasUnmedDependency: false,
             spec: spec,
 
             clustered: clustered,
@@ -217,6 +220,7 @@ export class RuleRegistry
         }
 
         this._rules[manifest.idKey] = {
+            isDisabled: spec.disabled,
             manifest: manifest,
             source: manifest.source.source,
             kind: RuleKind.Rule,
@@ -229,6 +233,8 @@ export class RuleRegistry
             cache: spec.cache,
             script: spec.rule,
             values: spec.values,
+            dependencies: spec.dependencies ?? [],
+            hasUnmedDependency: false,
             spec: spec
         };
     }

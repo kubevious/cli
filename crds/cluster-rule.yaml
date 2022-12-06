@@ -67,6 +67,8 @@ spec:
                         type: string
                       maxVersion:
                         type: string
+                      range:
+                        type: string
                     required:
                       - name
               required:

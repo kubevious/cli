@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
-import { ApplicatorRule, ClusterRule, NamespaceRule, RuleApplicationScope, RuleObject } from '../registry/types';
+import { ApplicatorRule, ClusterRule, CommonRule, NamespaceRule, RuleApplicationScope, RuleObject } from '../registry/types';
 import { RuleRegistry } from '../registry/rule-registry';
 import { RuleRuntime } from './rule-runtime';
 import { RegistryQueryExecutor } from '../query-executor';
@@ -10,8 +10,10 @@ import { ManifestPackage } from '../../manifests/manifest-package';
 import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { ISpinner, spinOperation } from '../../screen/spinner';
 import { RuleCompiler } from '../compiler/rule-compiler';
-import { RuleOverrideValues } from '../spec/rule-spec';
+import { RuleDependency, RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
+import { checkKubeviousVersion } from '../../utils/version-checker';
+import cluster from 'cluster';
 
 export class RulesRuntime
 {
@@ -54,6 +56,7 @@ export class RulesRuntime
     init()
     {
         return Promise.resolve()
+            .then(() => this._checkDependencies())
             .then(() => this._initClusterRules())
             .then(() => this._initRules())
             .then(() => this._initRuleApplicators())
@@ -71,6 +74,46 @@ export class RulesRuntime
             });
     }
 
+    private _checkDependencies()
+    {
+        for(const rule of this._ruleRegistry.clusterRules)
+        {
+            this._checkRuleDependencies(rule);
+        }
+
+        for(const rule of this._ruleRegistry.rules)
+        {
+            this._checkRuleDependencies(rule);
+        }
+    }
+
+    private _checkRuleDependencies(rule: CommonRule)
+    {
+        for(const dependency of rule.dependencies)
+        {
+            if(rule.isDisabled) {
+                return;
+            }
+            this._checkRuleDependency(rule, dependency);
+        }
+    }
+
+    private _checkRuleDependency(rule: CommonRule, dependency: RuleDependency)
+    {
+        if (dependency.name === 'kubevious')
+        {
+            if (!checkKubeviousVersion(dependency.minVersion, dependency.maxVersion, dependency.range))
+            {
+                if (!rule.hasUnmedDependency)
+                {
+                    this._manifestPackage.manifestWarning(rule.manifest, 'Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
+                    rule.hasUnmedDependency = true;
+                    rule.isDisabled = true;
+                }
+            }
+        }
+    }
+
     private _initClusterRules()
     {
         return Promise.serial(this._ruleRegistry.clusterRules, x => {
@@ -82,7 +125,11 @@ export class RulesRuntime
     {
         this._logger.info("[_initClusterRule] %s...", clusterRule.name);
 
-        if (clusterRule.spec.disabled) {
+        if (clusterRule.hasUnmedDependency) {
+            this._logger.info("[_initClusterRule] skipping. Has Unmet Dependency.");
+        }
+
+        if (clusterRule.isDisabled) {
             this._logger.info("[_initClusterRule] skipping. Disabled: %s", clusterRule.name);
 
             this._clusterRules[clusterRule.name] = {
@@ -169,7 +216,11 @@ export class RulesRuntime
     {
         this._logger.info("[_initRule] %s :: %s...", rule.namespace, rule.name);
 
-        if (rule.spec.disabled) {
+        if (rule.hasUnmedDependency) {
+            this._logger.info("[_initRule] skipping. Has Unmet Dependency.");
+        }
+
+        if (rule.isDisabled) {
             return;
         }
 
@@ -220,7 +271,7 @@ export class RulesRuntime
             this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not using applicators`);
             return;
         }
-        if (clusterRuleInfo.rule.spec.disabled) {
+        if (clusterRuleInfo.rule.isDisabled) {
             this._logger.info("[_initRuleApplicator] Cluster Rule disabled: %s", clusterRefName);
             return;
         }

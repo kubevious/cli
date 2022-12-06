@@ -1,6 +1,6 @@
 import { K8sManifest } from "../../manifests/k8s-manifest";
 import { ManifestSourceId } from "../../types/manifest";
-import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleK8sSpec, RuleOverrideValues } from "../spec/rule-spec";
+import { ClusterRuleK8sSpec, RuleApplicatorK8sSpec, RuleDependencies, RuleK8sSpec, RuleOverrideValues } from "../spec/rule-spec";
 
 export enum RuleKind {
     ClusterRule = 'ClusterRule',
@@ -23,9 +23,16 @@ export interface RuleApplicationScope {
     namespace?: string;
 }
 
-export interface ClusterRule {
-    source: ManifestSourceId,
+export interface CommonRule {
     manifest: K8sManifest,
+
+    isDisabled: boolean;
+    dependencies: RuleDependencies;
+    hasUnmedDependency: boolean;
+}
+
+export interface ClusterRule extends CommonRule {
+    source: ManifestSourceId,
     kind: RuleKind;
     name: string;
     application?: RuleApplicationScope; 
@@ -45,8 +52,7 @@ export interface ClusterRule {
     spec: ClusterRuleK8sSpec;
 }
 
-export interface NamespaceRule {
-    manifest: K8sManifest,
+export interface NamespaceRule extends CommonRule {
     source: ManifestSourceId,
     kind: RuleKind;
     namespace: string;
