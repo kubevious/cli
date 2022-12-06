@@ -128,6 +128,15 @@ export const SOURCE_ICONS = {
     k8s: new IconDefinition('☸️ '),
 }
 
+
+export const OTHER_ICONS = {
+    email: new IconDefinition(emoji.get(':e-mail:')),
+    bug: new IconDefinition(emoji.get(':ladybug:')),
+    slack: new IconDefinition(emoji.get(':speech_balloon:')),
+    party: new IconDefinition(emoji.get(':tada:')),
+}
+
+
 export function printSummaryCounter(icon: IconDefinition, title: string, count: number)
 {
     print(`${icon.get(count)} ${title}: ${count}`, 8);

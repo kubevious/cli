@@ -12,6 +12,7 @@ import setupGuard from './commands/guard';
 import setupListKnownK8sVersions from './commands/list-known-k8s-versions';
 import setupIndexLibrary from './commands/index-library';
 import setupInstallGitHook from './commands/install-git-hook';
+import setupSupport from './commands/support';
 
 logger.info("[execPath]: %s", process.execPath)
 logger.info("[execArgv]: ", process.execArgv)
@@ -23,10 +24,11 @@ program
   .description('Kubevious CLI validates Kubernetes manifests.\nFind more information at: https://github.com/kubevious/cli')
   .version(VERSION);
 
-setupLintManifests(program);
 setupGuard(program);
+setupLintManifests(program);
 setupListKnownK8sVersions(program);
 setupIndexLibrary(program);
 setupInstallGitHook(program);
+setupSupport(program);
 
 program.parse();
