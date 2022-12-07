@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as Path from 'path';
 
 import { ManifestSource } from './k8s-manifest';
-import { isAbsolutePath, isWebPath, resolvePath } from '../utils/path';
+import { isWebPath, resolvePath } from '../utils/path';
 
 export interface InputSourceExtractorOptions {}
 
@@ -30,20 +30,18 @@ export class InputSourceExtractor {
         return _.values(this._sources);
     }
 
-    public async addMany(fileOrPatternOrUrls: string[], parentSource?: ManifestSource) {
-        await MyPromise.serial(fileOrPatternOrUrls, (x) => MyPromise.resolve(this.addSingle(x, parentSource)));
+    public async addMany(fileOrPatternOrUrls: string[]) {
+        await MyPromise.serial(fileOrPatternOrUrls, (x) => MyPromise.resolve(this.addSingle(x)));
     }
 
-    public async addSingle(fileOrPatternOrUrl: string, parentSource?: ManifestSource): Promise<void> {
-        let finalPath = fileOrPatternOrUrl;
-        if (parentSource && (parentSource.source.kind === 'file' || parentSource.source.kind === 'web')) {
-            finalPath = resolvePath(finalPath, parentSource.source.path);
-        }
+    public async addSingle(fileOrPatternOrUrl: string): Promise<void>
+    {
+        this._logger.info('[addSingle] %s', fileOrPatternOrUrl);
 
-        if (isWebPath(finalPath)) {
-            this._registerSource(finalPath, parentSource);
+        if (isWebPath(fileOrPatternOrUrl)) {
+            this._registerSource(fileOrPatternOrUrl);
         } else {
-            await this._addFromFileOrPattern(finalPath, parentSource);
+            await this._addFromFileOrPattern(fileOrPatternOrUrl);
         }
     }
 
@@ -126,7 +124,7 @@ export class InputSourceExtractor {
         return true;
     }
 
-    private async _addFromFileOrPattern(fileOrPattern: string, parentSource?: ManifestSource) {
+    private async _addFromFileOrPattern(fileOrPattern: string) {
         // this._logger.info("[_addFromFileOrPattern] fileOrPattern: %s", fileOrPattern);
 
         const pattern = this._makeSearchPattern(fileOrPattern);
@@ -142,14 +140,14 @@ export class InputSourceExtractor {
 
         for (const file of files)
         {
-            this._registerSource(file, parentSource);
+            this._registerSource(file);
         }
     }
 
-    private _registerSource(sourcePath: string, parentSource?: ManifestSource) {
+    private _registerSource(sourcePath: string) {
         // this._logger.info("[_addFromFileOrPattern] sourcePath: %s", sourcePath);
 
-        const source = new InputSource(sourcePath, parentSource);
+        const source = new InputSource(sourcePath);
 
         this._logger.verbose('[_addFromFileOrPattern] normalPath: %s', source.path);
 

@@ -148,6 +148,7 @@ export class ManifestLoader
         }
         catch(reason : any)
         {
+            // this._logger.error("_loadUrl] ERROR: ", reason);
             this._manifestPackage.sourceError(source, 'Failed to fetch manifest. Reason: ' + (reason?.message ?? "Unknown"));
             return [];
         }
