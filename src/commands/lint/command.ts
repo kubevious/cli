@@ -6,33 +6,56 @@ import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../api-schema
 import { LintCommandData, LintCommandOptions } from './types';
 import { DefaultNamespaceSetter } from '../../processors/default-namespace-setter';
 import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
-import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { ManifestLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { PathResolver } from '../../path-resolver';
+import { InputSourceExtractor } from '../../manifests/input-source-extractor';
+import { spinOperation } from '../../screen/spinner';
 
 const myLogger = logger.sublogger('LintCommand');
 
-export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
+export async function command(paths: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
-    logger.info("[PATH] ", path);
+    logger.info("[PATH] ", paths);
 
-    const manifestPackage = new ManifestPackage(logger);
-
-    const loader = new ManifetsLoader(logger, manifestPackage, {
-        ignoreNonK8s: options.ignoreNonK8s
-    });
+    const inputSourceExtractor = new InputSourceExtractor(logger);
 
     {
-        const pathResolver = new PathResolver();
-        await loader.load([pathResolver.cliCrdsDir]);
-    }
+        const sourceExtractorSpinner = spinOperation('Identifying manifest sources...');
 
-    await loader.load(path);
+        {
+            const pathResolver = new PathResolver();
+            await inputSourceExtractor.addMany([pathResolver.cliCrdsDir]);
+        }
+    
+        await inputSourceExtractor.addMany(paths);
+
+        await inputSourceExtractor.reconcile();
+
+        sourceExtractorSpinner.complete('Sources identified.');
+    }
+    
+    const manifestPackage = new ManifestPackage(logger);
+    
+    const manifestLoader = new ManifestLoader(logger,
+                                              manifestPackage,
+                                              inputSourceExtractor,
+                                              {
+                                                  ignoreNonK8s: options.ignoreNonK8s
+                                              });
+
+    await manifestLoader.loadFromExtractor();
 
     if (options.stream) {
-        await loader.loadFromStream();
+        await manifestLoader.loadFromStream();
     }
+
+
+    // if (1 + 1 == 2) {
+    //     throw new Error("XXX")
+    // }
+
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 
@@ -94,7 +117,10 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
         success,
         k8sConnector,
         manifestPackage,
-        k8sSchemaInfo
+        k8sSchemaInfo,
+
+        inputSourceExtractor,
+        manifestLoader
     } 
 }
 

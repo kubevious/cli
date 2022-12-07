@@ -2,6 +2,17 @@ import _ from 'the-lodash';
 
 export function parseImage(fullImage: string) : ImageTag
 {
+    if (!fullImage) {
+        return {
+            isInvalid: true,
+            registry: '',
+            repository: fullImage,
+            namespace: '',
+            name: fullImage,
+            tag: 'latest',
+        }
+    }
+
     let parts = fullImage.split('/');
     if (parts.length === 0) {
         return {

@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@kubevious/entity-meta": "^1.0.80",
-    "@kubevious/kubik": "^1.0.29",
+    "@kubevious/kubik": "^1.0.32",
     "@kubevious/state-registry": "^1.0.17",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
@@ -53,7 +53,7 @@
     "cli-table": "^0.3.11",
     "commander": "^9.4.1",
     "express-openapi-validate": "^0.6.1",
-    "glob": "^8.0.3",
+    "fast-glob": "^3.2.12",
     "k8s-super-client": "^2.0.50",
     "kubernetes-types": "^1.25.0",
     "node-emoji": "^1.11.0",
@@ -68,7 +68,6 @@
   },
   "devDependencies": {
     "@types/cli-table": "^0.3.1",
-    "@types/glob": "^8.0.0",
     "@types/mocha": "^8.0.3",
     "@types/node": "^17.0.23",
     "@types/node-emoji": "^1.8.2",
@@ -88,7 +87,7 @@
     "the-promise": "^2.0.15",
     "k8s-super-client": "^2.0.50",
     "@kubevious/state-registry": "^1.0.17",
-    "@kubevious/kubik": "^1.0.29",
+    "@kubevious/kubik": "^1.0.32",
     "@kubevious/entity-meta": "^1.0.80"
   },
   "pkg": {

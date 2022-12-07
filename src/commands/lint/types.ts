@@ -1,6 +1,8 @@
 import { K8sApiSchemaFetcherResult } from "../../api-schema/k8s-api-schema-fetcher";
 import { K8sClusterConnector } from "../../k8s-connector/k8s-cluster-connector";
+import { InputSourceExtractor } from "../../manifests/input-source-extractor";
 import { ManifestPackage } from "../../manifests/manifest-package";
+import { ManifestLoader } from "../../manifests/manifests-loader";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 
@@ -21,6 +23,9 @@ export interface LintCommandData {
     k8sConnector: K8sClusterConnector,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
+
+    inputSourceExtractor: InputSourceExtractor,
+    manifestLoader: ManifestLoader,
 }
 
 export type LintSeverity = 'pass' | 'fail' | 'warning';

@@ -27,7 +27,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     const lintResult = await lintCommand(path, options);
 
     const manifestPackage = lintResult.manifestPackage;
-
+    const manifestLoader = lintResult.manifestLoader;
     const k8sConnector = lintResult.k8sConnector;
 
     const registryPopulator = new LocalRegistryPopulator(logger,
@@ -45,7 +45,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
         remoteRegistry = new CachedK8sRegistry(logger, myRemoteRegistry);
     }
 
-    const ruleRegistry = new RuleRegistry(logger, manifestPackage);
+    const ruleRegistry = new RuleRegistry(logger, manifestPackage, manifestLoader);
     if (!options.skipRemoteRules)
     {
         if (remoteRegistry)

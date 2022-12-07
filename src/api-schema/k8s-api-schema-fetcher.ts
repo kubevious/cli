@@ -91,7 +91,7 @@ export class K8sApiSchemaFetcher
         }
 
         const k8sApiRegistry = new K8sApiSchemaRegistry(this._logger);
-        k8sApiRegistry.init();
+        await k8sApiRegistry.init();
 
         this._logger.info("TargetVersion: ", targetVersion)
 

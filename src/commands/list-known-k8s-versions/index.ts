@@ -20,7 +20,7 @@ export default function (program: Command)
                 .perform(async () => {
 
                     const k8sApiRegistry = new K8sApiSchemaRegistry(logger);
-                    k8sApiRegistry.init();
+                    await k8sApiRegistry.init();
 
                     return k8sApiRegistry.getVersions();
                 })

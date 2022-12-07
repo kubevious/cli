@@ -7,9 +7,10 @@ import { ClusterRuleK8sSpec, LibraryK8sSpec, LibraryRuleRefK8sSpec, RuleApplicat
 import { K8sTargetFilter } from '../query-spec/k8s/k8s-target-query';
 import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
-import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { ManifestLoader } from '../../manifests/manifests-loader';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { KubeviousKinds, KUBEVIOUS_API_NAME } from '../../types/kubevious';
+import { InputSource } from '../../manifests/input-source-extractor';
 
 
 export interface RuleRegistryLoadOptions {
@@ -28,14 +29,14 @@ export class RuleRegistry
     private _ruleApplicators : Record<string, ApplicatorRule> = {};
 
     private _manifestPackage : ManifestPackage;
-    private _manifestsLoader : ManifetsLoader;
+    private _manifestsLoader : ManifestLoader;
 
-    constructor(logger: ILogger, manifestPackage : ManifestPackage)
+    constructor(logger: ILogger, manifestPackage : ManifestPackage, manifestsLoader: ManifestLoader)
     {
         this._logger = logger.sublogger('RuleRegistry');
 
         this._manifestPackage = manifestPackage; //new ManifestPackage(logger);
-        this._manifestsLoader = new ManifetsLoader(logger, this._manifestPackage);
+        this._manifestsLoader = manifestsLoader;
     }
 
     get clusterRules() {
@@ -336,6 +337,8 @@ export class RuleRegistry
 
     private async _loadLibrary(manifest: K8sManifest)
     {
+        this._logger.info("[_loadLibrary] manifest: %s...", manifest.source.source.path);
+
         const config = manifest.config;
         
         const name = config.metadata?.name;
@@ -357,7 +360,11 @@ export class RuleRegistry
 
     private async _loadLibraryRule(library: K8sManifest, ruleRef: LibraryRuleRefK8sSpec)
     {
-        const ruleManifests = await this._manifestsLoader.loadSingle(ruleRef.path, library.source);
+        this._logger.info("[_loadLibraryRule] loading: %s...", ruleRef.path);
+
+        const inputSource = new InputSource(ruleRef.path, library.source);
+
+        const ruleManifests = await this._manifestsLoader.loadSingle(inputSource);
 
         if (ruleManifests.length === 0) {
             this._logger.error("[_loadLibraryRule] target rule not found: ", ruleRef);

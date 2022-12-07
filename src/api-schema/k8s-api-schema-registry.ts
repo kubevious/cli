@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import glob from 'glob';
+import FastGlob from 'fast-glob';
 import * as fs from 'fs';
 import * as Path from 'path';
 import { K8sApiJsonSchema } from 'k8s-super-client/dist/open-api/converter/types';
@@ -17,10 +17,14 @@ export class K8sApiSchemaRegistry
         this._logger = logger.sublogger('K8sApiSchemaRegistry');
     }
 
-    init()
+    async init()
     {
         const pathResolver = new PathResolver();
-        const files = glob.sync(`${pathResolver.k8sApiSchemaDir}/*.json`);
+        const pattern = `${pathResolver.k8sApiSchemaDir}/*.json`;
+        const files = await FastGlob(pattern, {
+            onlyFiles: true
+        })
+
         // this._logger.info("Files: ", files);
         for(const file of files)
         {
