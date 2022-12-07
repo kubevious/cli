@@ -10,7 +10,7 @@ import { K8sManifest } from '../../manifests/k8s-manifest';
 import { ManifestLoader } from '../../manifests/manifests-loader';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { KubeviousKinds, KUBEVIOUS_API_NAME } from '../../types/kubevious';
-import { InputSource } from '../../manifests/input-source-extractor';
+import { InputSource } from '../../manifests/input-source';
 
 
 export interface RuleRegistryLoadOptions {

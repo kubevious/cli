@@ -12,7 +12,8 @@ import { readFromInputStream } from '../utils/stream';
 import { spinOperation } from '../screen/spinner';
 import { K8sManifest, ManifestSource } from './k8s-manifest';
 import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
-import { InputSource, InputSourceExtractor, InputSourceKind } from './input-source-extractor';
+import { InputSourceExtractor } from './input-source-extractor';
+import { InputSource, InputSourceKind } from './input-source';
 
 export interface ManifestLoaderOptions
 {

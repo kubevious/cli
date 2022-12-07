@@ -5,25 +5,20 @@ import FastGlob from 'fast-glob';
 import * as fs from 'fs';
 import * as Path from 'path';
 
-import { ManifestSource } from './k8s-manifest';
-import { isWebPath, resolvePath } from '../utils/path';
-
-export interface InputSourceExtractorOptions {}
+import { isWebPath } from '../utils/path';
+import { OriginalSource } from './original-source';
+import { InputSource } from './input-source';
 
 export class InputSourceExtractor {
     private _logger: ILogger;
-    private _options: InputSourceExtractorOptions;
+
+    private _originalSources : OriginalSource[] = [];
 
     private _sources: Record<string, InputSource> = {};
     private _reconcilerDirsToDelete : Record<string, InputSource[]> = {};
 
-    constructor(logger: ILogger, options?: Partial<InputSourceExtractorOptions>) {
+    constructor(logger: ILogger) {
         this._logger = logger.sublogger('InputSourcesExtractor');
-
-        options = options ?? {};
-        this._options = {};
-
-        this._logger.info('setup. options: ', this._options);
     }
 
     public get sources() {
@@ -38,10 +33,14 @@ export class InputSourceExtractor {
     {
         this._logger.info('[addSingle] %s', fileOrPatternOrUrl);
 
-        if (isWebPath(fileOrPatternOrUrl)) {
-            this._registerSource(fileOrPatternOrUrl);
+        const isWeb = isWebPath(fileOrPatternOrUrl);
+        const orignalSource = new OriginalSource(isWeb ? "web" : "file", fileOrPatternOrUrl);
+        this._originalSources.push(orignalSource);
+
+        if (isWeb) {
+            this._registerSource(fileOrPatternOrUrl, orignalSource);
         } else {
-            await this._addFromFileOrPattern(fileOrPatternOrUrl);
+            await this._addFromFileOrPattern(fileOrPatternOrUrl, orignalSource);
         }
     }
 
@@ -124,7 +123,7 @@ export class InputSourceExtractor {
         return true;
     }
 
-    private async _addFromFileOrPattern(fileOrPattern: string) {
+    private async _addFromFileOrPattern(fileOrPattern: string, originalSource: OriginalSource) {
         // this._logger.info("[_addFromFileOrPattern] fileOrPattern: %s", fileOrPattern);
 
         const pattern = this._makeSearchPattern(fileOrPattern);
@@ -140,11 +139,11 @@ export class InputSourceExtractor {
 
         for (const file of files)
         {
-            this._registerSource(file);
+            this._registerSource(file, originalSource);
         }
     }
 
-    private _registerSource(sourcePath: string) {
+    private _registerSource(sourcePath: string, originalSource: OriginalSource) {
         // this._logger.info("[_addFromFileOrPattern] sourcePath: %s", sourcePath);
 
         const source = new InputSource(sourcePath);
@@ -170,81 +169,4 @@ export class InputSourceExtractor {
 
         return null;
     }
-}
-
-export class InputSource {
-    private _key: string;
-    private _kind: InputSourceKind;
-    private _path: string;
-    private _file: string;
-    private _dir: string;
-    private _parentSource?: ManifestSource;
-    private _isLoaded = false;
-
-    constructor(path: string, parentSource?: ManifestSource)
-    {
-        if (parentSource) {
-            path = resolvePath(path, parentSource.source.path);
-        }
-
-        if (isWebPath(path))
-        {
-            this._kind = InputSourceKind.web;
-        }
-        else
-        {
-            this._kind = InputSourceKind.file;
-        }
-
-        this._path = path;
-        this._parentSource = parentSource;
-
-        this._key = _.stableStringify([this._kind, this._path]);
-        this._file = Path.basename(path);
-        this._dir = makeDirStr(Path.dirname(path));
-    }
-
-    public get parentSource() {
-        return this._parentSource;
-    }
-
-    public get key() {
-        return this._key;
-    }
-
-    public get kind() {
-        return this._kind;
-    }
-
-    public get path() {
-        return this._path;
-    }
-
-    public get file() {
-        return this._file;
-    }
-
-    public get dir() {
-        return this._dir;
-    }
-
-    public get isLoaded(): boolean {
-        return this._isLoaded;
-    }
-    public set isLoaded(value: boolean) {
-        this._isLoaded = value;
-    }
-}
-
-export enum InputSourceKind {
-    file = 'file',
-    web = 'web',
-}
-
-function makeDirStr(str: string) : string
-{
-    if ((str.length > 0) && str[str.length - 1] != "/") {
-        str += "/";
-    }
-    return str;
 }
