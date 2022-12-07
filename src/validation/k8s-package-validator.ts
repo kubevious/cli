@@ -168,7 +168,7 @@ export class K8sPackageValidator
 
         manifest.isLinted = true;
 
-        this._spinner!.update(`Validating ${manifest.source.source.path}...`);
+        this._spinner!.update(`Validating ${manifest.source.id.path}...`);
 
         {
             const jsonSchema = isCRD(manifest.id) ? this._origK8sJsonSchema : this._k8sJsonSchema;

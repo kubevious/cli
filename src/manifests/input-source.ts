@@ -2,7 +2,7 @@ import _ from 'the-lodash';
 import * as Path from 'path';
 
 import { isWebPath, resolvePath } from "../utils/path";
-import { ManifestSource } from "./k8s-manifest";
+import { OriginalSource } from './original-source';
 
 export class InputSource {
     private _key: string;
@@ -10,13 +10,14 @@ export class InputSource {
     private _path: string;
     private _file: string;
     private _dir: string;
-    private _parentSource?: ManifestSource;
+    private _originalSource?: OriginalSource;
+    private _isSkipped = false;
     private _isLoaded = false;
 
-    constructor(path: string, parentSource?: ManifestSource)
+    constructor(path: string, originalSource?: OriginalSource)
     {
-        if (parentSource) {
-            path = resolvePath(path, parentSource.source.path);
+        if (originalSource) {
+            path = resolvePath(path, originalSource.path);
         }
 
         if (isWebPath(path))
@@ -29,15 +30,15 @@ export class InputSource {
         }
 
         this._path = path;
-        this._parentSource = parentSource;
+        this._originalSource = originalSource;
 
         this._key = _.stableStringify([this._kind, this._path]);
         this._file = Path.basename(path);
         this._dir = makeDirStr(Path.dirname(path));
     }
 
-    public get parentSource() {
-        return this._parentSource;
+    public get originalSource() {
+        return this._originalSource;
     }
 
     public get key() {
@@ -65,6 +66,13 @@ export class InputSource {
     }
     public set isLoaded(value: boolean) {
         this._isLoaded = value;
+    }
+
+    public get isSkipped() {
+        return this._isSkipped;
+    }
+    public set isSkipped(value: boolean) {
+        this._isSkipped = value;
     }
 }
 

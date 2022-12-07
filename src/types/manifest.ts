@@ -1,4 +1,4 @@
-export type ManifestSourceType = "file" | "web" | "stream" | "k8s";
+export type ManifestSourceType = "file" | "web" | "stream" | "k8s" | "root";
 
 export interface ErrorStatus
 {

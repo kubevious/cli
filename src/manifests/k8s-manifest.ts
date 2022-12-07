@@ -1,12 +1,7 @@
 import _ from 'the-lodash';
 import { K8sObject, K8sObjectId, makeId, makeK8sKeyStr } from "../types/k8s";
-import { ErrorStatus, ManifestSourceId } from "../types/manifest";
-
-export interface ManifestSource extends Required<ErrorStatus>
-{
-    source: ManifestSourceId;
-    contents: K8sManifest[];
-}
+import { ErrorStatus } from "../types/manifest";
+import { ManifestSource } from './manifest-source';
 
 export interface K8sManifestRuleResult
 {

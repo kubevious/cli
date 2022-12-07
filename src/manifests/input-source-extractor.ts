@@ -25,6 +25,10 @@ export class InputSourceExtractor {
         return _.values(this._sources);
     }
 
+    public get originalSources() {
+        return this._originalSources;
+    }
+
     public async addMany(fileOrPatternOrUrls: string[]) {
         await MyPromise.serial(fileOrPatternOrUrls, (x) => MyPromise.resolve(this.addSingle(x)));
     }
@@ -58,10 +62,13 @@ export class InputSourceExtractor {
         }
 
         this._logger.info('[reconcile] END');
+
+        this.debugOutput();
     }
 
     public includeRawSource(source : InputSource)
     {
+        source.isSkipped = false;
         this._sources[source.key] = source;
     }
 
@@ -82,6 +89,7 @@ export class InputSourceExtractor {
             for(const source of _.values(this._sources))
             {
                 if (source.dir.startsWith(dir)) {
+                    source.isSkipped = true;
                     delete this._sources[source.key];
                 }
             }
@@ -91,6 +99,27 @@ export class InputSourceExtractor {
         {
             this.includeRawSource(source);
         }
+    }
+
+    public debugOutput()
+    {
+        this._logger.info('[OrigSource] BEGIN');
+
+        for(const originalSource of this.originalSources)
+        {
+            this._logger.info('[OrigSource] => %s :: %s', originalSource.kind, originalSource.path);
+
+            for (const source of originalSource.innerSources)
+            {
+                if (source.isSkipped) {
+                    this._logger.info('              > %s [SKIPPED]', source.key);
+                } else {
+                    this._logger.info('              > %s', source.key);
+                }
+            }
+        }
+
+        this._logger.info('[OrigSource] END');
     }
 
     private _isPreprosessorSource(source: InputSource)
@@ -150,7 +179,9 @@ export class InputSourceExtractor {
 
         this._logger.verbose('[_addFromFileOrPattern] normalPath: %s', source.path);
 
-        this._sources[source.key] = source;
+        originalSource.innerSources.push(source);
+
+        this.includeRawSource(source);
     }
 
     private _makeSearchPattern(fileOrPattern: string): string | null {

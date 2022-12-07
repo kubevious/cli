@@ -10,7 +10,8 @@ import YAML from 'yaml';
 import { ManifestPackage } from './manifest-package';
 import { readFromInputStream } from '../utils/stream';
 import { spinOperation } from '../screen/spinner';
-import { K8sManifest, ManifestSource } from './k8s-manifest';
+import { K8sManifest } from './k8s-manifest';
+import { ManifestSource } from "./manifest-source";
 import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
 import { InputSourceExtractor } from './input-source-extractor';
 import { InputSource, InputSourceKind } from './input-source';
@@ -217,7 +218,7 @@ export class ManifestLoader
 
         if (source.success)
         {
-            if (source.contents.length === 0)
+            if (source.manifests.length === 0)
             {
                 if (!this._options.ignoreNonK8s) {
                     this._manifestPackage.sourceError(source, 'Contains no manifests');
@@ -231,7 +232,7 @@ export class ManifestLoader
 
     private _addManifest(source : ManifestSource, config: any) : K8sManifest | null
     {
-        this._logger.silly("[_addManifest] file: %s, manifest:", source.source.path, config);
+        this._logger.silly("[_addManifest] file: %s, manifest:", source.id.path, config);
         if (!config) {
             return null;
         }

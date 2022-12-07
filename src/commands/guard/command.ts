@@ -41,7 +41,7 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     let remoteRegistry: RegistryQueryExecutor | undefined;
     if (k8sConnector.isUsed)
     {
-        const myRemoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
+        const myRemoteRegistry = new RemoteK8sRegistry(logger, k8sConnector, manifestPackage);
         remoteRegistry = new CachedK8sRegistry(logger, myRemoteRegistry);
     }
 

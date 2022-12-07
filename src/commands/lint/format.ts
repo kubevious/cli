@@ -42,11 +42,11 @@ export function formatResult({
     for(const source of manifestPackage.sources)
     {
         const outputSource : LintSourceResult = {
-            kind: source.source.kind,
-            path: source.source.path,
-            manifestCount: source.contents.length,
+            kind: source.id.kind,
+            path: source.id.path,
+            manifestCount: source.manifests.length,
             success: source.success,
-            severity: decideSeverity(source, source.contents),
+            severity: decideSeverity(source, source.manifests),
             errors: source.errors,
             warnings: source.warnings,
             manifests: []
@@ -63,7 +63,7 @@ export function formatResult({
             result.counters.sources.withWarnings++;
         }
 
-        for(const manifest of source.contents)
+        for(const manifest of source.manifests)
         {
             outputSource.manifests.push({
                 apiVersion: manifest.id.apiVersion,

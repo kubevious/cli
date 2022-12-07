@@ -5,30 +5,22 @@ import { RegistryQueryExecutor, RegistryQueryOptions } from '../rules-engine/que
 import { K8sClusterConnector } from '../k8s-connector/k8s-cluster-connector';
 import { KubernetesClient, KubernetesObject } from 'k8s-super-client';
 import { ClientSideFiltering } from './client-side-filtering';
-import { K8sManifest, ManifestSource } from '../manifests/k8s-manifest';
+import { K8sManifest } from '../manifests/k8s-manifest';
+import { ManifestPackage } from '../manifests/manifest-package';
 
 export class RemoteK8sRegistry implements RegistryQueryExecutor
 {
     private _logger: ILogger;
     private _k8sConnector: K8sClusterConnector;
     private _client: KubernetesClient;
-    private _source: ManifestSource = {
-        source: {
-            kind: "k8s",
-            path: "live"
-        },
-        contents: [],
-        success: true,
-        errors: [],
-        warnings: [],
-    };
-
-    
-    constructor(logger: ILogger, k8sConnector: K8sClusterConnector)
+    private _manifestPackage: ManifestPackage;
+   
+    constructor(logger: ILogger, k8sConnector: K8sClusterConnector, manifestPackage: ManifestPackage)
     {
         this._logger = logger.sublogger('RemoteK8sRegistry');
         this._k8sConnector = k8sConnector;
         this._client = k8sConnector.client!;
+        this._manifestPackage = manifestPackage;
     }
 
     query(query: RegistryQueryOptions) : K8sManifest[]
@@ -106,7 +98,8 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
     private _makeManifest(config: KubernetesObject) : K8sManifest
     {
         const k8sObject = config as K8sObject;
-        const k8sManifest = new K8sManifest(k8sObject, this._source);
+        const source = this._manifestPackage.getSource("k8s", "live");
+        const k8sManifest = new K8sManifest(k8sObject, source);
         return k8sManifest;
     }
 

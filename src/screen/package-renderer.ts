@@ -16,8 +16,8 @@ export class PackageRenderer
     {
         const rows = 
             _.chain(manifestPackage.sources)
-             .orderBy(x => x.source.path)
-             .map(x => ([x.source.path, x.contents.length.toString(), x.success ? 'OK' : 'Has Errors' ]))
+             .orderBy(x => x.id.path)
+             .map(x => ([x.id.path, x.manifests.length.toString(), x.success ? 'OK' : 'Has Errors' ]))
              .value();
 
         const table = new Table({
@@ -33,7 +33,7 @@ export class PackageRenderer
         const filesWithErrors = 
             _.chain(manifestPackage.sources)
             .filter(x => !x.success)
-            .orderBy(x => x.source.path)
+            .orderBy(x => x.id.path)
             .value();
 
         const rows : string[][] = [];
@@ -41,7 +41,7 @@ export class PackageRenderer
         {
             for(const error of file.errors)
             {
-                rows.push([file.source.path, error]);
+                rows.push([file.id.path, error]);
             }
         }
 
@@ -57,8 +57,8 @@ export class PackageRenderer
     {
         const rows =
             _.chain(manifestPackage.manifests)
-             .orderBy([x => x.source.source.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
-             .map(x => ([x.source.source.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', x.success ? 'OK' : 'Has Errors']))
+             .orderBy([x => x.source.id.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
+             .map(x => ([x.source.id.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', x.success ? 'OK' : 'Has Errors']))
              .value();
 
         const table = new Table({
@@ -74,7 +74,7 @@ export class PackageRenderer
         const manifestsWithErrors =
             _.chain(manifestPackage.manifests)
              .filter(x => !x.success) 
-             .orderBy([x => x.source.source.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
+             .orderBy([x => x.source.id.path, x => x.id.namespace, x => x.id.apiVersion, x => x.id.kind, x => x.id.name ])
              .value();
 
         const rows : string[][] = [];
@@ -82,7 +82,7 @@ export class PackageRenderer
         {
             for(const error of x.errors)
             {
-                rows.push([x.source.source.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', error])
+                rows.push([x.source.id.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', error])
             }
         }
    

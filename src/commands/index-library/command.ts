@@ -56,8 +56,8 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         const libraryRule : LibraryRule = {
             title: (summary.length > 0) ? summary : name,
             name: name,
-            path: makeRelativePath(rule.source.source.path, dir),
-            category: makeRelativePath(Path.dirname(rule.source.source.path), dir),
+            path: makeRelativePath(rule.source.id.path, dir),
+            category: makeRelativePath(Path.dirname(rule.source.id.path), dir),
             summary: summary,
             description: _.trim(ruleConfig.description ?? ""),
         

@@ -11,6 +11,7 @@ import { ManifestLoader } from '../../manifests/manifests-loader';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { KubeviousKinds, KUBEVIOUS_API_NAME } from '../../types/kubevious';
 import { InputSource } from '../../manifests/input-source';
+import { OriginalSource } from '../../manifests/original-source';
 
 
 export interface RuleRegistryLoadOptions {
@@ -133,7 +134,7 @@ export class RuleRegistry
         this._clusterRules[name] = {
             isDisabled: spec.disabled,
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.ClusterRule,
             name: name,
             target: spec.target,
@@ -223,7 +224,7 @@ export class RuleRegistry
         this._rules[manifest.idKey] = {
             isDisabled: spec.disabled,
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.Rule,
             namespace: namespace,
             name: name,
@@ -300,7 +301,7 @@ export class RuleRegistry
 
         this._ruleApplicators[manifest.idKey] = {
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.RuleApplicator,
             namespace: namespace,
             name: name,
@@ -337,7 +338,7 @@ export class RuleRegistry
 
     private async _loadLibrary(manifest: K8sManifest)
     {
-        this._logger.info("[_loadLibrary] manifest: %s...", manifest.source.source.path);
+        this._logger.info("[_loadLibrary] manifest: %s...", manifest.source.id.path);
 
         const config = manifest.config;
         
@@ -362,7 +363,8 @@ export class RuleRegistry
     {
         this._logger.info("[_loadLibraryRule] loading: %s...", ruleRef.path);
 
-        const inputSource = new InputSource(ruleRef.path, library.source);
+        const orignalSource = new OriginalSource(library.source.id.kind, library.source.id.path);
+        const inputSource = new InputSource(ruleRef.path, orignalSource);
 
         const ruleManifests = await this._manifestsLoader.loadSingle(inputSource);
 

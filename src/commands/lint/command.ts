@@ -51,10 +51,11 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
         await manifestLoader.loadFromStream();
     }
 
+    manifestPackage.debugOutput();
 
-    // if (1 + 1 == 2) {
-    //     throw new Error("XXX")
-    // }
+    if (1 + 1 === 2) {
+        throw new Error("XXX")
+    }
 
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
@@ -133,7 +134,7 @@ export function determineLintSuccess(manifestPackage: ManifestPackage)
             success = false;
         }
 
-        for(const manifest of source.contents)
+        for(const manifest of source.manifests)
         {
             if (!manifest.success) {
                 success = false;

@@ -59,7 +59,7 @@ export function formatResult({
             hasViolationWarnings: false,
             passed: rule.passed.map(x => ({
                 manifest: x.id,
-                source: x.source.source
+                source: x.source.id
             }))
         };
 
@@ -85,7 +85,7 @@ export function formatResult({
 
                 ruleResult.violations.push({
                     manifest: violation.manifest.id,
-                    source: violation.manifest.source.source,
+                    source: violation.manifest.source.id,
                     errors: violation.errors,
                     warnings: violation.warnings,
                 });

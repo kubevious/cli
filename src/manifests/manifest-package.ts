@@ -1,13 +1,14 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { K8sObject } from '../types/k8s';
-import { ManifestSourceId, ManifestSourceType } from '../types/manifest';
-import { K8sManifest, ManifestSource } from './k8s-manifest';
+import { ManifestSourceType } from '../types/manifest';
+import { K8sManifest } from './k8s-manifest';
+import { ManifestSource } from "./manifest-source";
 
 export class ManifestPackage
 {
     private _logger: ILogger;
-    private _sources: { [key: string] : ManifestSource } = {}
+    private _rootSource : ManifestSource = new ManifestSource('root', 'root');
     private _manifests: K8sManifest[] = [];
     private _namespaces : string[] = [];
 
@@ -17,7 +18,7 @@ export class ManifestPackage
     }
 
     get sources() {
-        return _.values(this._sources);
+        return this._rootSource.childSources;
     }
 
     get manifests() {
@@ -30,24 +31,7 @@ export class ManifestPackage
 
     getSource(kind: ManifestSourceType, path: string) : ManifestSource
     {
-        const sourceId : ManifestSourceId = {
-            kind: kind,
-            path: path
-        };
-        const sourceKey = _.stableStringify(sourceId);
-
-        let source = this._sources[sourceKey];
-        if (!source) {
-            source = {
-                source: sourceId,
-                success: true,
-                errors: [],
-                warnings: [],
-                contents: []
-            }
-            this._sources[sourceKey] = source;
-        }
-        return source;
+        return this._rootSource.getSource(kind, path);
     }
 
     sourceError(source: ManifestSource, error: string)
@@ -81,7 +65,6 @@ export class ManifestPackage
     manifestWarning(manifest: K8sManifest, msg: string)
     {
         manifest.warnings.push(msg);
-        // manifest.success = false;
     }
 
     manifestWarnings(manifest: K8sManifest, msgs?: string[])
@@ -98,7 +81,7 @@ export class ManifestPackage
     {
         const k8sManifest = new K8sManifest(k8sObject, source)
 
-        source.contents.push(k8sManifest);
+        source.manifests.push(k8sManifest);
         this._manifests.push(k8sManifest);
 
         return k8sManifest;
@@ -114,5 +97,40 @@ export class ManifestPackage
             }
         }
         this._namespaces = _.keys(namespaces);
+    }
+
+    public debugOutput()
+    {
+        this._logger.info('[ManifestPackage] BEGIN SOURCES');
+
+        this._debugOutputSource(this._rootSource, 0);
+        // for(const originalSource of this.originalSources)
+        // {
+        //     this._logger.info('[OrigSource] => %s :: %s', originalSource.kind, originalSource.path);
+
+        //     for (const source of originalSource.innerSources)
+        //     {
+        //         if (source.isSkipped) {
+        //             this._logger.info('              > %s [SKIPPED]', source.key);
+        //         } else {
+        //             this._logger.info('              > %s', source.key);
+        //         }
+        //     }
+        // }
+
+        this._logger.info('[ManifestPackage] END');
+    }
+
+    private _debugOutputSource(source: ManifestSource, indent: number)
+    {
+        this._logger.info("[ManifestPackage] %s| + [%s] %s", 
+            " ".repeat(indent * 2),
+            source.id.kind.toUpperCase(),
+            source.id.path)
+
+        for(const child of source.childSources)
+        {
+            this._debugOutputSource(child, indent + 1);
+        }
     }
 }
