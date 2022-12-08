@@ -65,7 +65,7 @@ export class ManifestLoader
     public async loadFromStream()
     {
         this._logger.info("[_loadFromStream] ");
-        const source = this._manifestPackage.getSource("stream", 'stream');
+        const source = this._manifestPackage.getSource("stream", 'stream', null);
 
         try
         {
@@ -113,33 +113,44 @@ export class ManifestLoader
         }
     }
 
-    public async loadSingle(inputSource: InputSource) : Promise<K8sManifest[]>
+    public async loadSingle(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
         if (inputSource.kind == InputSourceKind.web)
         {
-            return await this._loadUrl(inputSource);
+            return await this._loadUrl(inputSource, parentSource);
         }
         else
         {
-            return await this._loadFile(inputSource);
+            return await this._loadFile(inputSource, parentSource);
         }
     }
 
-    private async _loadFile(inputSource: InputSource) : Promise<K8sManifest[]>
+    private async _loadFile(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
         const path = inputSource.path;
-        const source = this._manifestPackage.getSource("file", path);
+
+        // const orignalSource = inputSource.originalSource
+        const source = this._manifestPackage.getSource("file", path, inputSource.originalSource, parentSource);
 
         this._logger.info("[_loadFile] path: %s", path);
 
-        const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
-        return this._parseContents(source, path, contents);
+        try
+        {
+            const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
+            return this._parseContents(source, path, contents);
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._manifestPackage.sourceError(source, 'Failed to load manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            return [];
+        }
     }
 
-    private async _loadUrl(inputSource: InputSource) : Promise<K8sManifest[]>
+    private async _loadUrl(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
         const url = inputSource.path;
-        const source = this._manifestPackage.getSource("web", url);
+        const source = this._manifestPackage.getSource("web", url, inputSource.originalSource, parentSource);
 
         this._logger.info("[_loadUrl] url: %s", url);
         try

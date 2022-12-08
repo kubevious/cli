@@ -4,11 +4,12 @@ import { K8sObject } from '../types/k8s';
 import { ManifestSourceType } from '../types/manifest';
 import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
+import { OriginalSource } from './original-source';
 
 export class ManifestPackage
 {
     private _logger: ILogger;
-    private _rootSource : ManifestSource = new ManifestSource('root', 'root');
+    private _rootSource : ManifestSource = new ManifestSource('root', 'root', null);
     private _manifests: K8sManifest[] = [];
     private _namespaces : string[] = [];
 
@@ -29,9 +30,12 @@ export class ManifestPackage
         return this._namespaces;
     }
 
-    getSource(kind: ManifestSourceType, path: string) : ManifestSource
+    getSource(kind: ManifestSourceType, path: string, originalSource: OriginalSource | null, parentSource?: ManifestSource) : ManifestSource
     {
-        return this._rootSource.getSource(kind, path);
+        if (!parentSource) {
+            parentSource = this._rootSource;
+        }
+        return parentSource.getSource(kind, path, originalSource);
     }
 
     sourceError(source: ManifestSource, error: string)
@@ -101,22 +105,18 @@ export class ManifestPackage
 
     public debugOutput()
     {
-        this._logger.info('[ManifestPackage] BEGIN SOURCES');
+        this._logger.info('[ManifestPackage] BEGIN SOURCES:');
 
         this._debugOutputSource(this._rootSource, 0);
-        // for(const originalSource of this.originalSources)
-        // {
-        //     this._logger.info('[OrigSource] => %s :: %s', originalSource.kind, originalSource.path);
 
-        //     for (const source of originalSource.innerSources)
-        //     {
-        //         if (source.isSkipped) {
-        //             this._logger.info('              > %s [SKIPPED]', source.key);
-        //         } else {
-        //             this._logger.info('              > %s', source.key);
-        //         }
-        //     }
-        // }
+        this._logger.info('[ManifestPackage] BEGIN MANIFESTS:');
+
+        for(const manifest of this.manifests)
+        {
+            this._logger.info("[ManifestPackage] |> %s", 
+                manifest.idKey);
+            this._debugOutputSourceTree(manifest.source, 1);
+        }
 
         this._logger.info('[ManifestPackage] END');
     }
@@ -126,11 +126,30 @@ export class ManifestPackage
         this._logger.info("[ManifestPackage] %s| + [%s] %s", 
             " ".repeat(indent * 2),
             source.id.kind.toUpperCase(),
-            source.id.path)
+            source.id.path);
+
+        if (source.originalSource) {
+            this._logger.info("[ManifestPackage] %s     ORIG: %s :: %s", 
+                " ".repeat(indent * 2),
+                source.originalSource.kind,
+                source.originalSource.path);
+        }
 
         for(const child of source.childSources)
         {
             this._debugOutputSource(child, indent + 1);
+        }
+    }
+
+    private _debugOutputSourceTree(source: ManifestSource, indent: number)
+    {
+        this._logger.info("[ManifestPackage] %s| + [%s] %s", 
+            " ".repeat(indent * 2),
+            source.id.kind.toUpperCase(),
+            source.id.path);
+
+        if (source.parentSource) {
+            this._debugOutputSourceTree(source.parentSource, indent + 1);
         }
     }
 }

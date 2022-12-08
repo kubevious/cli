@@ -163,6 +163,7 @@ export class InputSourceExtractor {
 
         const files = await FastGlob(pattern, {
             onlyFiles: true,
+            absolute: true
         });
         // this._logger.info("[_addFromFileOrPattern] files: %s", files);
 
@@ -173,9 +174,9 @@ export class InputSourceExtractor {
     }
 
     private _registerSource(sourcePath: string, originalSource: OriginalSource) {
-        // this._logger.info("[_addFromFileOrPattern] sourcePath: %s", sourcePath);
+        this._logger.info("[_addFromFileOrPattern] sourcePath: %s. origSource: %s", sourcePath, originalSource?.path);
 
-        const source = new InputSource(sourcePath);
+        const source = new InputSource(sourcePath, originalSource);
 
         this._logger.verbose('[_addFromFileOrPattern] normalPath: %s', source.path);
 

@@ -10,15 +10,13 @@ export class InputSource {
     private _path: string;
     private _file: string;
     private _dir: string;
-    private _originalSource?: OriginalSource;
+    private _originalSource: OriginalSource;
     private _isSkipped = false;
     private _isLoaded = false;
 
-    constructor(path: string, originalSource?: OriginalSource)
+    constructor(path: string, originalSource: OriginalSource)
     {
-        if (originalSource) {
-            path = resolvePath(path, originalSource.path);
-        }
+        path = resolvePath(path, originalSource.path);
 
         if (isWebPath(path))
         {

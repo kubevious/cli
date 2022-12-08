@@ -366,7 +366,7 @@ export class RuleRegistry
         const orignalSource = new OriginalSource(library.source.id.kind, library.source.id.path);
         const inputSource = new InputSource(ruleRef.path, orignalSource);
 
-        const ruleManifests = await this._manifestsLoader.loadSingle(inputSource);
+        const ruleManifests = await this._manifestsLoader.loadSingle(inputSource, library.source);
 
         if (ruleManifests.length === 0) {
             this._logger.error("[_loadLibraryRule] target rule not found: ", ruleRef);

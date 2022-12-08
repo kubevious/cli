@@ -128,6 +128,12 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     myLogger.info("RuleSuccess: %s", ruleSuccess);
     myLogger.info("LintResult.success: %s", lintResult.success);
 
+    // manifestPackage.debugOutput();
+
+    // if (1 + 1 === 2) {
+    //     throw new Error("XXX")
+    // }
+
     return {
         success,
         ruleSuccess,

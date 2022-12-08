@@ -98,7 +98,7 @@ export class RemoteK8sRegistry implements RegistryQueryExecutor
     private _makeManifest(config: KubernetesObject) : K8sManifest
     {
         const k8sObject = config as K8sObject;
-        const source = this._manifestPackage.getSource("k8s", "live");
+        const source = this._manifestPackage.getSource("k8s", "live", null);
         const k8sManifest = new K8sManifest(k8sObject, source);
         return k8sManifest;
     }

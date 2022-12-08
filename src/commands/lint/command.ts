@@ -51,11 +51,11 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
         await manifestLoader.loadFromStream();
     }
 
-    manifestPackage.debugOutput();
+    // manifestPackage.debugOutput();
 
-    if (1 + 1 === 2) {
-        throw new Error("XXX")
-    }
+    // if (1 + 1 === 2) {
+    //     throw new Error("XXX")
+    // }
 
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
