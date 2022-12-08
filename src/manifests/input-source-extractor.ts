@@ -27,11 +27,14 @@ export class InputSourceExtractor {
         return _.values(this._originalSources);
     }
 
-    public async addMany(fileOrPatternOrUrls: string[]) {
-        await MyPromise.serial(fileOrPatternOrUrls, (x) => MyPromise.resolve(this.addSingle(x)));
+    public addMany(fileOrPatternOrUrls: string[]) {
+        for(const x of fileOrPatternOrUrls)
+        {
+            this.addSingle(x);
+        }
     }
 
-    public async addSingle(fileOrPatternOrUrl: string): Promise<void>
+    public addSingle(fileOrPatternOrUrl: string)
     {
         this._logger.info('[addSingle] %s', fileOrPatternOrUrl);
 
@@ -44,12 +47,11 @@ export class InputSourceExtractor {
         
         const orignalSource = new OriginalSource(kind, fileOrPatternOrUrl);
         this._originalSources[key] = orignalSource;
+    }
 
-        if (isWeb) {
-            this._registerSource(fileOrPatternOrUrl, orignalSource);
-        } else {
-            await this._addFromFileOrPattern(fileOrPatternOrUrl, orignalSource);
-        }
+    public async extractSources()
+    {
+        await MyPromise.serial(this.originalSources, (x) => MyPromise.resolve(x.extractInputSources()));
     }
 
     public reconcile() {
@@ -99,7 +101,7 @@ export class InputSourceExtractor {
     }
 
     private _registerSource(sourcePath: string, originalSource: OriginalSource) {
-        this._logger.info("[_addFromFileOrPattern] sourcePath: %s. origSource: %s", sourcePath, originalSource?.path);
+        this._logger.info("[_registerSource] sourcePath: %s. origSource: %s", sourcePath, originalSource?.path);
 
         new InputSource(sourcePath, originalSource);
     }

@@ -15,6 +15,7 @@ import { ManifestSource } from "./manifest-source";
 import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
 import { InputSourceExtractor } from './input-source-extractor';
 import { InputSource, InputSourceKind } from './input-source';
+import { PreProcessorExecutor } from '../preprocessors/executor';
 
 export interface ManifestLoaderOptions
 {
@@ -123,6 +124,10 @@ export class ManifestLoader
 
     public async loadSingle(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
+        if (inputSource.isPreprocessor) {
+            return await this._loadFromPreProcessor(inputSource, parentSource);
+        }
+
         if (inputSource.kind == InputSourceKind.web)
         {
             return await this._loadUrl(inputSource, parentSource);
@@ -130,6 +135,30 @@ export class ManifestLoader
         else
         {
             return await this._loadFile(inputSource, parentSource);
+        }
+    }
+
+    private async _loadFromPreProcessor(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
+    {
+        const source = this._manifestPackage.getSource("file", inputSource.path, inputSource.originalSource, parentSource);
+
+        const preprocessor = new PreProcessorExecutor(this._logger);
+
+        try
+        {
+            const contents = await preprocessor.extract(inputSource);
+            if (!contents) {
+                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
+                return [];
+            } else {
+                return this._parseContents(source, inputSource.path, contents);
+            }
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            return [];
         }
     }
 

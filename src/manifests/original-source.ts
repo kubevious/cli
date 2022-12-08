@@ -4,11 +4,17 @@ import { InputSource } from "./input-source";
 import { logger } from '../logger';
 import { ILogger } from "the-logger/dist";
 import _ from "lodash";
+
+import FastGlob from 'fast-glob';
+import * as fs from 'fs';
+import * as Path from 'path';
+
 export class OriginalSource
 {
     public kind: ManifestSourceType;
     public path: string;
     private _logger : ILogger = logger.sublogger("OriginalSource");
+    private _isExtracted = false;
 
     private _sources: Record<string, InputSource> = {};
     private _allSources: Record<string, InputSource> = {};
@@ -26,6 +32,23 @@ export class OriginalSource
 
     get hasAnyInput() {
         return _.keys(this._allSources).length > 0;
+    }
+
+    public async extractInputSources()
+    {
+        if (this._isExtracted) {
+            return;
+        }
+        this._isExtracted = true;
+
+        if (this.kind === 'file')
+        {
+            await this._addFromFileOrPattern();
+        }
+        else if (this.kind === 'web')
+        {
+            this._registerInputSource(this.path);
+        }
     }
     
     public reconcile()
@@ -57,6 +80,27 @@ export class OriginalSource
         }
     }
 
+    private async _addFromFileOrPattern() {
+        // this._logger.info("[_addFromFileOrPattern] fileOrPattern: %s", fileOrPattern);
+
+        const pattern = this._makeSearchPattern(this.path);
+        this._logger.info('[_addFromFileOrPattern] pattern: %s', pattern);
+        if (!pattern) {
+            return;
+        }
+
+        const files = await FastGlob(pattern, {
+            onlyFiles: true,
+            absolute: true
+        });
+        // this._logger.info("[_addFromFileOrPattern] files: %s", files);
+
+        for (const file of files)
+        {
+            this._registerInputSource(file);
+        }
+    }
+
     private _includePreprocessorSource(source: InputSource)
     {
         for(const parentDir of _.keys(this._reconcilerDirsToDelete))
@@ -76,11 +120,34 @@ export class OriginalSource
         return true;
     }
 
+    private _makeSearchPattern(fileOrPattern: string): string | null {
+        if (fs.existsSync(fileOrPattern)) {
+            const stats = fs.statSync(fileOrPattern);
+            if (stats.isDirectory()) {
+                return Path.join(fileOrPattern, '**/*.{yaml,yml}');
+            }
+
+            if (stats.isFile()) {
+                return fileOrPattern;
+            }
+        } else {
+            return fileOrPattern;
+        }
+
+        return null;
+    }
+
     public includeRawSource(source : InputSource)
     {
         source.isSkipped = false;
         this._sources[source.key] = source;
         this._allSources[source.key] = source;
+    }
+
+    private _registerInputSource(sourcePath: string) {
+        this._logger.info("[_registerInputSource] sourcePath: %s. origSource: %s", sourcePath, this.path);
+
+        new InputSource(sourcePath, this);
     }
 
     public debugOutput()

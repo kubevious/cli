@@ -12,6 +12,7 @@ import { ManifestPackage } from '../../manifests/manifest-package';
 import { PathResolver } from '../../path-resolver';
 import { InputSourceExtractor } from '../../manifests/input-source-extractor';
 import { spinOperation } from '../../screen/spinner';
+import { PreProcessorExecutor } from '../../preprocessors/executor';
 
 const myLogger = logger.sublogger('LintCommand');
 
@@ -20,17 +21,17 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     logger.info("[PATH] ", paths);
 
     const inputSourceExtractor = new InputSourceExtractor(logger);
-
     {
         const sourceExtractorSpinner = spinOperation('Identifying manifest sources...');
 
         {
             const pathResolver = new PathResolver();
-            await inputSourceExtractor.addMany([pathResolver.cliCrdsDir]);
+            inputSourceExtractor.addMany([pathResolver.cliCrdsDir]);
         }
     
-        await inputSourceExtractor.addMany(paths);
+        inputSourceExtractor.addMany(paths);
 
+        await inputSourceExtractor.extractSources();
         await inputSourceExtractor.reconcile();
 
         sourceExtractorSpinner.complete('Sources identified.');
@@ -50,6 +51,9 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     if (options.stream) {
         await manifestLoader.loadFromStream();
     }
+
+    // const preprocessor = new PreProcessorExecutor(logger);
+    // await preprocessor.execute('kustomize build /Users/rubenhak/repos/public/kustomize.git/examples/wordpress/kustomize.yaml');
 
     // manifestPackage.debugOutput();
 
