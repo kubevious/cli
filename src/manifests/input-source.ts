@@ -13,6 +13,7 @@ export class InputSource {
     private _originalSource: OriginalSource;
     private _isSkipped = false;
     private _isLoaded = false;
+    private _preprocessor : string | null = null;
 
     constructor(path: string, originalSource: OriginalSource)
     {
@@ -33,6 +34,10 @@ export class InputSource {
         this._key = _.stableStringify([this._kind, this._path]);
         this._file = Path.basename(path);
         this._dir = makeDirStr(Path.dirname(path));
+
+        // this._logger.verbose('[InputSource] normalPath: %s', this.path);
+
+        originalSource.includeRawSource(this);
     }
 
     public get originalSource() {
@@ -71,6 +76,23 @@ export class InputSource {
     }
     public set isSkipped(value: boolean) {
         this._isSkipped = value;
+    }
+
+    get preprocessor() {
+        return this._preprocessor;
+    }
+
+    get isPreprocessor() {
+        return _.isNotNullOrUndefined(this._preprocessor);
+    }
+
+    public checkPreprocessor()
+    {
+        if (this.file === 'kustomization.yaml') {
+            this._preprocessor = 'kustomize';
+        } else if (this.file === 'Chart.yaml') {
+            this._preprocessor = 'helm';
+        }
     }
 }
 

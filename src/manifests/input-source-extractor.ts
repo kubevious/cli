@@ -8,25 +8,23 @@ import * as Path from 'path';
 import { isWebPath } from '../utils/path';
 import { OriginalSource } from './original-source';
 import { InputSource } from './input-source';
+import { ManifestSourceType } from '../types/manifest';
 
 export class InputSourceExtractor {
     private _logger: ILogger;
 
-    private _originalSources : OriginalSource[] = [];
-
-    private _sources: Record<string, InputSource> = {};
-    private _reconcilerDirsToDelete : Record<string, InputSource[]> = {};
+    private _originalSources : Record<string, OriginalSource> = {};
 
     constructor(logger: ILogger) {
         this._logger = logger.sublogger('InputSourcesExtractor');
     }
 
     public get sources() {
-        return _.values(this._sources);
+        return _.flatten(this.originalSources.map(x => x.sources));
     }
 
     public get originalSources() {
-        return this._originalSources;
+        return _.values(this._originalSources);
     }
 
     public async addMany(fileOrPatternOrUrls: string[]) {
@@ -38,8 +36,14 @@ export class InputSourceExtractor {
         this._logger.info('[addSingle] %s', fileOrPatternOrUrl);
 
         const isWeb = isWebPath(fileOrPatternOrUrl);
-        const orignalSource = new OriginalSource(isWeb ? "web" : "file", fileOrPatternOrUrl);
-        this._originalSources.push(orignalSource);
+        const kind: ManifestSourceType = isWeb ? "web" : "file";
+        const key = _.stableStringify([kind, fileOrPatternOrUrl]);
+        if (this._originalSources[key]) {
+            return;
+        }
+        
+        const orignalSource = new OriginalSource(kind, fileOrPatternOrUrl);
+        this._originalSources[key] = orignalSource;
 
         if (isWeb) {
             this._registerSource(fileOrPatternOrUrl, orignalSource);
@@ -48,17 +52,12 @@ export class InputSourceExtractor {
         }
     }
 
-    public async reconcile() {
+    public reconcile() {
         this._logger.info('[reconcile] BEGIN');
-        for (const source of _.values(this._sources)) {
-            this._logger.info('[reconcile] |> %s', source.key);
-        }
+        this.debugOutput();
 
-        await this._processReconcile();
-
-        this._logger.info('[reconcile] FINAL');
-        for (const source of _.values(this._sources)) {
-            this._logger.info('[reconcile] |> %s', source.key);
+        for(const originalSource of this.originalSources) {
+            originalSource.reconcile();
         }
 
         this._logger.info('[reconcile] END');
@@ -66,90 +65,16 @@ export class InputSourceExtractor {
         this.debugOutput();
     }
 
-    public includeRawSource(source : InputSource)
-    {
-        source.isSkipped = false;
-        this._sources[source.key] = source;
-    }
-
-    private async _processReconcile()
-    {
-        this._reconcilerDirsToDelete = {};
-
-        for (const source of _.values(this._sources))
-        {
-            if (this._isPreprosessorSource(source))
-            {
-                this._includePreprocessorSource(source);
-            }
-        }
-
-        for(const dir of _.keys(this._reconcilerDirsToDelete))
-        {
-            for(const source of _.values(this._sources))
-            {
-                if (source.dir.startsWith(dir)) {
-                    source.isSkipped = true;
-                    delete this._sources[source.key];
-                }
-            }
-        }
-
-        for(const source of _.flatten(_.values(this._reconcilerDirsToDelete)))
-        {
-            this.includeRawSource(source);
-        }
-    }
-
     public debugOutput()
     {
-        this._logger.info('[OrigSource] BEGIN');
+        this._logger.info('[InputSourceExtractor] BEGIN');
 
         for(const originalSource of this.originalSources)
         {
-            this._logger.info('[OrigSource] => %s :: %s', originalSource.kind, originalSource.path);
-
-            for (const source of originalSource.innerSources)
-            {
-                if (source.isSkipped) {
-                    this._logger.info('              > %s [SKIPPED]', source.key);
-                } else {
-                    this._logger.info('              > %s', source.key);
-                }
-            }
+            originalSource.debugOutput();
         }
 
-        this._logger.info('[OrigSource] END');
-    }
-
-    private _isPreprosessorSource(source: InputSource)
-    {
-        if (source.file === 'kustomization.yaml') {
-            return true;
-        }
-        if (source.file === 'Chart.yaml') {
-            return true;
-        }
-        return false;
-    }
-
-    private _includePreprocessorSource(source: InputSource)
-    {
-        for(const parentDir of _.keys(this._reconcilerDirsToDelete))
-        {
-            if (source.dir.startsWith(parentDir)) {
-                return;
-            }
-            if (parentDir.startsWith(source.dir)) {
-                delete this._reconcilerDirsToDelete[parentDir];
-            }
-        }
-
-        if (!this._reconcilerDirsToDelete[source.dir]) {
-            this._reconcilerDirsToDelete[source.dir] = [];
-        }
-        this._reconcilerDirsToDelete[source.dir].push(source);
-        return true;
+        this._logger.info('[InputSourceExtractor] END');
     }
 
     private async _addFromFileOrPattern(fileOrPattern: string, originalSource: OriginalSource) {
@@ -176,13 +101,7 @@ export class InputSourceExtractor {
     private _registerSource(sourcePath: string, originalSource: OriginalSource) {
         this._logger.info("[_addFromFileOrPattern] sourcePath: %s. origSource: %s", sourcePath, originalSource?.path);
 
-        const source = new InputSource(sourcePath, originalSource);
-
-        this._logger.verbose('[_addFromFileOrPattern] normalPath: %s', source.path);
-
-        originalSource.innerSources.push(source);
-
-        this.includeRawSource(source);
+        new InputSource(sourcePath, originalSource);
     }
 
     private _makeSearchPattern(fileOrPattern: string): string | null {

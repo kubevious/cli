@@ -56,6 +56,14 @@ export class ManifestLoader
 
         const spinner = spinOperation('Loading manifests...');
 
+        for(const originalSource of this._inputSourceExtractor.originalSources)
+        {
+            if (!originalSource.hasAnyInput) {
+                const source = this._manifestPackage.getSource(originalSource.kind, originalSource.path, originalSource);
+                this._manifestPackage.sourceError(source, `No input was found.`);
+            }
+        }
+
         const sources = this._inputSourceExtractor.sources;
         await MyPromise.serial(sources, x => MyPromise.resolve(this.loadSingle(x)));
 
