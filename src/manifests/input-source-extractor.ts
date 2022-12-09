@@ -1,13 +1,9 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
 import { Promise as MyPromise } from 'the-promise';
-import FastGlob from 'fast-glob';
-import * as fs from 'fs';
-import * as Path from 'path';
 
 import { isWebPath } from '../utils/path';
 import { OriginalSource } from './original-source';
-import { InputSource } from './input-source';
 import { ManifestSourceType } from '../types/manifest';
 
 export class InputSourceExtractor {
@@ -79,47 +75,4 @@ export class InputSourceExtractor {
         this._logger.info('[InputSourceExtractor] END');
     }
 
-    private async _addFromFileOrPattern(fileOrPattern: string, originalSource: OriginalSource) {
-        // this._logger.info("[_addFromFileOrPattern] fileOrPattern: %s", fileOrPattern);
-
-        const pattern = this._makeSearchPattern(fileOrPattern);
-        this._logger.info('[_addFromFileOrPattern] pattern: %s', pattern);
-        if (!pattern) {
-            return;
-        }
-
-        const files = await FastGlob(pattern, {
-            onlyFiles: true,
-            absolute: true
-        });
-        // this._logger.info("[_addFromFileOrPattern] files: %s", files);
-
-        for (const file of files)
-        {
-            this._registerSource(file, originalSource);
-        }
-    }
-
-    private _registerSource(sourcePath: string, originalSource: OriginalSource) {
-        this._logger.info("[_registerSource] sourcePath: %s. origSource: %s", sourcePath, originalSource?.path);
-
-        new InputSource(sourcePath, originalSource);
-    }
-
-    private _makeSearchPattern(fileOrPattern: string): string | null {
-        if (fs.existsSync(fileOrPattern)) {
-            const stats = fs.statSync(fileOrPattern);
-            if (stats.isDirectory()) {
-                return Path.join(fileOrPattern, '**/*.{yaml,yml}');
-            }
-
-            if (stats.isFile()) {
-                return fileOrPattern;
-            }
-        } else {
-            return fileOrPattern;
-        }
-
-        return null;
-    }
 }

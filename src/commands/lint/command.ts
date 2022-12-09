@@ -55,7 +55,7 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     // const preprocessor = new PreProcessorExecutor(logger);
     // await preprocessor.execute('kustomize build /Users/rubenhak/repos/public/kustomize.git/examples/wordpress/kustomize.yaml');
 
-    // manifestPackage.debugOutput();
+    manifestPackage.debugOutput();
 
     // if (1 + 1 === 2) {
     //     throw new Error("XXX")

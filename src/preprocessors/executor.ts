@@ -22,6 +22,11 @@ export class PreProcessorExecutor
             return await this._kustomize(inputSource);
         }
 
+        if (inputSource.preprocessor === 'helm')
+        {
+            return await this._helm(inputSource);
+        }
+
         return null;
     }
 
@@ -32,6 +37,12 @@ export class PreProcessorExecutor
         return result;
     }
 
+    private async _helm(inputSource: InputSource) : Promise<string | null>
+    {
+        const dirName = Path.dirname(inputSource.path);
+        const result = await this.executeCommand(`helm template ${dirName}`);
+        return result;
+    }
 
     async executeCommand(command: string) : Promise<string | null>
     {
