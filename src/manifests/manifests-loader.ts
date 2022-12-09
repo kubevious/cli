@@ -142,22 +142,18 @@ export class ManifestLoader
     {
         const source = this._manifestPackage.getSource("file", inputSource.path, inputSource.originalSource, parentSource);
 
-        const preprocessor = new PreProcessorExecutor(this._logger);
+        const preprocessor = new PreProcessorExecutor(this._logger, this);
 
         try
         {
-            const contents = await preprocessor.extract(inputSource);
-            if (!contents) {
-                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
-                return [];
-            } else {
-                return this._parseContents(source, inputSource.path, contents);
-            }
+            await preprocessor.execute(inputSource, source);
+
+            return source.manifests; // TODO: Include Hierarchy manifests too.
         }
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            this._manifestPackage.sourceError(source, `Failed to execute preprocessor: ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
             return [];
         }
     }
@@ -174,7 +170,7 @@ export class ManifestLoader
         try
         {
             const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
-            return this._parseContents(source, path, contents);
+            return this.parseContents(source, path, contents);
         }
         catch(reason : any)
         {
@@ -194,7 +190,7 @@ export class ManifestLoader
         {
             const { data } = await axios.get(url);
             const contents = data.toString();
-            return this._parseContents(source, url, contents);
+            return this.parseContents(source, url, contents);
         }
         catch(reason : any)
         {
@@ -204,13 +200,15 @@ export class ManifestLoader
         }
     }
 
-    private _parseContents(source: ManifestSource, path: string, contents: string) : K8sManifest[]
+    public parseContents(source: ManifestSource, path: string, contents: string) : K8sManifest[]
     {
-        this._logger.info("[_parseContents] path: %s", path);
+        this._logger.info("[parseContents] path: %s", path);
         
         const manifests: K8sManifest[] = [];
 
         const extension = Path.extname(path);
+        this._logger.info("[parseContents] extension: %s", extension);
+
         if (extension === '.yaml' || extension === '.yml')
         {
             let configs : any[] | null = [];
@@ -225,8 +223,8 @@ export class ManifestLoader
 
             if (configs)
             {
-                this._logger.info("[_parseContents] Manifest Count: %s", configs.length);
-                this._logger.silly("[_parseContents] Manifests: ", configs);
+                this._logger.info("[parseContents] Manifest Count: %s", configs.length);
+                this._logger.silly("[parseContents] Manifests: ", configs);
                 for(const config of configs)
                 {
                     const manifest = this._addManifest(source, config);
@@ -237,7 +235,7 @@ export class ManifestLoader
             }         
             else
             {
-                this._logger.info("[_parseContents] No Manifests Found.");
+                this._logger.info("[parseContents] No Manifests Found.");
             }
             
             
@@ -280,7 +278,8 @@ export class ManifestLoader
 
     private _addManifest(source : ManifestSource, config: any) : K8sManifest | null
     {
-        this._logger.silly("[_addManifest] file: %s, manifest:", source.id.path, config);
+        this._logger.info("[_addManifest] source path: %s", source.id.path);
+        // this._logger.silly("[_addManifest] source path: %s, manifest:", source.id.path, config);
         if (!config) {
             return null;
         }

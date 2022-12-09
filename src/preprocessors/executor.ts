@@ -5,43 +5,79 @@ import { exec } from 'child_process';
 import Path from "path";
 import { InputSource } from "../manifests/input-source";
 import { spinOperation } from '../screen/spinner';
+import { ManifestLoader } from "../manifests/manifests-loader";
+import { ManifestSource } from "../manifests/manifest-source";
+import { ManifestPackage } from "../manifests/manifest-package";
 
 export class PreProcessorExecutor
 {
     private _logger: ILogger;
+    private _manifestsLoader: ManifestLoader;
+    private _manifestPackage: ManifestPackage;
 
-    constructor(logger: ILogger)
+    constructor(logger: ILogger, manifestsLoader: ManifestLoader)
     {
         this._logger = logger.sublogger("PreProcessorExecutor");
+        this._manifestsLoader = manifestsLoader;
+        this._manifestPackage = manifestsLoader.manifestPackage;
     }
 
-    async extract(inputSource: InputSource) : Promise<string | null>
+    async execute(inputSource: InputSource, source: ManifestSource) : Promise<void>
     {
         if (inputSource.preprocessor === 'kustomize')
         {
-            return await this._kustomize(inputSource);
+            await this._kustomize(inputSource, source);
         }
 
         if (inputSource.preprocessor === 'helm')
         {
-            return await this._helm(inputSource);
+            await this._helm(inputSource, source);
         }
-
-        return null;
     }
 
-    private async _kustomize(inputSource: InputSource) : Promise<string | null>
+    private async _kustomize(inputSource: InputSource, source: ManifestSource)
     {
         const dirName = Path.dirname(inputSource.path);
-        const result = await this.executeCommand(`kustomize build ${dirName}`);
-        return result;
+
+        source = source.getSource("kustomize", dirName, source.originalSource);
+
+        try
+        {
+            const command = `kustomize build ${dirName}`;
+            const contents = await await this.executeCommand(command);
+            if (!contents) {
+                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
+            } else {
+                this._manifestsLoader.parseContents(source, "manifests.yaml", contents);
+            }
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+        }
     }
 
-    private async _helm(inputSource: InputSource) : Promise<string | null>
+    private async _helm(inputSource: InputSource, source: ManifestSource)
     {
         const dirName = Path.dirname(inputSource.path);
-        const result = await this.executeCommand(`helm template ${dirName}`);
-        return result;
+        source = source.getSource("helm", dirName, source.originalSource);
+
+        try
+        {
+            const command = `helm template ${dirName}`;
+            const contents = await await this.executeCommand(command);
+            if (!contents) {
+                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
+            } else {
+                this._manifestsLoader.parseContents(source, "manifests.yaml", contents);
+            }
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+        }
     }
 
     async executeCommand(command: string) : Promise<string | null>
