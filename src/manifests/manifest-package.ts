@@ -4,7 +4,7 @@ import { K8sObject } from '../types/k8s';
 import { ManifestSourceType } from '../types/manifest';
 import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
-import { OriginalSource } from './original-source';
+import { OriginalSource } from '../input/original-source';
 
 export class ManifestPackage
 {

@@ -13,8 +13,8 @@ import { spinOperation } from '../screen/spinner';
 import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
 import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
-import { InputSourceExtractor } from './input-source-extractor';
-import { InputSource, InputSourceKind } from './input-source';
+import { InputSourceExtractor } from '../input/input-source-extractor';
+import { InputSource, InputSourceKind } from '../input/input-source';
 import { PreProcessorExecutor } from '../preprocessors/executor';
 
 export interface ManifestLoaderOptions
@@ -162,7 +162,6 @@ export class ManifestLoader
     {
         const path = inputSource.path;
 
-        // const orignalSource = inputSource.originalSource
         const source = this._manifestPackage.getSource("file", path, inputSource.originalSource, parentSource);
 
         this._logger.info("[_loadFile] path: %s", path);

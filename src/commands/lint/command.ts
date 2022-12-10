@@ -10,9 +10,8 @@ import { ManifestLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { PathResolver } from '../../path-resolver';
-import { InputSourceExtractor } from '../../manifests/input-source-extractor';
 import { spinOperation } from '../../screen/spinner';
-import { PreProcessorExecutor } from '../../preprocessors/executor';
+import { InputSourceExtractor } from '../../input/input-source-extractor';
 
 const myLogger = logger.sublogger('LintCommand');
 

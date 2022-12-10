@@ -2,13 +2,12 @@ import _ from 'the-lodash';
 import { ErrorStatus, ManifestSourceId, ManifestSourceType } from "../types/manifest";
 import { resolvePath } from '../utils/path';
 import { K8sManifest } from './k8s-manifest';
-import { OriginalSource } from './original-source';
-
+import { OriginalSource } from '../input/original-source';
 
 export class ManifestSource implements Required<ErrorStatus>
 {
     private _id: ManifestSourceId;
-    private _key: string;
+    private _idKey: string;
     private _manifests: K8sManifest[] = [];
 
     private _parentSource: ManifestSource | null = null;
@@ -25,21 +24,17 @@ export class ManifestSource implements Required<ErrorStatus>
             kind,
             path
         };
-        this._key = makeSourceKey(kind, path);
+        this._idKey = makeSourceKey(kind, path);
         this.originalSource = originalSource;
     }
 
-    get key() {
-        return this._id;
+    get idKey() {
+        return this._idKey;
     }
 
     get id() {
         return this._id;
     }
-
-    // get source() {
-    //     return this._id;
-    // }
 
     get manifests() {
         return this._manifests;

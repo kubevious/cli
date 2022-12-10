@@ -4,8 +4,7 @@ import { Promise as MyPromise } from "the-promise";
 
 import { exec } from 'child_process';
 import Path from "path";
-import * as fs from 'fs';
-import { InputSource } from "../manifests/input-source";
+import { InputSource } from "../input/input-source";
 import { spinOperation } from '../screen/spinner';
 import { ManifestLoader } from "../manifests/manifests-loader";
 import { ManifestSource } from "../manifests/manifest-source";

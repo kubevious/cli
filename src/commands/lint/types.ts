@@ -1,6 +1,6 @@
 import { K8sApiSchemaFetcherResult } from "../../api-schema/k8s-api-schema-fetcher";
+import { InputSourceExtractor } from "../../input/input-source-extractor";
 import { K8sClusterConnector } from "../../k8s-connector/k8s-cluster-connector";
-import { InputSourceExtractor } from "../../manifests/input-source-extractor";
 import { ManifestPackage } from "../../manifests/manifest-package";
 import { ManifestLoader } from "../../manifests/manifests-loader";
 import { K8sObjectId } from "../../types/k8s";

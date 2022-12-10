@@ -3,7 +3,7 @@ import { ILogger } from 'the-logger';
 import { Promise as MyPromise } from 'the-promise';
 
 import { isWebPath } from '../utils/path';
-import { OriginalSource } from './original-source';
+import { OriginalSource } from '../input/original-source';
 import { ManifestSourceType } from '../types/manifest';
 
 export class InputSourceExtractor {
@@ -23,7 +23,8 @@ export class InputSourceExtractor {
         return _.values(this._originalSources);
     }
 
-    public addMany(fileOrPatternOrUrls: string[]) {
+    public addMany(fileOrPatternOrUrls: string[])
+    {
         for(const x of fileOrPatternOrUrls)
         {
             this.addSingle(x);
