@@ -1,5 +1,6 @@
 import _ from 'the-lodash';
 import { ErrorStatus, ManifestSourceId, ManifestSourceType } from "../types/manifest";
+import { resolvePath } from '../utils/path';
 import { K8sManifest } from './k8s-manifest';
 import { OriginalSource } from './original-source';
 
@@ -58,7 +59,11 @@ export class ManifestSource implements Required<ErrorStatus>
 
         let source = this._childSources[sourceKey];
         if (!source) {
-            source = new ManifestSource(kind, path, originalSource);
+            let childPath = path;
+            if (this.id.path.length > 0) {
+                childPath = resolvePath(path, this.id.path);
+            } 
+            source = new ManifestSource(kind, childPath, originalSource);
             this._childSources[sourceKey] = source;
             source._parentSource = this;
         }

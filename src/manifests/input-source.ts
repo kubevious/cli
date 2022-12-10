@@ -1,7 +1,7 @@
 import _ from 'the-lodash';
 import * as Path from 'path';
 
-import { isWebPath, resolvePath } from "../utils/path";
+import { getParentDir, isWebPath, resolvePath } from "../utils/path";
 import { OriginalSource } from './original-source';
 
 export class InputSource {
@@ -17,7 +17,8 @@ export class InputSource {
 
     constructor(path: string, originalSource: OriginalSource)
     {
-        path = resolvePath(path, originalSource.path);
+        const parentDir = getParentDir(originalSource.path);
+        path = resolvePath(path, parentDir);
 
         if (isWebPath(path))
         {

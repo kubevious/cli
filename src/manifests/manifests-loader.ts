@@ -108,7 +108,7 @@ export class ManifestLoader
             {
                 for(const manifest of manifests)
                 {
-                    this._addManifest(source, manifest);
+                    this.addManifest(source, manifest);
                 }
             }
             else
@@ -169,7 +169,7 @@ export class ManifestLoader
 
         try
         {
-            const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
+            const contents = await this.rawReadFile(path);
             return this.parseContents(source, path, contents);
         }
         catch(reason : any)
@@ -214,7 +214,7 @@ export class ManifestLoader
             let configs : any[] | null = [];
             try
             {
-                configs = this._parseYaml(contents);    
+                configs = this._parseYaml(contents);
             }
             catch(reason: any)
             {
@@ -227,7 +227,7 @@ export class ManifestLoader
                 this._logger.silly("[parseContents] Manifests: ", configs);
                 for(const config of configs)
                 {
-                    const manifest = this._addManifest(source, config);
+                    const manifest = this.addManifest(source, config);
                     if (manifest) {
                         manifests.push(manifest);
                     }
@@ -253,7 +253,7 @@ export class ManifestLoader
             }
             if (configs)
             {
-                const manifest = this._addManifest(source, configs);
+                const manifest = this.addManifest(source, configs);
                 if (manifest) {
                     manifests.push(manifest);
                 }
@@ -267,6 +267,7 @@ export class ManifestLoader
             if (source.manifests.length === 0)
             {
                 if (!this._options.ignoreNonK8s) {
+                    // TODO: Move this to post parse validation logic
                     this._manifestPackage.sourceError(source, 'Contains no manifests');
                 }
 
@@ -276,10 +277,10 @@ export class ManifestLoader
         return manifests;
     }
 
-    private _addManifest(source : ManifestSource, config: any) : K8sManifest | null
+    public addManifest(source : ManifestSource, config: any) : K8sManifest | null
     {
-        this._logger.info("[_addManifest] source path: %s", source.id.path);
-        // this._logger.silly("[_addManifest] source path: %s, manifest:", source.id.path, config);
+        this._logger.info("[addManifest] source path: %s", source.id.path);
+        // this._logger.silly("[addManifest] source path: %s, manifest:", source.id.path, config);
         if (!config) {
             return null;
         }
@@ -310,22 +311,41 @@ export class ManifestLoader
         return errors;
     }
 
-    private _parseYaml(contents: string) : any[] | null
+    public parseYamlRaw(contents: string) : YAML.Document.Parsed<YAML.ParsedNode>[]
     {
-        // this._logger.info("[parseYaml] >>>>>>>>>>>>>>>. STR: ", contents);
-
         const result = YAML.parseAllDocuments(contents, {
-        });
+        }); 
 
         if (!result) {
             return [];
         }
-        
-        const jsons = result.map(x => x.toJS({ })); // emptySourceAsObject: false 
-        // for(const json of jsons)
-        // {
-        //     this._logger.info("[parseYaml] *************************** DATA: ", json);
-        // }
+
+        return result;
+    }
+
+    public rawYamlToObj(rawYaml: YAML.Document.Parsed<YAML.ParsedNode>)
+    {
+        return rawYaml.toJS({});
+    }
+
+    public async rawReadFile(path: string)
+    {
+        try
+        {
+            const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
+            return contents;
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[rawReadFile] ERROR: ", reason);
+            throw reason;
+        }
+    }
+
+    private _parseYaml(contents: string) : any[]
+    {
+        const result = this.parseYamlRaw(contents);
+        const jsons = result.map(x => this.rawYamlToObj(x));
         return jsons;
     }
 

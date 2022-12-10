@@ -1,13 +1,16 @@
+import _ from 'the-lodash';
 import { ILogger } from "the-logger";
 import { Promise as MyPromise } from "the-promise";
 
 import { exec } from 'child_process';
 import Path from "path";
+import * as fs from 'fs';
 import { InputSource } from "../manifests/input-source";
 import { spinOperation } from '../screen/spinner';
 import { ManifestLoader } from "../manifests/manifests-loader";
 import { ManifestSource } from "../manifests/manifest-source";
 import { ManifestPackage } from "../manifests/manifest-package";
+import YAML from "yaml";
 
 export class PreProcessorExecutor
 {
@@ -60,6 +63,25 @@ export class PreProcessorExecutor
 
     private async _helm(inputSource: InputSource, source: ManifestSource)
     {
+        let helmChartName : string;
+        try
+        {
+            const contents = await this._manifestsLoader.rawReadFile(source.id.path);
+            const chart = YAML.parseDocument(contents).toJS({});
+            helmChartName = chart.name;
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._manifestPackage.sourceError(source, 'Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            return;
+        }
+
+        if(!helmChartName) {
+            this._manifestPackage.sourceError(source, 'Invalid Helm Chart manifest. Chart name not set.');
+            return;
+        }
+
         const dirName = Path.dirname(inputSource.path);
         source = source.getSource("helm", dirName, source.originalSource);
 
@@ -67,10 +89,25 @@ export class PreProcessorExecutor
         {
             const command = `helm template ${dirName}`;
             const contents = await await this.executeCommand(command);
-            if (!contents) {
+            if (!contents)
+            {
                 this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
-            } else {
-                this._manifestsLoader.parseContents(source, "manifests.yaml", contents);
+            }
+            else
+            {
+                try
+                {
+                    const rawYamls = this._manifestsLoader.parseYamlRaw(contents);
+                    for(const rawYaml of rawYamls)
+                    {
+                        this._processHelm(source, rawYaml, helmChartName);
+                    }
+                }
+                catch(reason: any)
+                {
+                    this._manifestPackage.sourceError(source, `Failed to parse YAML manifests from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+                    return;
+                }
             }
         }
         catch(reason : any)
@@ -78,6 +115,35 @@ export class PreProcessorExecutor
             this._logger.info("[_loadFile] ERROR: ", reason);
             this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
         }
+    }
+
+    private _processHelm(source: ManifestSource, rawYaml: YAML.Document.Parsed<YAML.ParsedNode>, helmChartName : string)
+    {
+        const comment = rawYaml.contents?.commentBefore;
+
+        this._logger.info("[_processHelm] comment: %s", comment);
+        if (comment)
+        {
+            const matches = comment.match(/Source: (\S*)$/);
+            if (matches)
+            {
+                let templatePath = matches[1];
+                this._logger.info("[_processHelm] templatePath: %s", templatePath);
+
+                if (_.last(helmChartName) !== '/') {
+                    helmChartName += '/';
+                }
+
+                if (templatePath.startsWith(helmChartName)) {
+                    templatePath = templatePath.substring(helmChartName.length);
+                }
+
+                source = source.getSource('file', templatePath, source.originalSource);
+            }
+        }
+
+        const config = this._manifestsLoader.rawYamlToObj(rawYaml);
+        this._manifestsLoader.addManifest(source, config);
     }
 
     async executeCommand(command: string) : Promise<string | null>

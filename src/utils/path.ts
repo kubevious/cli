@@ -6,22 +6,21 @@ export function isWebPath(fileOrPath : string)
     return _.startsWith(fileOrPath, 'http://') || _.startsWith(fileOrPath, 'https://');
 }
 
-export function resolvePath(path: string, parentFileOrUrl?: string)
+export function resolvePath(path: string, parentDirOrPath?: string)
 {
-    if (parentFileOrUrl && !isAbsolutePath(path))
+    if (parentDirOrPath && !isAbsolutePath(path))
     {
-        let parentPath = parent(parentFileOrUrl);
-        if (isWebPath(parentPath))
+        if (isWebPath(parentDirOrPath))
         {
             if (!_.endsWith('/')) {
-                parentPath = `${parentPath}/`;
+                parentDirOrPath = `${parentDirOrPath}/`;
             }
-            path = `${parentPath}${path}`;
+            path = `${parentDirOrPath}${path}`;
             return path;
         }
         else
         {
-            path = Path.resolve(parentPath, path);
+            path = Path.resolve(parentDirOrPath, path);
             return path;
         }
     }
@@ -38,7 +37,7 @@ export function isAbsolutePath(fileOrPath : string)
     return _.startsWith(fileOrPath, '/') || isWebPath(fileOrPath);
 }
 
-export function parent(fileOrUrl: string)
+export function getParentDir(fileOrUrl: string)
 {
     return Path.dirname(fileOrUrl);
 }

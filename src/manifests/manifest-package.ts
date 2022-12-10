@@ -9,7 +9,7 @@ import { OriginalSource } from './original-source';
 export class ManifestPackage
 {
     private _logger: ILogger;
-    private _rootSource : ManifestSource = new ManifestSource('root', 'root', null);
+    private _rootSource : ManifestSource = new ManifestSource('root', '', null);
     private _manifests: K8sManifest[] = [];
     private _namespaces : string[] = [];
 
