@@ -55,8 +55,7 @@ export class K8sApiSchemaFetcher
                                 result.found = true;
                                 result.foundExact = true;
                                 result.k8sJsonSchema = k8sJsonSchema;
-                            })
-
+                            });
                     });
             })
             .then(() => result)

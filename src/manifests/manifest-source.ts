@@ -1,10 +1,14 @@
 import _ from 'the-lodash';
-import { ErrorStatus, ManifestSourceId, ManifestSourceType } from "../types/manifest";
+import { ManifestSourceId, ManifestSourceType } from "../types/manifest";
 import { resolvePath } from '../utils/path';
 import { K8sManifest } from './k8s-manifest';
 import { OriginalSource } from '../input/original-source';
+import { rootLogger } from '../logger'
+import { BaseObject } from '../types/base-object';
 
-export class ManifestSource implements Required<ErrorStatus>
+const logger = rootLogger.sublogger("ManifestSource");
+
+export class ManifestSource extends BaseObject 
 {
     private _id: ManifestSourceId;
     private _idKey: string;
@@ -13,13 +17,12 @@ export class ManifestSource implements Required<ErrorStatus>
     private _parentSource: ManifestSource | null = null;
     private _childSources: Record<string, ManifestSource> = {}
 
-    public success = true;
-    public errors: string[] = [];
-    public warnings: string[] = [];
     public originalSource : OriginalSource | null = null;
 
     constructor(kind: ManifestSourceType, path: string, originalSource: OriginalSource | null)
     {
+        super();
+
         this._id = {
             kind,
             path
@@ -64,9 +67,21 @@ export class ManifestSource implements Required<ErrorStatus>
         }
         return source;
     }
+
+    addManifest(k8sManifest: K8sManifest)
+    {
+        this._manifests.push(k8sManifest);
+    }
+
+    protected yieldChildren() : BaseObject[]
+    {
+        const list : BaseObject[][] = [ this.childSources, this.manifests ];
+        return _.flatten(list);
+    }
 }
 
 export function makeSourceKey(kind: ManifestSourceType, path: string)
 {
     return _.stableStringify({kind, path});
 }
+    

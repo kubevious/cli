@@ -106,7 +106,7 @@ export class RulesRuntime
             {
                 if (!rule.hasUnmedDependency)
                 {
-                    this._manifestPackage.manifestWarning(rule.manifest, 'Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
+                    rule.manifest.reportWarning('Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
                     rule.hasUnmedDependency = true;
                     rule.isDisabled = true;
                 }
@@ -263,12 +263,12 @@ export class RulesRuntime
         const clusterRuleInfo = this._clusterRules[clusterRefName];
         if (!clusterRuleInfo) {
             this._logger.info("[_initRuleApplicator] Missing Cluster Rule: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not found`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not found`);
             return;
         }
         if (!clusterRuleInfo.rule.useApplicator) {
             this._logger.info("[_initRuleApplicator] Cluster Rule not using applicators: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not using applicators`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not using applicators`);
             return;
         }
         if (clusterRuleInfo.rule.isDisabled) {
@@ -278,13 +278,13 @@ export class RulesRuntime
 
         if (!clusterRuleInfo.compiler) {
             this._logger.info("[_initRuleApplicator] Cluster Rule not compiled: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not compiled`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not compiled`);
             return;
         }
 
         if (!clusterRuleInfo.compiler.isCompiled) {
             this._logger.info("[_initRuleApplicator] Cluster Rule has compilation errors: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} has compilation errors`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} has compilation errors`);
             return;
         }
 
@@ -323,7 +323,7 @@ export class RulesRuntime
 
                 for(const error of compiler.ruleErrors)
                 {
-                    this._manifestPackage.manifestError(manifest, error.msg);
+                    manifest.reportError(error.msg);
                 }
 
                 return compiler;

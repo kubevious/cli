@@ -5,8 +5,9 @@ import { ManifestSourceType } from '../types/manifest';
 import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
 import { OriginalSource } from '../input/original-source';
+import { BaseObject } from '../types/base-object';
 
-export class ManifestPackage
+export class ManifestPackage extends BaseObject 
 {
     private _logger: ILogger;
     private _rootSource : ManifestSource = new ManifestSource('root', '', null);
@@ -15,6 +16,7 @@ export class ManifestPackage
 
     constructor(logger: ILogger)
     {
+        super();
         this._logger = logger.sublogger('ManifetPackage');
     }
 
@@ -38,54 +40,12 @@ export class ManifestPackage
         return parentSource.getSource(kind, path, originalSource);
     }
 
-    sourceError(source: ManifestSource, error: string)
-    {
-        source.errors.push(error);
-        source.success = false;
-    }
-
-    sourceErrors(source: ManifestSource, errors: string[])
-    {
-        for(const error of errors)
-        {
-            this.sourceError(source, error);
-        }
-    }
-
-    manifestError(manifest: K8sManifest, msg: string)
-    {
-        manifest.errors.push(msg);
-        manifest.success = false;
-    }
-
-    manifestErrors(manifest: K8sManifest, msgs: string[])
-    {
-        for(const msg of msgs)
-        {
-            this.manifestError(manifest, msg);
-        }
-    }
-
-    manifestWarning(manifest: K8sManifest, msg: string)
-    {
-        manifest.warnings.push(msg);
-    }
-
-    manifestWarnings(manifest: K8sManifest, msgs?: string[])
-    {
-        if (msgs) {
-            for(const msg of msgs)
-            {
-                this.manifestWarning(manifest, msg);
-            }
-        }
-    }
-
     addManifest(source: ManifestSource, k8sObject: K8sObject) : K8sManifest
     {
         const k8sManifest = new K8sManifest(k8sObject, source)
 
-        source.manifests.push(k8sManifest);
+        source.addManifest(k8sManifest);
+
         this._manifests.push(k8sManifest);
 
         return k8sManifest;
@@ -151,5 +111,10 @@ export class ManifestPackage
         if (source.parentSource) {
             this._debugOutputSourceTree(source.parentSource, indent + 1);
         }
+    }
+
+    protected yieldChildren() : BaseObject[]
+    {
+        return _.flatten([this._rootSource]);
     }
 }

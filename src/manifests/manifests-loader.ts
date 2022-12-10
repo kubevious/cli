@@ -61,7 +61,7 @@ export class ManifestLoader
         {
             if (!originalSource.hasAnyInput) {
                 const source = this._manifestPackage.getSource(originalSource.kind, originalSource.path, originalSource);
-                this._manifestPackage.sourceError(source, `No input was found.`);
+                source.reportError(`No input was found.`);
             }
         }
 
@@ -89,7 +89,7 @@ export class ManifestLoader
                 }
                 catch(reason: any)
                 {
-                    this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing YAML.');
+                    source.reportError(reason.message ?? 'Error parsing YAML.');
                 }
             }
 
@@ -113,12 +113,12 @@ export class ManifestLoader
             }
             else
             {
-                this._manifestPackage.sourceError(source, 'Failed to parse manifests from stream.');
+                source.reportError('Failed to parse manifests from stream.');
             }
         }
         catch(reason: any)
         {
-            this._manifestPackage.sourceError(source, `Failed to fetch manifest. Reason: ${reason.message ?? 'unknown'}`);
+            source.reportError(`Failed to fetch manifest. Reason: ${reason.message ?? 'unknown'}`);
         }
     }
 
@@ -153,7 +153,7 @@ export class ManifestLoader
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, `Failed to execute preprocessor: ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            source.reportError(`Failed to execute preprocessor: ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
             return [];
         }
     }
@@ -174,7 +174,7 @@ export class ManifestLoader
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, 'Failed to load manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            source.reportError('Failed to load manifest. Reason: ' + (reason?.message ?? "Unknown"));
             return [];
         }
     }
@@ -194,7 +194,7 @@ export class ManifestLoader
         catch(reason : any)
         {
             // this._logger.error("_loadUrl] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, 'Failed to fetch manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            source.reportError('Failed to fetch manifest. Reason: ' + (reason?.message ?? "Unknown"));
             return [];
         }
     }
@@ -217,7 +217,7 @@ export class ManifestLoader
             }
             catch(reason: any)
             {
-                this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing YAML.');
+                source.reportError(reason.message ?? 'Error parsing YAML.');
             }
 
             if (configs)
@@ -248,7 +248,7 @@ export class ManifestLoader
             }
             catch(reason: any)
             {
-                this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing JSON');
+                source.reportError(reason.message ?? 'Error parsing JSON');
             }
             if (configs)
             {
@@ -258,7 +258,7 @@ export class ManifestLoader
                 }
             }
         } else {
-            this._manifestPackage.sourceError(source, 'Unknown extension. Should be one of: .yaml, .yml or .json');
+            source.reportError('Unknown extension. Should be one of: .yaml, .yml or .json');
         }
 
         if (source.success)
@@ -267,7 +267,7 @@ export class ManifestLoader
             {
                 if (!this._options.ignoreNonK8s) {
                     // TODO: Move this to post parse validation logic
-                    this._manifestPackage.sourceError(source, 'Contains no manifests');
+                    source.reportError('Contains no manifests');
                 }
 
             }
@@ -290,7 +290,7 @@ export class ManifestLoader
         if (errors.length > 0)
         {
             if (!this._options.ignoreNonK8s) {
-                this._manifestPackage.sourceErrors(source, errors);
+                source.reportErrors(errors);
             }
             return null;
         }

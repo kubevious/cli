@@ -29,5 +29,5 @@ for(const key of _.keys(process.env).filter(x => _.startsWith(x, LogLevelOverrid
 }
 
 
-const rootLogger = setupRootLogger('CLI', loggerOptions);
+export const rootLogger = setupRootLogger('CLI', loggerOptions);
 export const logger = rootLogger.logger;

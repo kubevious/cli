@@ -89,7 +89,7 @@ export class RuleRuntime
                     if (!(this._manifest.errorsWithRule ?? false))
                     {
                         this._manifest.errorsWithRule = true;
-                        this._ruleEngineReporter.manifestPackage.manifestError(this._manifest, "Failed to compile the rule.");
+                        this._manifest.reportError("Failed to compile the rule.");
                     }
                 }
             })

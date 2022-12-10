@@ -39,7 +39,7 @@ export class PackageRenderer
         const rows : string[][] = [];
         for(const file of filesWithErrors)
         {
-            for(const error of file.errors)
+            for(const error of file.selfErrors)
             {
                 rows.push([file.id.path, error]);
             }
@@ -80,7 +80,7 @@ export class PackageRenderer
         const rows : string[][] = [];
         for(const x of manifestsWithErrors)
         {
-            for(const error of x.errors)
+            for(const error of x.selfErrors)
             {
                 rows.push([x.source.id.path, x.id.namespace ?? '', x.id.apiVersion, x.id.kind, x.id.name ?? '', error])
             }

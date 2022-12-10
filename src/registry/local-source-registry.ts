@@ -40,7 +40,7 @@ export class LocalSourceRegistry
                 for(const manifest of manifests)
                 {
                     const message = 'Manifest is defined in multiple sources.';
-                    this._manifestPackage.manifestError(manifest, message);
+                    manifest.reportError(message);
                 }
             }
         }

@@ -48,7 +48,7 @@ export class PreProcessorExecutor
             const command = `kustomize build ${dirName}`;
             const contents = await await this.executeCommand(command);
             if (!contents) {
-                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
+                source.reportError(`Could not extract manifest contents from ${inputSource.preprocessor}`);
             } else {
                 this._manifestsLoader.parseContents(source, "manifests.yaml", contents);
             }
@@ -56,7 +56,7 @@ export class PreProcessorExecutor
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            source.reportError(`Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
         }
     }
 
@@ -72,12 +72,12 @@ export class PreProcessorExecutor
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, 'Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            source.reportError('Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
             return;
         }
 
         if(!helmChartName) {
-            this._manifestPackage.sourceError(source, 'Invalid Helm Chart manifest. Chart name not set.');
+            source.reportError('Invalid Helm Chart manifest. Chart name not set.');
             return;
         }
 
@@ -90,7 +90,7 @@ export class PreProcessorExecutor
             const contents = await await this.executeCommand(command);
             if (!contents)
             {
-                this._manifestPackage.sourceError(source, `Could not extract manifest contents from ${inputSource.preprocessor}`);
+                source.reportError(`Could not extract manifest contents from ${inputSource.preprocessor}`);
             }
             else
             {
@@ -104,7 +104,7 @@ export class PreProcessorExecutor
                 }
                 catch(reason: any)
                 {
-                    this._manifestPackage.sourceError(source, `Failed to parse YAML manifests from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+                    source.reportError(`Failed to parse YAML manifests from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
                     return;
                 }
             }
@@ -112,7 +112,7 @@ export class PreProcessorExecutor
         catch(reason : any)
         {
             this._logger.info("[_loadFile] ERROR: ", reason);
-            this._manifestPackage.sourceError(source, `Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            source.reportError(`Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
         }
     }
 

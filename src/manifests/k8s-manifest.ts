@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
+import { BaseObject } from '../types/base-object';
 import { K8sObject, K8sObjectId, makeId, makeK8sKeyStr } from "../types/k8s";
-import { ErrorStatus } from "../types/manifest";
 import { ManifestSource } from './manifest-source';
 
 export interface K8sManifestRuleResult
@@ -10,20 +10,7 @@ export interface K8sManifestRuleResult
     warnings?: boolean;
 }
 
-interface IK8sManifest extends Required<ErrorStatus>
-{
-    id: K8sObjectId;
-
-    isLinted: boolean;
-    rules: K8sManifestRuleResult;
-
-    errorsWithRule?: boolean;
-
-    source: ManifestSource;
-    config: K8sObject;
-}
-
-export class K8sManifest implements IK8sManifest
+export class K8sManifest extends BaseObject 
 {
     private _idKey: string;
     private _id: K8sObjectId;
@@ -34,13 +21,11 @@ export class K8sManifest implements IK8sManifest
     private _isLinted = false;
     private _rules: K8sManifestRuleResult = {};
     private _errorsWithRule?: boolean | undefined;
-        
-    private _success = true;
-    private _errors: string[] = [];
-    private _warnings: string[] = [];
 
     constructor(config: K8sObject, source: ManifestSource)
     {
+        super();
+
         this._config = config;
         this._source = source;
         this._id = makeId(config);
@@ -80,22 +65,6 @@ export class K8sManifest implements IK8sManifest
 
     public get rules(): K8sManifestRuleResult {
         return this._rules;
-    }
-
-    public get success() {
-        return this._success;
-    }
-
-    public set success(value) {
-        this._success = value;
-    }
-
-    public get errors(): string[] {
-        return this._errors;
-    }
-
-    public get warnings(): string[] {
-        return this._warnings;
     }
    
 }
