@@ -3,8 +3,7 @@ import { InputSourceExtractor } from "../../input/input-source-extractor";
 import { K8sClusterConnector } from "../../k8s-connector/k8s-cluster-connector";
 import { ManifestPackage } from "../../manifests/manifest-package";
 import { ManifestLoader } from "../../manifests/manifests-loader";
-import { K8sObjectId } from "../../types/k8s";
-import { ManifestSourceId } from "../../types/manifest";
+import { ManifestPackageCounters, ManifestPackageResult, ResultObject } from "../../types/result";
 
 export interface LintCommandOptions {
     k8sVersion?: string;
@@ -19,7 +18,6 @@ export interface LintCommandOptions {
 
 
 export interface LintCommandData {
-    success: boolean,
     k8sConnector: K8sClusterConnector,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
@@ -37,7 +35,7 @@ export interface LintStatus
     warnings?: string[]
 }
 
-export interface LintManifestsResult
+export interface LintManifestsResult extends ResultObject
 {
     success: boolean;
 
@@ -46,28 +44,7 @@ export interface LintManifestsResult
     foundK8sVersion: boolean;
     foundExactK8sVersion: boolean;
 
-    sources: LintSourceResult[];
+    packageResult: ManifestPackageResult;
 
-    counters: {
-        sources: {
-            total: number,
-            withErrors: number,
-            withWarnings: number
-        },
-        manifests: {
-            total: number,
-            passed: number,
-            withErrors: number,
-            withWarnings: number
-        }
-    }
+    counters: ManifestPackageCounters;
 }
-
-export type LintSourceResult = ManifestSourceId & LintStatus & {
-    manifestCount: number;
-
-    manifests: LintManifestResult[];
-};
-
-export type LintManifestResult = K8sObjectId & LintStatus;
-

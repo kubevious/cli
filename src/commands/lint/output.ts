@@ -1,7 +1,8 @@
-import { IconDefinition, print, printErrors, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
-import { LintManifestsResult, LintSeverity, LintSourceResult } from "./types";
-import { ErrorStatus, ManifestSourceId } from '../../types/manifest';
+import { IconDefinition, print, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
+import { LintManifestsResult } from "./types";
+import { ManifestSourceId } from '../../types/manifest';
 import { K8sObjectId } from '../../types/k8s';
+import { outputManifestPackageResult } from '../../screen/manifest';
 
 export interface LintOutputParams {
     skipResult?: boolean,
@@ -25,21 +26,7 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
     printInfoLine(`Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
     print();
     
-
-    for(const source of result.sources)
-    {
-        outputSource(source);
-        outputErrors(source, 3);
-
-        for(const manifest of source.manifests)
-        {
-            outputManifest(manifest, severityStatusIcon(manifest.severity), 3);
-            outputErrors(manifest, 6);
-        }
-
-        print();
-    }
-
+    outputManifestPackageResult(result.packageResult);
     print();
 
     if (!params.skipSummary)
@@ -55,13 +42,12 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
 
 export function outputLintResult(result: LintManifestsResult)
 {
-    printProcessStatus(result.success, 'Lint');
+    printProcessStatus(result.severity, 'Lint');
 }
 
 export function outputLintSummary(result: LintManifestsResult)
 {
     printSectionTitle('Lint Summary');
-
 
     print(`Sources: ${result.counters.sources.total}`, 4);
     printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', result.counters.sources.withErrors);
@@ -70,17 +56,6 @@ export function outputLintSummary(result: LintManifestsResult)
     printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', result.counters.manifests.passed);
     printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', result.counters.manifests.withErrors);
     printSummaryCounter(STATUS_ICONS.warning, 'Manifests With Warnings', result.counters.manifests.withWarnings);
-}
-
-export function outputSource(source: LintSourceResult, indent?: number)
-{
-    const parts : string[] = [];
-
-    parts.push(severityStatusIcon(source.severity).get());
-
-    parts.push(produceSourceLine(source));
-    
-    print(parts.join(' '), indent);
 }
 
 export function produceSourceLine(source: ManifestSourceId)
@@ -126,28 +101,3 @@ export function outputManifest(manifest: K8sObjectId, icon: IconDefinition, inde
 
     print(`${icon.get()} ${line}`, indent);
 }
-
-function outputErrors(obj: ErrorStatus, indent?: number)
-{
-    if (!obj.success) {
-        printErrors(obj.errors, indent);
-    }
-
-    printWarnings(obj.warnings, indent);
-}
-
-
-function severityStatusIcon(severity: LintSeverity)
-{
-    if (severity === 'pass') {
-        return STATUS_ICONS.passed;
-    }
-    else if (severity === 'fail') {
-        return STATUS_ICONS.failed;
-    }
-    else if (severity === 'warning') {
-        return STATUS_ICONS.warning;
-    }
-    return STATUS_ICONS.question;
-}
-

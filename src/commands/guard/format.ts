@@ -24,6 +24,9 @@ export function formatResult({
 
     const result: GuardResult = {
         success: success,
+
+        severity: 'pass', // TODO: FIX ME
+
         ruleSuccess: ruleSuccess,
         lintResult : lintResult,
         rules: [],

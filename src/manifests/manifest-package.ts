@@ -6,7 +6,7 @@ import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
 import { OriginalSource } from '../input/original-source';
 import { BaseObject } from '../types/base-object';
-import { makeObjectSeverityFromChildren, ManifestPackageResult } from '../types/result';
+import { makeObjectSeverityFromChildren, ManifestPackageCounters, ManifestPackageResult } from '../types/result';
 
 export class ManifestPackage extends BaseObject 
 {
@@ -151,4 +151,6 @@ export class ManifestPackage extends BaseObject
 
         return manifestPackageR;
     }
+
+
 }

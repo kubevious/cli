@@ -29,5 +29,5 @@ export function output(result: IndexLibraryResult)
 
     print(`Library Index: ${result.libraryPath}`);
 
-    printProcessStatus(result.success, 'Index Generation');
+    printProcessStatus(result.success ? 'pass' : 'fail', 'Index Generation');
 }

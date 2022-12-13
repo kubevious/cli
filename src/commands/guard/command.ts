@@ -6,7 +6,7 @@ import { LocalRegistryPopulator } from '../../registry/local-registry-populator'
 import { RuleRegistry, RuleRegistryLoadOptions } from '../../rules-engine/registry/rule-registry';
 import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
-import { command as lintCommand, determineLintSuccess, massageLintOptions } from '../lint/command';
+import { command as lintCommand, massageLintOptions } from '../lint/command';
 import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
@@ -120,13 +120,11 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
         }
     }
 
-    lintResult.success = determineLintSuccess(manifestPackage);
-
-    const success = lintResult.success && ruleSuccess; 
+    const success = true && ruleSuccess;  // lintResult.success
 
     myLogger.info("Success: %s", success);
     myLogger.info("RuleSuccess: %s", ruleSuccess);
-    myLogger.info("LintResult.success: %s", lintResult.success);
+    // myLogger.info("LintResult.success: %s", lintResult.success);
 
     // manifestPackage.debugOutput();
 

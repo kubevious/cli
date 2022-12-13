@@ -5,7 +5,7 @@ import { K8sManifest } from './k8s-manifest';
 import { OriginalSource } from '../input/original-source';
 import { rootLogger } from '../logger'
 import { BaseObject } from '../types/base-object';
-import { makeObjectSeverity, makeObjectSeverityFromChildren, SourceInfoResult, SourceResult } from '../types/result';
+import { makeObjectSeverity, makeObjectSeverityFromChildren, ManifestPackageCounters, SourceInfoResult, SourceResult } from '../types/result';
 
 const logger = rootLogger.sublogger("ManifestSource");
 
@@ -99,9 +99,6 @@ export class ManifestSource extends BaseObject
         if (this.manifests.length > 0)
         {
             result.manifests = this.manifests.map(x => x.exportInfoResult());
-            // for(const manifestR of result.manifests)
-            // {
-            // }
         }
         
         return result;

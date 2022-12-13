@@ -1,6 +1,7 @@
 import _ from 'the-lodash';
 import chalk from 'chalk';
 import emoji from 'node-emoji';
+import { ResultObjectSeverity } from '../types/result';
 
 
 export function indentify(str: string, count?: number) : string
@@ -64,17 +65,22 @@ export function printSectionTitle(title: string, indent? : number)
     print(chalk.underline(title), indent);
 }
 
-export function printProcessStatus(success: boolean, taskName: string)
+export function printProcessStatus(severity: ResultObjectSeverity, taskName: string)
 {
     print();
-    if (success)
+    if (severity === 'pass')
     {
         print(`${emoji.get('white_check_mark')} ${taskName} Succeeded.`);
     }
-    else
+    else if (severity === 'warning')
+    {
+        print(`${emoji.get('white_check_mark')} ${taskName} Succeeded with Warnings.`);
+    }
+    else if (severity === 'fail')
     {
         print(`${emoji.get('x')} ${taskName} Failed`);
     }
+     
 }
 
 

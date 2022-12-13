@@ -44,6 +44,21 @@ export interface ManifestPackageResult extends ResultObject
     sources: SourceResult[];
 }
 
+export interface ManifestPackageCounters
+{
+    sources: {
+        total: number,
+        withErrors: number,
+        withWarnings: number
+    },
+    manifests: {
+        total: number,
+        passed: number,
+        withErrors: number,
+        withWarnings: number
+    }
+}
+
 export function makeObjectSeverity(severity: ResultObjectSeverity, others: ResultObjectSeverity[]) : ResultObjectSeverity
 {
     const items = _.flatten([[severity], others]);

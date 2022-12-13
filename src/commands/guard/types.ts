@@ -6,6 +6,7 @@ import { ManifestSourceId } from "../../types/manifest";
 import { RuleKind } from "../../rules-engine/registry/types";
 import { LintCommandData, LintCommandOptions, LintManifestsResult } from "../lint/types";
 import { LocalK8sRegistry } from "../../registry/local-k8s-registry";
+import { ResultObject } from "../../types/result";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
@@ -36,7 +37,7 @@ export interface GuardCommandData {
     lintCommandData: LintCommandData,
 }
 
-export interface GuardResult
+export interface GuardResult extends ResultObject
 {
     success: boolean;
 

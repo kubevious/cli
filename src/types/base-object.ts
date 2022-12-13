@@ -65,18 +65,18 @@ export class BaseObject
             if (!result.messages) {
                 result.messages = [];
             }
-            result.messages = _.concat(result.messages, this.errors.map(x => ({ severity: 'error', msg: x})));
+            result.messages = _.concat(result.messages, this.errors.map(x => ({ severity: 'error', msg: x })));
         }
 
         if (this.warnings.length > 0)
         {
             if (result.severity === 'pass') {
-                result.severity = 'fail';
+                result.severity = 'warning';
             }
             if (!result.messages) {
                 result.messages = [];
             }
-            result.messages = _.concat(result.messages, this.warnings.map(x => ({ severity: 'warning', msg: x})));
+            result.messages = _.concat(result.messages, this.warnings.map(x => ({ severity: 'warning', msg: x })));
         }
 
         return result;

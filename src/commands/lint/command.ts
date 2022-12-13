@@ -108,15 +108,7 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
 
     manifestPackage.debugOutput();
 
-    myLogger.info(">>>>>>>>>>>>>>>>>>>>>>>");
-    myLogger.info("RESULT: ", manifestPackage.exportResult());
-    myLogger.info(">>>>>>>>>>>>>>>>>>>>>>>");
-
-    const success = determineLintSuccess(manifestPackage);
-    myLogger.info("Success: %s", success);
-
     return {
-        success,
         k8sConnector,
         manifestPackage,
         k8sSchemaInfo,
@@ -124,27 +116,6 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
         inputSourceExtractor,
         manifestLoader
     } 
-}
-
-export function determineLintSuccess(manifestPackage: ManifestPackage)
-{
-    let success = true;
-
-    // manifestPackage
-    for(const source of manifestPackage.sources)
-    {
-        if (!source.success) {
-            success = false;
-        }
-
-        for(const manifest of source.manifests)
-        {
-            if (!manifest.success) {
-                success = false;
-            }
-        }
-    }
-    return success;
 }
 
 export function massageLintOptions(options: Partial<LintCommandOptions>) : LintCommandOptions

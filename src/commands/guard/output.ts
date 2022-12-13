@@ -88,7 +88,7 @@ export function output(result: GuardResult)
 
     outputLintResult(result.lintResult);
 
-    printProcessStatus(result.success, 'Guard');
+    printProcessStatus(result.severity, 'Guard');
 }
 
 
