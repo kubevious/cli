@@ -10,7 +10,7 @@ import { RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { RuleResult } from '../../types/rules-result';
 import { ManifestInfoResult, ManifestResult } from '../../types/manifest-result';
-import { setupBaseObjectSeverity } from '../../types/result';
+import { ResultObjectSeverity, setupBaseObjectSeverity } from '../../types/result';
 import { ManifestViolation } from './manifest-violation';
 
 export class RuleRuntime
@@ -115,13 +115,24 @@ export class RuleRuntime
 
         const violations = this.violations.map(x => x.exportResult());
 
+        const hasViolationErrors = _.some(violations, x => x.severity === 'fail');
+        const hasViolationWarnings = _.some(violations, x => x.severity === 'warning');
+
+        let ruleSeverity : ResultObjectSeverity = 'pass';
+        if (hasViolationErrors) {
+            ruleSeverity = 'fail';
+        } else if (hasViolationWarnings) {
+            ruleSeverity = 'warning';
+        }
+
         const result : RuleResult = {
             ruleManifest: ruleManifestResult,
             namespace: this.rule.namespace,
             compiled: this.isCompiled && !this.hasRuntimeErrors,
-            pass: true,
-            hasViolationErrors: _.some(violations, x => x.severity === 'fail'),
-            hasViolationWarnings: _.some(violations, x => x.severity === 'warning'),
+            pass: hasViolationErrors,
+            ruleSeverity: ruleSeverity,
+            hasViolationErrors: hasViolationErrors,
+            hasViolationWarnings: hasViolationWarnings,
             violations: violations,
             passed: this.passed.map(x => this._exportPassedManifest(x))
         };

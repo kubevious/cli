@@ -1,7 +1,8 @@
-import { ManifestPackageCounters } from "../types/result";
+import { ManifestPackageCounters, RuleEngineCounters } from "../types/result";
 import { logger } from '../logger';
 import { ManifestInfoResult, ManifestPackageResult } from "../types/manifest-result";
 import { SourceResult } from "../types/source-result";
+import { RuleEngineResult } from "../types/rules-result";
 const myLogger = logger.sublogger('Counters');
 
 export function calculateManifestPackageCounters(manifestPackageR: ManifestPackageResult) : ManifestPackageCounters
@@ -60,4 +61,30 @@ function calculateManifestCounters(manifest: ManifestInfoResult, counters: Manif
     } else {
         counters.manifests.passed++;
     }
+}
+
+
+
+export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult) : RuleEngineCounters
+{
+    const counters : RuleEngineCounters = {
+        rules: {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            withErrors: 0,
+            withWarnings: 0
+        },
+        manifests: {
+            total: 0,
+            processed: 0,
+            passed: 0,
+            withErrors: 0,
+            withWarnings: 0
+        }
+    };
+
+    // TODO: Implement this!!!
+    
+    return counters;
 }

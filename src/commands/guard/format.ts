@@ -4,6 +4,7 @@ import { GuardCommandData, GuardResult,  LintRuleResult } from "./types";
 import { logger } from '../../logger';
 
 import { formatResult as lintFormatResult } from '../lint/format';
+import { calculateRuleEngineCounters } from '../../manifests/counters';
 
 const myLogger = logger.sublogger('GuardFormat');
 
@@ -21,6 +22,8 @@ export function formatResult({
     myLogger.info("RuleSuccess: %s", ruleSuccess);
     myLogger.info("LintResult.success: %s", lintResult.success);
 
+    const rulesResult = rulesRuntime.exportResult();
+
     const result: GuardResult = {
         success: success,
         severity: lintResult.severity,
@@ -29,25 +32,10 @@ export function formatResult({
         lintResult : lintResult,
         rules: [],
 
-        counters: {
-            rules: {
-                total: rulesRuntime.rules.length,
-                passed: 0,
-                failed: 0,
-                withErrors: 0,
-                withWarnings: 0
-            },
-            manifests: {
-                total: manifestPackage.manifests.length,
-                processed: 0,
-                passed: 0,
-                withErrors: 0,
-                withWarnings: 0
-            }
-        }
+        counters: calculateRuleEngineCounters(rulesResult)
     };
 
-    const rulesResult = rulesRuntime.exportResult();
+   
     logger.info("XXX: ", rulesResult);
 
     // for(const rule of rulesRuntime.rules)

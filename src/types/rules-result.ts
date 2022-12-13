@@ -1,5 +1,5 @@
 import { ManifestResult } from "./manifest-result";
-import { ResultObject } from "./result";
+import { ResultObject, ResultObjectSeverity } from "./result";
 
 export interface RuleEngineResult extends ResultObject
 {
@@ -14,6 +14,7 @@ export interface RuleResult
     namespace?: string,
     compiled: boolean;
     pass: boolean;
+    ruleSeverity : ResultObjectSeverity;
     hasViolationErrors: boolean;
     hasViolationWarnings: boolean;
     errors?: string[];
