@@ -103,13 +103,17 @@ export class RuleRuntime
     {
         const ruleManifestResult = this._manifest.exportResult();
 
-        for(const error of this.ruleErrors ?? [])
+        const ruleErrors = (this.ruleErrors ?? []).map(x => x.msg);
+        for(const error of ruleErrors)
         {
             if (!ruleManifestResult.messages) {
                 ruleManifestResult.messages = [];
             }
-            ruleManifestResult.messages.push({ severity: 'error', msg: error.msg }); // TODO: include the error.source??
+            ruleManifestResult.messages.push({ severity: 'error', msg: error });
         }
+
+        // TODO: Take this out later and avoid duplicates in the first place
+        ruleManifestResult.messages = _.uniqBy(ruleManifestResult.messages, x => _.stableStringify(x));
 
         setupBaseObjectSeverity(ruleManifestResult);
 

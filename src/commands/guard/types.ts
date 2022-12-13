@@ -7,6 +7,7 @@ import { RuleKind } from "../../rules-engine/registry/types";
 import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 import { LocalK8sRegistry } from "../../registry/local-k8s-registry";
 import { ResultObject, RuleEngineCounters } from "../../types/result";
+import { RuleEngineResult } from "../../types/rules-result";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
@@ -43,33 +44,7 @@ export interface GuardResult extends ResultObject
     lintResult: LintManifestsResult;
     
     ruleSuccess: boolean;
-    rules: LintRuleResult[];
+    rules: RuleEngineResult;
 
     counters: RuleEngineCounters;
-}
-
-export interface LintRuleResult
-{
-    source: ManifestSourceId,
-    kind: RuleKind;
-    namespace?: string;
-    rule: string;
-    compiled: boolean;
-    pass: boolean;
-    hasViolationErrors: boolean;
-    hasViolationWarnings: boolean;
-    errors?: string[];
-    violations?: LintRuleViolation[];
-    passed: {
-        manifest: K8sObjectId;
-        source: ManifestSourceId;
-    }[];
-}
-
-export interface LintRuleViolation
-{
-    manifest: K8sObjectId;
-    source: ManifestSourceId;
-    errors?: string[];
-    warnings?: string[];
 }

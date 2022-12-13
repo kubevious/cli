@@ -1,9 +1,7 @@
-import { IconDefinition, print, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
+import { print, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
 import { LintManifestsResult } from "./types";
 import { ManifestSourceId } from '../../types/manifest';
-import { K8sObjectId } from '../../types/k8s';
 import { outputManifestPackageResult } from '../../screen/manifest';
-import { outputManifestPackageCounters } from '../../screen/counters';
 
 export interface LintOutputParams {
     skipResult?: boolean,
@@ -28,7 +26,6 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
     print();
     
     outputManifestPackageResult(result.packageResult);
-    print();
 
     if (!params.skipSummary)
     {
@@ -37,20 +34,23 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
 
     if (!params.skipResult)
     {
-        outputLintResult(result);
+        printProcessStatus(result.severity, 'Lint');
     }
-}
-
-export function outputLintResult(result: LintManifestsResult)
-{
-    printProcessStatus(result.severity, 'Lint');
 }
 
 export function outputLintSummary(result: LintManifestsResult)
 {
     printSectionTitle('Summary');
 
-    outputManifestPackageCounters(result.counters);
+    const lintCounters = result.counters;
+
+    print(`Sources: ${lintCounters.sources.total}`, 4);
+    printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', lintCounters.sources.withErrors);
+
+    print(`Manifests: ${lintCounters.manifests.total}`, 4);
+    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', lintCounters.manifests.passed);
+    printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', lintCounters.manifests.withErrors);
+    printSummaryCounter(STATUS_ICONS.warning, 'Manifests with Warnings', lintCounters.manifests.withWarnings);
 }
 
 export function produceSourceLine(source: ManifestSourceId)
@@ -81,18 +81,3 @@ export function produceSourceLine(source: ManifestSourceId)
     return parts.join(' ');
 }
 
-export function outputManifest(manifest: K8sObjectId, icon: IconDefinition, indent: number)
-{
-    const namingParts : string[] = [];
-
-    if (manifest.namespace) {
-        namingParts.push(`Namespace: ${manifest.namespace}`);
-    }
-    namingParts.push(`API: ${manifest.apiVersion}`);
-    namingParts.push(`Kind: ${manifest.kind}`);
-    namingParts.push(`Name: ${manifest.name}`);
-
-    const line = namingParts.join(', ')
-
-    print(`${icon.get()} ${line}`, indent);
-}

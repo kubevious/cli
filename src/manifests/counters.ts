@@ -2,7 +2,9 @@ import { ManifestPackageCounters, RuleEngineCounters } from "../types/result";
 import { logger } from '../logger';
 import { ManifestInfoResult, ManifestPackageResult } from "../types/manifest-result";
 import { SourceResult } from "../types/source-result";
-import { RuleEngineResult } from "../types/rules-result";
+import { RuleEngineResult, RuleResult } from "../types/rules-result";
+import { ManifestPackage } from "./manifest-package";
+import { K8sManifest } from "./k8s-manifest";
 const myLogger = logger.sublogger('Counters');
 
 export function calculateManifestPackageCounters(manifestPackageR: ManifestPackageResult) : ManifestPackageCounters
@@ -64,19 +66,18 @@ function calculateManifestCounters(manifest: ManifestInfoResult, counters: Manif
 }
 
 
-
-export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult) : RuleEngineCounters
+export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult, manifestPackage: ManifestPackage) : RuleEngineCounters
 {
     const counters : RuleEngineCounters = {
         rules: {
-            total: 0,
+            total: ruleEngineR.rules.length,
             passed: 0,
             failed: 0,
             withErrors: 0,
             withWarnings: 0
         },
         manifests: {
-            total: 0,
+            total: manifestPackage.manifests.length,
             processed: 0,
             passed: 0,
             withErrors: 0,
@@ -84,7 +85,57 @@ export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult) : Rul
         }
     };
 
-    // TODO: Implement this!!!
+    for(const ruleResult of ruleEngineR.rules)
+    {
+        calculateRuleCounters(ruleResult, counters);
+    }
+
+    for(const manifest of manifestPackage.manifests)
+    {
+        calculateRuleManifestCounters(manifest, counters);
+    }
     
     return counters;
+}
+
+function calculateRuleCounters(ruleResult: RuleResult, counters: RuleEngineCounters)
+{
+    if (!ruleResult.compiled)
+    {
+        counters.rules.failed++;
+    }
+
+    if (!ruleResult.compiled) {
+        counters.rules.failed++;
+    }
+    if (ruleResult.passed) {
+        counters.rules.passed++;
+    }
+    if (ruleResult.hasViolationErrors) {
+        counters.rules.withErrors++;
+    }
+    if (ruleResult.hasViolationWarnings) {
+        counters.rules.withWarnings++;
+    }
+}
+
+function calculateRuleManifestCounters(manifest: K8sManifest, counters: RuleEngineCounters)
+{
+    if (manifest.rules.processed)
+    {
+        counters.manifests.processed++;
+        if (manifest.rules.errors)
+        {
+            counters.manifests.withErrors++;
+        }
+        else
+        {
+            counters.manifests.passed++;
+        }
+
+        if (manifest.rules.warnings)
+        {
+            counters.manifests.withWarnings++;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { SOURCE_ICONS, STATUS_ICONS, print, printErrorLine, printWarningLine, printSectionTitle } from ".";
+import { SOURCE_ICONS, STATUS_ICONS, print, printErrorLine, printWarningLine, printSectionTitle, IconDefinition } from ".";
 import { ManifestInfoResult, ManifestPackageResult, ManifestResult } from "../types/manifest-result";
 import { ResultObject, ResultObjectSeverity } from "../types/result";
 import { SourceInfoResult, SourceResult } from "../types/source-result";
@@ -50,8 +50,14 @@ export function outputSourceInfo(sourceResult: SourceInfoResult, indent?: number
     print(parts.join(' '), indent);
 }
 
-export function outputManifestInfo(manifest: ManifestInfoResult, indent?: number)
+export interface outputManifestInfoOptions {
+    icon? : IconDefinition
+}
+
+export function outputManifestInfo(manifest: ManifestInfoResult, indent?: number, options?: outputManifestInfoOptions)
 {
+    options = options ?? {};
+
     const namingParts : string[] = [];
 
     if (manifest.namespace) {
@@ -63,21 +69,28 @@ export function outputManifestInfo(manifest: ManifestInfoResult, indent?: number
 
     const line = namingParts.join(', ');
 
-    print(`${severityStatusIcon(manifest.severity).get()} ${line}`, indent);
+    const icon = options.icon ?? severityStatusIcon(manifest.severity);
+
+    print(`${icon.get()} ${line}`, indent);
 }
 
-export function outputManifestResult(manifestResult: ManifestResult, indent?: number)
+export function outputManifestResult(manifestResult: ManifestResult, indent?: number, options?: outputManifestInfoOptions)
 {
-    outputManifestInfo(manifestResult, indent);
+    outputManifestInfo(manifestResult, indent, options);
 
-    for(const source of manifestResult.sources)
-    {
-        outputSourceInfo(source, (indent ?? 0) + 3);
-    }
+    outputManifestResultSources(manifestResult, (indent ?? 0) + 3);
 
     outputMessages(manifestResult, (indent ?? 0) + 3);
 
     print();
+}
+
+export function outputManifestResultSources(manifestResult: ManifestResult, indent?: number)
+{
+    for(const source of manifestResult.sources)
+    {
+        outputSourceInfo(source, indent);
+    }
 }
 
 export function severityStatusIcon(severity: ResultObjectSeverity)
@@ -123,7 +136,7 @@ export function produceSourceLine(source: SourceInfoResult)
 }
 
 
-function outputMessages(obj: ResultObject, indent?: number)
+export function outputMessages(obj: ResultObject, indent?: number)
 {
     for(const msg of obj.messages ?? [])
     {
