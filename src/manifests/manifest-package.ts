@@ -6,6 +6,7 @@ import { K8sManifest } from './k8s-manifest';
 import { ManifestSource } from "./manifest-source";
 import { OriginalSource } from '../input/original-source';
 import { BaseObject } from '../types/base-object';
+import { makeObjectSeverityFromChildren, ManifestPackageResult } from '../types/result';
 
 export class ManifestPackage extends BaseObject 
 {
@@ -95,6 +96,17 @@ export class ManifestPackage extends BaseObject
                 source.originalSource.path);
         }
 
+        if (source.selfErrors.length > 0) {
+            this._logger.info("[ManifestPackage] %s     Errors: %s",
+                " ".repeat(indent * 2),
+                source.selfErrors.length);
+        }
+        if (source.selfWarnings.length > 0) {
+            this._logger.info("[ManifestPackage] %s     Warnings: %s",
+                " ".repeat(indent * 2),
+                source.selfWarnings.length);
+        }
+
         for(const child of source.childSources)
         {
             this._debugOutputSource(child, indent + 1);
@@ -116,5 +128,27 @@ export class ManifestPackage extends BaseObject
     protected yieldChildren() : BaseObject[]
     {
         return _.flatten([this._rootSource]);
+    }
+
+    exportResult() : ManifestPackageResult
+    {
+        const manifestPackageR : ManifestPackageResult = {
+            severity: 'pass',
+            manifests: [],
+            sources: [],
+        };
+
+        for(const manifest of this._manifests)
+        {
+            const manifestR = manifest.exportResult();
+            manifestPackageR.manifests.push(manifestR);
+        }
+        manifestPackageR.severity = makeObjectSeverityFromChildren(manifestPackageR.severity, manifestPackageR.manifests);
+
+        const rootSourceResult = this._rootSource.exportResult();
+        manifestPackageR.sources = rootSourceResult.children ?? [];
+        manifestPackageR.severity = makeObjectSeverityFromChildren(manifestPackageR.severity, [rootSourceResult]);
+
+        return manifestPackageR;
     }
 }

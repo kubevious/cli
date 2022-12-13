@@ -106,6 +106,12 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
 
     manifestPackage.produceNamespaces();
 
+    manifestPackage.debugOutput();
+
+    myLogger.info(">>>>>>>>>>>>>>>>>>>>>>>");
+    myLogger.info("RESULT: ", manifestPackage.exportResult());
+    myLogger.info(">>>>>>>>>>>>>>>>>>>>>>>");
+
     const success = determineLintSuccess(manifestPackage);
     myLogger.info("Success: %s", success);
 
@@ -123,6 +129,8 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
 export function determineLintSuccess(manifestPackage: ManifestPackage)
 {
     let success = true;
+
+    // manifestPackage
     for(const source of manifestPackage.sources)
     {
         if (!source.success) {

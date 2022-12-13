@@ -5,6 +5,7 @@ import { K8sManifest } from './k8s-manifest';
 import { OriginalSource } from '../input/original-source';
 import { rootLogger } from '../logger'
 import { BaseObject } from '../types/base-object';
+import { makeObjectSeverity, makeObjectSeverityFromChildren, SourceInfoResult, SourceResult } from '../types/result';
 
 const logger = rootLogger.sublogger("ManifestSource");
 
@@ -71,6 +72,39 @@ export class ManifestSource extends BaseObject
     addManifest(k8sManifest: K8sManifest)
     {
         this._manifests.push(k8sManifest);
+    }
+
+    extractInfoResult() : SourceInfoResult
+    {
+        const result : SourceInfoResult = {
+            kind: this.id.kind,
+            path: this.id.path,
+            ...this.extractBaseResult()
+        }
+        return result;
+    }
+
+    exportResult() : SourceResult
+    {
+        const result : SourceResult = {
+            ...this.extractInfoResult(),
+        }
+
+        if (this.childSources.length > 0)
+        {
+            result.children = this.childSources.map(x => x.exportResult());
+            result.severity = makeObjectSeverityFromChildren(result.severity, result.children);
+        }
+
+        if (this.manifests.length > 0)
+        {
+            result.manifests = this.manifests.map(x => x.exportInfoResult());
+            // for(const manifestR of result.manifests)
+            // {
+            // }
+        }
+        
+        return result;
     }
 
     protected yieldChildren() : BaseObject[]

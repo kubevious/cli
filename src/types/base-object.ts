@@ -1,3 +1,6 @@
+import _ from 'the-lodash';
+import { ResultObject } from "./result";
+
 export class BaseObject
 {
     private _selfSuccess = true;
@@ -49,6 +52,34 @@ export class BaseObject
         {
             this.reportWarning(msg);
         }
+    }
+
+    protected extractBaseResult() : ResultObject {
+        const result : ResultObject = {
+            severity: 'pass',
+        }
+
+        if (this.errors.length > 0)
+        {
+            result.severity = 'fail';
+            if (!result.messages) {
+                result.messages = [];
+            }
+            result.messages = _.concat(result.messages, this.errors.map(x => ({ severity: 'error', msg: x})));
+        }
+
+        if (this.warnings.length > 0)
+        {
+            if (result.severity === 'pass') {
+                result.severity = 'fail';
+            }
+            if (!result.messages) {
+                result.messages = [];
+            }
+            result.messages = _.concat(result.messages, this.warnings.map(x => ({ severity: 'warning', msg: x})));
+        }
+
+        return result;
     }
 
     protected yieldChildren() : BaseObject[]
