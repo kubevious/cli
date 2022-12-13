@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { ResultObject } from "./result";
+import { ResultObject, setupBaseObjectSeverity } from "./result";
 
 export class BaseObject
 {
@@ -61,7 +61,6 @@ export class BaseObject
 
         if (this.errors.length > 0)
         {
-            result.severity = 'fail';
             if (!result.messages) {
                 result.messages = [];
             }
@@ -70,15 +69,14 @@ export class BaseObject
 
         if (this.warnings.length > 0)
         {
-            if (result.severity === 'pass') {
-                result.severity = 'warning';
-            }
             if (!result.messages) {
                 result.messages = [];
             }
             result.messages = _.concat(result.messages, this.warnings.map(x => ({ severity: 'warning', msg: x })));
         }
 
+        setupBaseObjectSeverity(result);
+        
         return result;
     }
 

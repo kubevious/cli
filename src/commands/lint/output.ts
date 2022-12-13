@@ -3,6 +3,7 @@ import { LintManifestsResult } from "./types";
 import { ManifestSourceId } from '../../types/manifest';
 import { K8sObjectId } from '../../types/k8s';
 import { outputManifestPackageResult } from '../../screen/manifest';
+import { outputManifestPackageCounters } from '../../screen/counters';
 
 export interface LintOutputParams {
     skipResult?: boolean,
@@ -47,15 +48,9 @@ export function outputLintResult(result: LintManifestsResult)
 
 export function outputLintSummary(result: LintManifestsResult)
 {
-    printSectionTitle('Lint Summary');
+    printSectionTitle('Summary');
 
-    print(`Sources: ${result.counters.sources.total}`, 4);
-    printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', result.counters.sources.withErrors);
-
-    print(`Manifests: ${result.counters.manifests.total}`, 4);
-    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', result.counters.manifests.passed);
-    printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', result.counters.manifests.withErrors);
-    printSummaryCounter(STATUS_ICONS.warning, 'Manifests With Warnings', result.counters.manifests.withWarnings);
+    outputManifestPackageCounters(result.counters);
 }
 
 export function produceSourceLine(source: ManifestSourceId)

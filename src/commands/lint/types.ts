@@ -3,7 +3,8 @@ import { InputSourceExtractor } from "../../input/input-source-extractor";
 import { K8sClusterConnector } from "../../k8s-connector/k8s-cluster-connector";
 import { ManifestPackage } from "../../manifests/manifest-package";
 import { ManifestLoader } from "../../manifests/manifests-loader";
-import { ManifestPackageCounters, ManifestPackageResult, ResultObject } from "../../types/result";
+import { ManifestPackageResult } from "../../types/manifest-result";
+import { ManifestPackageCounters, ResultObject } from "../../types/result";
 
 export interface LintCommandOptions {
     k8sVersion?: string;

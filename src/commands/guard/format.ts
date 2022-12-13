@@ -8,26 +8,24 @@ import { formatResult as lintFormatResult } from '../lint/format';
 const myLogger = logger.sublogger('GuardFormat');
 
 export function formatResult({
-        success,
         ruleSuccess,
         manifestPackage,
         k8sSchemaInfo,
         rulesRuntime,
-        lintCommandData
+        lintResult
     } : GuardCommandData) : GuardResult
 {
-    const lintResult = lintFormatResult(lintCommandData);
 
-    myLogger.info("Success: %s", success);
+    const success = lintResult.success;
+
     myLogger.info("RuleSuccess: %s", ruleSuccess);
     myLogger.info("LintResult.success: %s", lintResult.success);
 
     const result: GuardResult = {
         success: success,
-
-        severity: 'pass', // TODO: FIX ME
-
+        severity: lintResult.severity,
         ruleSuccess: ruleSuccess,
+
         lintResult : lintResult,
         rules: [],
 
@@ -49,88 +47,91 @@ export function formatResult({
         }
     };
 
-    for(const rule of rulesRuntime.rules)
-    {
-        const ruleResult : LintRuleResult = {
-            source: rule.rule.source,
-            kind: rule.rule.kind,
-            namespace: rule.rule.namespace,
-            rule: rule.rule.name,
-            compiled: rule.isCompiled && !rule.hasRuntimeErrors,
-            pass: true,
-            hasViolationErrors: false,
-            hasViolationWarnings: false,
-            passed: rule.passed.map(x => ({
-                manifest: x.id,
-                source: x.source.id
-            }))
-        };
+    const rulesResult = rulesRuntime.exportResult();
+    logger.info("XXX: ", rulesResult);
 
-        ruleResult.errors = rule.ruleErrors.map(x => x.msg) ?? [];
+    // for(const rule of rulesRuntime.rules)
+    // {
+    //     const ruleResult : LintRuleResult = {
+    //         source: rule.rule.source,
+    //         kind: rule.rule.kind,
+    //         namespace: rule.rule.namespace,
+    //         rule: rule.rule.name,
+    //         compiled: rule.isCompiled && !rule.hasRuntimeErrors,
+    //         pass: true,
+    //         hasViolationErrors: false,
+    //         hasViolationWarnings: false,
+    //         passed: rule.passed.map(x => ({
+    //             manifest: x.id,
+    //             source: x.source.id
+    //         }))
+    //     };
 
-        if (!ruleResult.compiled) {
-            result.counters.rules.failed++;
-        }
+    //     ruleResult.errors = rule.ruleErrors.map(x => x.msg) ?? [];
 
-        if (rule.violations.length > 0)
-        {
-            ruleResult.violations = [];
+    //     if (!ruleResult.compiled) {
+    //         result.counters.rules.failed++;
+    //     }
 
-            for(const violation of rule.violations)
-            {
-                if (violation.hasErrors) {
-                    ruleResult.pass = false;
-                    ruleResult.hasViolationErrors = true;
-                }
-                if (violation.hasWarnings) {
-                    ruleResult.hasViolationWarnings = true;
-                }
+    //     if (rule.violations.length > 0)
+    //     {
+    //         ruleResult.violations = [];
 
-                ruleResult.violations.push({
-                    manifest: violation.manifest.id,
-                    source: violation.manifest.source.id,
-                    errors: violation.errors,
-                    warnings: violation.warnings,
-                });
-            }
-        }
+    //         for(const violation of rule.violations)
+    //         {
+    //             if (violation.hasErrors) {
+    //                 ruleResult.pass = false;
+    //                 ruleResult.hasViolationErrors = true;
+    //             }
+    //             if (violation.hasWarnings) {
+    //                 ruleResult.hasViolationWarnings = true;
+    //             }
 
-        if (!ruleResult.compiled) {
-            result.counters.rules.failed++;
-        }
-        if (ruleResult.passed) {
-            result.counters.rules.passed++;
-        }
-        if (ruleResult.hasViolationErrors) {
-            result.counters.rules.withErrors++;
-        }
-        if (ruleResult.hasViolationWarnings) {
-            result.counters.rules.withWarnings++;
-        }
+    //             ruleResult.violations.push({
+    //                 manifest: violation.manifest.id,
+    //                 source: violation.manifest.source.id,
+    //                 errors: violation.errors,
+    //                 warnings: violation.warnings,
+    //             });
+    //         }
+    //     }
 
-        result.rules.push(ruleResult);
-    }
+    //     if (!ruleResult.compiled) {
+    //         result.counters.rules.failed++;
+    //     }
+    //     if (ruleResult.passed) {
+    //         result.counters.rules.passed++;
+    //     }
+    //     if (ruleResult.hasViolationErrors) {
+    //         result.counters.rules.withErrors++;
+    //     }
+    //     if (ruleResult.hasViolationWarnings) {
+    //         result.counters.rules.withWarnings++;
+    //     }
+
+    //     result.rules.push(ruleResult);
+    // }
     
-    for(const manifest of manifestPackage.manifests)
-    {
-        if (manifest.rules.processed)
-        {
-            result.counters.manifests.processed++;
-            if (manifest.rules.errors)
-            {
-                result.counters.manifests.withErrors++;
-            }
-            else
-            {
-                result.counters.manifests.passed++;
-            }
+    // for(const manifest of manifestPackage.manifests)
+    // {
+    //     if (manifest.rules.processed)
+    //     {
+    //         result.counters.manifests.processed++;
+    //         if (manifest.rules.errors)
+    //         {
+    //             result.counters.manifests.withErrors++;
+    //         }
+    //         else
+    //         {
+    //             result.counters.manifests.passed++;
+    //         }
 
-            if (manifest.rules.warnings)
-            {
-                result.counters.manifests.withWarnings++;
-            }
-        }
-    }
+    //         if (manifest.rules.warnings)
+    //         {
+    //             result.counters.manifests.withWarnings++;
+    //         }
+    //     }
+    // }
 
 
     return result;

@@ -1,5 +1,7 @@
-import { ManifestInfoResult, ManifestPackageCounters, ManifestPackageResult, SourceResult } from "../types/result";
+import { ManifestPackageCounters } from "../types/result";
 import { logger } from '../logger';
+import { ManifestInfoResult, ManifestPackageResult } from "../types/manifest-result";
+import { SourceResult } from "../types/source-result";
 const myLogger = logger.sublogger('Counters');
 
 export function calculateManifestPackageCounters(manifestPackageR: ManifestPackageResult) : ManifestPackageCounters

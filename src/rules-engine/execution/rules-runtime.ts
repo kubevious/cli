@@ -13,7 +13,8 @@ import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleDependency, RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { checkKubeviousVersion } from '../../utils/version-checker';
-import cluster from 'cluster';
+import { RuleEngineResult } from '../../types/rules-result';
+import { makeObjectSeverityFromChildren } from '../../types/result';
 
 export class RulesRuntime
 {
@@ -72,6 +73,21 @@ export class RulesRuntime
             .then(() => {
                 this._spinner!.complete('Rules validation complete.')
             });
+    }
+
+
+    exportResult() : RuleEngineResult
+    {
+        const result : RuleEngineResult = {
+            success: true,
+            severity: 'pass',
+            rules: this.rules.map(x => x.exportResult()),
+        };
+        
+        result.severity = makeObjectSeverityFromChildren(result.severity, result.rules.map(x => x.ruleManifest));
+        result.success = result.severity == 'pass' || result.severity == 'warning';
+
+        return result;
     }
 
     private _checkDependencies()

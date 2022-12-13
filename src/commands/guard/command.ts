@@ -11,6 +11,7 @@ import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
 import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
+import { formatResult as lintFormatResult } from '../lint/format';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/main/index.yaml';
 
@@ -24,14 +25,14 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     logger.info("[PATH] ", path);
 
-    const lintResult = await lintCommand(path, options);
+    const lintCommandData = await lintCommand(path, options);
 
-    const manifestPackage = lintResult.manifestPackage;
-    const manifestLoader = lintResult.manifestLoader;
-    const k8sConnector = lintResult.k8sConnector;
+    const manifestPackage = lintCommandData.manifestPackage;
+    const manifestLoader = lintCommandData.manifestLoader;
+    const k8sConnector = lintCommandData.k8sConnector;
 
     const registryPopulator = new LocalRegistryPopulator(logger,
-                                                         lintResult.k8sSchemaInfo.k8sJsonSchema!,
+                                                         lintCommandData.k8sSchemaInfo.k8sJsonSchema!,
                                                          manifestPackage);
     registryPopulator.process();
 
@@ -109,22 +110,19 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     await rulesRuntime.execute();
 
     let ruleSuccess = true;
-    for(const rule of rulesRuntime.rules)
-    {
-        for(const violation of rule.violations)
-        {
-            if (violation.hasErrors)
-            {
-                ruleSuccess = false;
-            }
-        }
-    }
+    // for(const rule of rulesRuntime.rules)
+    // {
+    //     for(const violation of rule.violations)
+    //     {
+    //         if (violation.hasErrors)
+    //         {
+    //             ruleSuccess = false;
+    //         }
+    //     }
+    // }
 
-    const success = true && ruleSuccess;  // lintResult.success
-
-    myLogger.info("Success: %s", success);
     myLogger.info("RuleSuccess: %s", ruleSuccess);
-    // myLogger.info("LintResult.success: %s", lintResult.success);
+    // myLogger.info("lintCommandData.success: %s", lintCommandData.success);
 
     // manifestPackage.debugOutput();
 
@@ -132,14 +130,15 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     //     throw new Error("XXX")
     // }
 
+    const lintResult = lintFormatResult(lintCommandData);
+
     return {
-        success,
         ruleSuccess,
         manifestPackage: manifestPackage,
-        k8sSchemaInfo: lintResult.k8sSchemaInfo,
+        k8sSchemaInfo: lintCommandData.k8sSchemaInfo,
         rulesRuntime,
         localK8sRegistry: localK8sRegistry,
-        lintCommandData: lintResult
+        lintResult: lintResult
     } 
 }
 

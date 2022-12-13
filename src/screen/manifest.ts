@@ -1,5 +1,7 @@
 import { SOURCE_ICONS, STATUS_ICONS, print, printErrorLine, printWarningLine, printSectionTitle } from ".";
-import { ManifestInfoResult, ManifestPackageResult, ManifestResult, ResultObject, ResultObjectSeverity, SourceInfoResult, SourceResult } from "../types/result";
+import { ManifestInfoResult, ManifestPackageResult, ManifestResult } from "../types/manifest-result";
+import { ResultObject, ResultObjectSeverity } from "../types/result";
+import { SourceInfoResult, SourceResult } from "../types/source-result";
 
 export function outputManifestPackageResult(packageResult: ManifestPackageResult)
 {

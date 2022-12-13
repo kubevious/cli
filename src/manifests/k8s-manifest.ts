@@ -1,7 +1,8 @@
 import _ from 'the-lodash';
 import { BaseObject } from '../types/base-object';
 import { K8sObject, K8sObjectId, makeId, makeK8sKeyStr } from "../types/k8s";
-import { ManifestInfoResult, ManifestResult } from '../types/result';
+import { ManifestInfoResult, ManifestResult } from '../types/manifest-result';
+import { SourceInfoResult } from '../types/source-result';
 import { ManifestSource } from './manifest-source';
 
 export interface K8sManifestRuleResult
@@ -80,20 +81,27 @@ export class K8sManifest extends BaseObject
         return manifestInfoResult;
     }
 
-    exportResult() : ManifestResult
+    exportSourcesResult() : SourceInfoResult[]
     {
-        const manifestResult : ManifestResult = {
-            ...this.exportInfoResult(),
-            sources: []
-        };
+        const sources : SourceInfoResult[] = [];
 
         let source : ManifestSource | null = this._source;
 
         while(source && source.id.kind !== 'root')
         {
-            manifestResult.sources.push(source.extractInfoResult());
+            sources.push(source.extractInfoResult());
             source = source.parentSource;   
         }
+
+        return sources;
+    }
+
+    exportResult() : ManifestResult
+    {
+        const manifestResult : ManifestResult = {
+            ...this.exportInfoResult(),
+            sources: this.exportSourcesResult()
+        };
 
         return manifestResult;
     }

@@ -73,8 +73,6 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         }
 
         libraryCategoriesDict[libraryRule.category].rules.push(libraryRule);
-        
-
     }
     
     const library: Library = {
@@ -118,7 +116,9 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
     const libraryFilePath = Path.join(dir, 'index.yaml');
 
-    if (guardResult.success)
+    const success = guardResult.lintResult.severity == 'pass' || guardResult.lintResult.severity == 'warning';
+
+    if (success)
     {
         await fs.writeFile(libraryFilePath,
             YAML.stringify(libraryObject, {
@@ -130,9 +130,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
         await setupDocs(dir, library);
     }
-
-    const success = guardResult.success;
-
+    
     return {
         success,
         manifestPackage,

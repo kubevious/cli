@@ -4,9 +4,9 @@ import { RulesRuntime } from "../../rules-engine/execution/rules-runtime";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 import { RuleKind } from "../../rules-engine/registry/types";
-import { LintCommandData, LintCommandOptions, LintManifestsResult } from "../lint/types";
+import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 import { LocalK8sRegistry } from "../../registry/local-k8s-registry";
-import { ResultObject } from "../../types/result";
+import { ResultObject, RuleEngineCounters } from "../../types/result";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
@@ -26,7 +26,6 @@ export interface GuardCommandOptions extends LintCommandOptions {
 }
 
 export interface GuardCommandData {
-    success: boolean,
     ruleSuccess: boolean,
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
@@ -34,7 +33,7 @@ export interface GuardCommandData {
 
     localK8sRegistry: LocalK8sRegistry,
 
-    lintCommandData: LintCommandData,
+    lintResult: LintManifestsResult,
 }
 
 export interface GuardResult extends ResultObject
@@ -46,23 +45,7 @@ export interface GuardResult extends ResultObject
     ruleSuccess: boolean;
     rules: LintRuleResult[];
 
-    counters: {
-        rules: {
-            total: number,
-            failed: number,
-            passed: number,
-            withErrors: number,
-            withWarnings: number
-        },
-        manifests: {
-            total: number,
-            processed: number,
-            passed: number,
-            withErrors: number,
-            withWarnings: number
-        }
-    }
-    
+    counters: RuleEngineCounters;
 }
 
 export interface LintRuleResult
