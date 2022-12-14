@@ -222,7 +222,7 @@ steps:
       - echo "Validating Voter app..."
       - kubevious guard 02-voter-app/voter-chart/templates/
       - echo "Validating Traefik..."
-      - kubevious guard ${{SAMPLES_PATH}}/traefik.yaml
+      - kubevious guard ${{SAMPLES_PATH}}/traefik/traefik.yaml
       - echo "Validating KubeFlow..."
       - kubevious guard ${{SAMPLES_PATH}}/kubeflow/cluster-scoped-resources.yaml ${{SAMPLES_PATH}}/kubeflow/env-platform-agnostic.yaml ${{SAMPLES_PATH}}/kubeflow/webhook-server-tls.yaml
       - echo "Validating Prometheus..."
@@ -233,4 +233,5 @@ steps:
       - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml 10-istio-bookinfo/istio-classic/destination-rule-all.yaml
       - echo "Validating Istio Gateway API..."
       - kubevious guard ../crds/gateway-api/standard.yaml ${{SAMPLES_PATH}}/istio/secret-gateway-api-admission.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/gateway-api/mock-gateway-class.yaml 10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml 10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
-
+      - echo "Validating Traefik Inline Chart..."
+      - kubevious guard --detailed \#helm@traefik/traefik@namespace=traefik@release-name=traefik

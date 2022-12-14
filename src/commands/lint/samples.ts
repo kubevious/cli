@@ -28,7 +28,7 @@ export const SAMPLES : ToolUsageSamples = [
 
     {
         title: 'Detailed output',
-        code: 'kubevious lint --detailed #helm@traefik/traefik@values=overrides.yaml@namespace=traefik@release-name=traefik',
+        code: 'kubevious lint --detailed #helm@traefik/traefik@namespace=traefik@release-name=traefik',
     },
 
 ]
