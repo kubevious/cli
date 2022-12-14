@@ -202,10 +202,10 @@ steps:
           namespace: gateway-system
         EOL
 
-  run_tests:
-    title: Run Tests
+  run_cli_tests:
+    title: Run CLI Tests
     stage: test
-    image: 'kubevious/node-builder:14'
+    image: 'kubevious/node-with-tools:v14.1'
     working_directory: "${{DEMOS_REPO_PATH}}/guard"
     commands:
       - source ${{MAIN_REPO_PATH}}/version.sh
