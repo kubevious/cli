@@ -34,6 +34,11 @@ export function output(result: LintManifestsResult, detailed?: boolean, params?:
 
     if (!params.skipResult)
     {
+        if (!detailed) {
+            print();
+            printInfoLine(`Run with --detailed to see all sources and manifests`);
+        }
+
         printProcessStatus(result.severity, 'Lint');
     }
 }

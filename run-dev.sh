@@ -17,4 +17,6 @@ export LOG_LEVEL=info
 
 node ${MY_DIR} $@
 
-echo "EXIT CODE: $?"
+EXIT_CODE=$?
+echo "EXIT CODE: $EXIT_CODE"
+exit $EXIT_CODE

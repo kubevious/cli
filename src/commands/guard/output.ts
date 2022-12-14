@@ -1,6 +1,6 @@
 import { GuardResult } from "./types";
 import { output as lintOutput, } from '../lint/output'
-import { OBJECT_ICONS, print, printFailLine, printInactivePassLine, printPassLine, printProcessStatus, printSectionTitle, printSubTitle, printSummaryCounter, printWarningLine, printWarnings, STATUS_ICONS } from '../../screen';
+import { OBJECT_ICONS, print, printFailLine, printInactivePassLine, printInfoLine, printPassLine, printProcessStatus, printSectionTitle, printSubTitle, printSummaryCounter, printWarningLine, printWarnings, STATUS_ICONS } from '../../screen';
 import { RuleEngineResult, RuleResult } from "../../types/rules-result";
 import { outputManifestResult, outputManifestResultSources, outputMessages } from "../../screen/manifest";
 
@@ -17,6 +17,11 @@ export function output(result: GuardResult, detailed?: boolean)
     outputRuleEngineResult(result.rules, detailed, 0);
 
     outputGuardSummary(result);
+
+    if (!detailed) {
+        print();
+        printInfoLine(`Run with --detailed to see all sources and manifests`);
+    }
 
     printProcessStatus(result.severity, 'Guard');
 }
@@ -94,7 +99,7 @@ function outputRuleResult(rule: RuleResult, detailed: boolean, indent: number)
         print(`${OBJECT_ICONS.rule.get()} [${rule.ruleManifest.kind}] ${rule.ruleManifest.name}`, indent);
     }
 
-    outputManifestResultSources(rule.ruleManifest, nestedIndent);
+    outputManifestResultSources(rule.ruleManifest, nestedIndent, { hideSeverityIcon: true });
 
     if (!rule.compiled)
     {
