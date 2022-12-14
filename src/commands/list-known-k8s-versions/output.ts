@@ -3,7 +3,7 @@ import { KnownK8sVersionsResult } from "./types";
 
 export function output(result: KnownK8sVersionsResult)
 {
-    printSectionTitle('Known K8s Versions:');
+    printSectionTitle('Known K8s Versions');
     print();
 
     for(const version of result.versions)

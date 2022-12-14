@@ -13,7 +13,8 @@ import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleDependency, RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { checkKubeviousVersion } from '../../utils/version-checker';
-import cluster from 'cluster';
+import { RuleEngineResult } from '../../types/rules-result';
+import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
 
 export class RulesRuntime
 {
@@ -74,6 +75,22 @@ export class RulesRuntime
             });
     }
 
+
+    exportResult() : RuleEngineResult
+    {
+        const result : RuleEngineResult = {
+            success: true,
+            severity: 'pass',
+            rules: this.rules.map(x => x.exportResult()),
+        };
+        
+        // result.severity = makeObjectSeverityFromChildren(result.severity, result.rules.map(x => x.ruleManifest));
+        result.severity = makeObjectSeverity(result.severity, result.rules.map(x => x.ruleSeverity));
+        result.success = result.severity == 'pass' || result.severity == 'warning';
+
+        return result;
+    }
+
     private _checkDependencies()
     {
         for(const rule of this._ruleRegistry.clusterRules)
@@ -106,7 +123,7 @@ export class RulesRuntime
             {
                 if (!rule.hasUnmedDependency)
                 {
-                    this._manifestPackage.manifestWarning(rule.manifest, 'Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
+                    rule.manifest.reportWarning('Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
                     rule.hasUnmedDependency = true;
                     rule.isDisabled = true;
                 }
@@ -263,12 +280,12 @@ export class RulesRuntime
         const clusterRuleInfo = this._clusterRules[clusterRefName];
         if (!clusterRuleInfo) {
             this._logger.info("[_initRuleApplicator] Missing Cluster Rule: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not found`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not found`);
             return;
         }
         if (!clusterRuleInfo.rule.useApplicator) {
             this._logger.info("[_initRuleApplicator] Cluster Rule not using applicators: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not using applicators`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not using applicators`);
             return;
         }
         if (clusterRuleInfo.rule.isDisabled) {
@@ -278,13 +295,13 @@ export class RulesRuntime
 
         if (!clusterRuleInfo.compiler) {
             this._logger.info("[_initRuleApplicator] Cluster Rule not compiled: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} not compiled`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not compiled`);
             return;
         }
 
         if (!clusterRuleInfo.compiler.isCompiled) {
             this._logger.info("[_initRuleApplicator] Cluster Rule has compilation errors: %s", clusterRefName);
-            this._manifestPackage.manifestError(applicator.manifest, `ClusterRule ${clusterRefName} has compilation errors`);
+            applicator.manifest.reportError(`ClusterRule ${clusterRefName} has compilation errors`);
             return;
         }
 
@@ -323,7 +340,7 @@ export class RulesRuntime
 
                 for(const error of compiler.ruleErrors)
                 {
-                    this._manifestPackage.manifestError(manifest, error.msg);
+                    manifest.reportError(error.msg);
                 }
 
                 return compiler;

@@ -20,12 +20,12 @@ export class RuleEngineReporter
 
     reportError(rule: RuleObject, manifest: K8sManifest, msg: string)
     {
-        this._manifestPackage.manifestError(manifest, msg);
+        manifest.reportError(msg);
     }
 
     reportWarning(rule: RuleObject, manifest: K8sManifest, msg: string)
     {
-        this._manifestPackage.manifestWarning(manifest, msg);
+        manifest.reportWarning(msg);
     }
 
 }

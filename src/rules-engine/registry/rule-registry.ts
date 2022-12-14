@@ -7,9 +7,11 @@ import { ClusterRuleK8sSpec, LibraryK8sSpec, LibraryRuleRefK8sSpec, RuleApplicat
 import { K8sTargetFilter } from '../query-spec/k8s/k8s-target-query';
 import { spinOperation } from '../../screen/spinner';
 import { K8sManifest } from '../../manifests/k8s-manifest';
-import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { ManifestLoader } from '../../manifests/manifests-loader';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { KubeviousKinds, KUBEVIOUS_API_NAME } from '../../types/kubevious';
+import { InputSource } from '../../input/input-source';
+import { OriginalSource } from '../../input/original-source';
 
 
 export interface RuleRegistryLoadOptions {
@@ -28,14 +30,14 @@ export class RuleRegistry
     private _ruleApplicators : Record<string, ApplicatorRule> = {};
 
     private _manifestPackage : ManifestPackage;
-    private _manifestsLoader : ManifetsLoader;
+    private _manifestsLoader : ManifestLoader;
 
-    constructor(logger: ILogger, manifestPackage : ManifestPackage)
+    constructor(logger: ILogger, manifestPackage : ManifestPackage, manifestsLoader: ManifestLoader)
     {
         this._logger = logger.sublogger('RuleRegistry');
 
         this._manifestPackage = manifestPackage; //new ManifestPackage(logger);
-        this._manifestsLoader = new ManifetsLoader(logger, this._manifestPackage);
+        this._manifestsLoader = manifestsLoader;
     }
 
     get clusterRules() {
@@ -132,7 +134,7 @@ export class RuleRegistry
         this._clusterRules[name] = {
             isDisabled: spec.disabled,
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.ClusterRule,
             name: name,
             target: spec.target,
@@ -222,7 +224,7 @@ export class RuleRegistry
         this._rules[manifest.idKey] = {
             isDisabled: spec.disabled,
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.Rule,
             namespace: namespace,
             name: name,
@@ -299,7 +301,7 @@ export class RuleRegistry
 
         this._ruleApplicators[manifest.idKey] = {
             manifest: manifest,
-            source: manifest.source.source,
+            source: manifest.source.id,
             kind: RuleKind.RuleApplicator,
             namespace: namespace,
             name: name,
@@ -336,6 +338,8 @@ export class RuleRegistry
 
     private async _loadLibrary(manifest: K8sManifest)
     {
+        this._logger.info("[_loadLibrary] manifest: %s...", manifest.source.id.path);
+
         const config = manifest.config;
         
         const name = config.metadata?.name;
@@ -357,7 +361,12 @@ export class RuleRegistry
 
     private async _loadLibraryRule(library: K8sManifest, ruleRef: LibraryRuleRefK8sSpec)
     {
-        const ruleManifests = await this._manifestsLoader.loadSingle(ruleRef.path, library.source);
+        this._logger.info("[_loadLibraryRule] loading: %s...", ruleRef.path);
+
+        const orignalSource = new OriginalSource(library.source.id.path);
+        const inputSource = InputSource.makeFromPath(orignalSource, ruleRef.path);
+
+        const ruleManifests = await this._manifestsLoader.loadSingle(inputSource, library.source);
 
         if (ruleManifests.length === 0) {
             this._logger.error("[_loadLibraryRule] target rule not found: ", ruleRef);

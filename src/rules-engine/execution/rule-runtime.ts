@@ -8,6 +8,10 @@ import { RuleEngineReporter } from '../reporting/rule-engine-reporter';
 import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
+import { RuleResult } from '../../types/rules-result';
+import { ManifestInfoResult, ManifestResult } from '../../types/manifest-result';
+import { ResultObjectSeverity, setupBaseObjectSeverity } from '../../types/result';
+import { ManifestViolation } from './manifest-violation';
 
 export class RuleRuntime
 {
@@ -20,7 +24,7 @@ export class RuleRuntime
     private _values: RuleOverrideValues;
     private _ruleEngineReporter : RuleEngineReporter;
     
-    private _violations : ManifestViolations[] = [];
+    private _violations : ManifestViolation[] = [];
     private _passed : K8sManifest[] = [];
 
     private _ruleCacheData : RuleCache = {
@@ -89,10 +93,65 @@ export class RuleRuntime
                     if (!(this._manifest.errorsWithRule ?? false))
                     {
                         this._manifest.errorsWithRule = true;
-                        this._ruleEngineReporter.manifestPackage.manifestError(this._manifest, "Failed to compile the rule.");
+                        this._manifest.reportError("Failed to compile the rule.");
                     }
                 }
             })
+    }
+
+    exportResult() : RuleResult
+    {
+        const ruleManifestResult = this._manifest.exportResult();
+
+        const ruleErrors = (this.ruleErrors ?? []).map(x => x.msg);
+        for(const error of ruleErrors)
+        {
+            if (!ruleManifestResult.messages) {
+                ruleManifestResult.messages = [];
+            }
+            ruleManifestResult.messages.push({ severity: 'error', msg: error });
+        }
+
+        // TODO: Take this out later and avoid duplicates in the first place
+        ruleManifestResult.messages = _.uniqBy(ruleManifestResult.messages, x => _.stableStringify(x));
+
+        setupBaseObjectSeverity(ruleManifestResult);
+
+        const violations = this.violations.map(x => x.exportResult());
+
+        const hasViolationErrors = _.some(violations, x => x.severity === 'fail');
+        const hasViolationWarnings = _.some(violations, x => x.severity === 'warning');
+
+        let ruleSeverity : ResultObjectSeverity = 'pass';
+        if (hasViolationErrors) {
+            ruleSeverity = 'fail';
+        } else if (hasViolationWarnings) {
+            ruleSeverity = 'warning';
+        }
+
+        const result : RuleResult = {
+            ruleManifest: ruleManifestResult,
+            namespace: this.rule.namespace,
+            compiled: this.isCompiled && !this.hasRuntimeErrors,
+            pass: !hasViolationErrors,
+            ruleSeverity: ruleSeverity,
+            hasViolationErrors: hasViolationErrors,
+            hasViolationWarnings: hasViolationWarnings,
+            violations: violations,
+            passed: this.passed.map(x => this._exportPassedManifest(x))
+        };
+
+        return result;
+    }
+
+    private _exportPassedManifest(manifest: K8sManifest) : ManifestResult
+    {
+        const result : ManifestResult = {
+            ...manifest.id,
+            severity: 'pass',
+            sources: manifest.exportSourcesResult(),
+        };
+        return result;
     }
 
     private _processTarget() : Promise<ScriptItem[]>
@@ -107,7 +166,6 @@ export class RuleRuntime
                 return [];
             });
     }
-
 
     private _processItem(item: ScriptItem)
     {
@@ -202,10 +260,7 @@ export class RuleRuntime
                         cache: clusterData.cache
                     }
                 });
-
         }
-
-        
     }
 
     private _processValidationResult(manifest: K8sManifest, result: ValidationProcessorResult)
@@ -222,28 +277,17 @@ export class RuleRuntime
                 manifest.rules.warnings = true;
             }
 
-            const manifestViolations : ManifestViolations = {
-                manifest: manifest,
-                hasErrors: (_.keys(result.validation.errorMsgs).length > 0),
-                hasWarnings: (_.keys(result.validation.warnMsgs).length > 0),
-            }
-
+            const manifestViolations = new ManifestViolation(manifest);
             for(const error of _.keys(result.validation.errorMsgs))
             {
                 this._reportError(manifest, error);
-                if (!manifestViolations.errors) {
-                    manifestViolations.errors = [];
-                }
-                manifestViolations.errors.push(error);
+                manifestViolations.reportError(error);
             }
 
             for(const warn of _.keys(result.validation.warnMsgs))
             {
                 this._reportWarning(manifest, warn);
-                if (!manifestViolations.warnings) {
-                    manifestViolations.warnings = [];
-                }
-                manifestViolations.warnings.push(warn);
+                manifestViolations.reportWarning(warn);
             }
 
             this._violations.push(manifestViolations);
@@ -267,14 +311,6 @@ export class RuleRuntime
     }
 }
 
-export interface ManifestViolations
-{
-    manifest: K8sManifest;
-    hasErrors: boolean;
-    hasWarnings: boolean;
-    errors?: string[];
-    warnings?: string[];
-}
 
 interface RuleCache
 {
@@ -293,3 +329,4 @@ interface CacheRunResult
     success: boolean,
     cache: Record<string, any>
 }
+

@@ -1,5 +1,5 @@
 import { IndexLibraryResult } from "./types";
-import { OBJECT_ICONS, print, printProcessStatus, printSectionTitle } from '../../screen';
+import { OBJECT_ICONS, print, printProcessStatus, printSectionTitle, printSubTitle } from '../../screen';
 
 import { output as guardOutput } from '../guard/output'
 
@@ -9,7 +9,7 @@ export function output(result: IndexLibraryResult)
 
     print();
 
-    printSectionTitle('Rule Library');
+    printSubTitle('Rule Library');
     print(`Rule Count: ${result.library.count}`)
     print(`Category Count: ${result.library.categoryCount}`)
     print();
@@ -29,5 +29,5 @@ export function output(result: IndexLibraryResult)
 
     print(`Library Index: ${result.libraryPath}`);
 
-    printProcessStatus(result.success, 'Index Generation');
+    printProcessStatus(result.success ? 'pass' : 'fail', 'Index Generation');
 }

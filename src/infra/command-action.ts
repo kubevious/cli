@@ -4,7 +4,7 @@ import { logger } from '../logger';
 
 export type ActionFunc<TData> = (...args: any[]) => TData | Promise<TData>;
 export type FormatFunc<TData, TResult> = (data: TData) => TResult;
-export type OutputFunc<TResult> = (result: TResult) => void;
+export type OutputFunc<TResult> = (result: TResult, detailed?: boolean) => void;
 export type DesideSuccess<TResult> = (result: TResult) => number;
 
 export class CommandBuilder<TData, TResult>
@@ -74,7 +74,7 @@ export class CommandBuilder<TData, TResult>
                         console.log(JSON.stringify(result, null, 4));
                     } else {
                         if (this._output) {
-                            return this._output(result);
+                            return this._output(result, options.detailed ?? false);
                         }
                     }
                 })

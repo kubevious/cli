@@ -1,8 +1,7 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { Promise } from 'the-promise';
+import { Promise as MyPromise } from 'the-promise';
 import axios from 'axios';
-import glob from 'glob';
 import * as fs from 'fs';
 import * as Path from 'path';
 import { K8sObject } from '../types/k8s';
@@ -11,25 +10,31 @@ import YAML from 'yaml';
 import { ManifestPackage } from './manifest-package';
 import { readFromInputStream } from '../utils/stream';
 import { spinOperation } from '../screen/spinner';
-import { K8sManifest, ManifestSource } from './k8s-manifest';
-import { isWeb, joinPath } from '../utils/path';
+import { K8sManifest } from './k8s-manifest';
+import { ManifestSource } from "./manifest-source";
 import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
+import { InputSourceExtractor } from '../input/input-source-extractor';
+import { InputSource, InputSourceKind } from '../input/input-source';
+import { PreProcessorExecutor } from '../preprocessors/executor';
+import { ManifestSourceType } from '../types/manifest';
 
-export interface ManifetsLoaderOptions
+export interface ManifestLoaderOptions
 {
     ignoreNonK8s: boolean;
 }
 
-export class ManifetsLoader
+export class ManifestLoader
 {
     private _logger: ILogger;
     private _manifestPackage: ManifestPackage;
-    private _options: ManifetsLoaderOptions;
+    private _inputSourceExtractor : InputSourceExtractor;
+    private _options: ManifestLoaderOptions;
 
-    constructor(logger: ILogger, manifestPackage : ManifestPackage, options? : Partial<ManifetsLoaderOptions>)
+    constructor(logger: ILogger, manifestPackage: ManifestPackage, inputSourceExtractor: InputSourceExtractor, options?: Partial<ManifestLoaderOptions>)
     {
-        this._logger = logger.sublogger('ManifetsLoader');
+        this._logger = logger.sublogger('ManifestLoader');
         this._manifestPackage = manifestPackage;
+        this._inputSourceExtractor = inputSourceExtractor;
 
         options = options ?? {};
         this._options = {
@@ -43,184 +48,189 @@ export class ManifetsLoader
         return this._manifestPackage;
     }
 
-    public load(fileOrPatternOrUrls: string[]) : Promise<void>
-    {
-        this._logger.info("[load] fileOrPatternOrUrl: ", fileOrPatternOrUrls);
+    get inputSourceExtractor() {
+        return this._inputSourceExtractor;
+    }
 
-        if (fileOrPatternOrUrls.length === 0)
-        {
-            return Promise.resolve();
-        }
+    public async loadFromExtractor()
+    {
+        this._logger.info("[load] BEGIN");
 
         const spinner = spinOperation('Loading manifests...');
 
-        return Promise.resolve()
-            .then(() => {
-                return this._loadMany(fileOrPatternOrUrls);
-            })
-            .then(() => {
-                spinner.complete('Manifests loaded.');
-            })
-            ;
-    }
-
-    public loadFromStream()
-    {
-        this._logger.info("[_loadFromStream] ");
-        const source = this._manifestPackage.getSource("stream", 'stream');
-
-        return readFromInputStream()
-            .then((contents) => {
-
-                let manifests : any[] | null = null;
-            
-                if (!manifests) {
-                    try
-                    {
-                        manifests = this._parseYaml(contents);
-                    }
-                    catch(reason: any)
-                    {
-                        this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing YAML.');
-                    }
-                }
-    
-                if (!manifests) {
-                    try
-                    {
-                        manifests = [JSON.parse(contents)];
-                    }
-                    catch(reason: any)
-                    {
-                        manifests = null;
-                    }
-                }                
-
-                if (manifests)
-                {
-                    for(const manifest of manifests)
-                    {
-                        this._addManifest(source, manifest);
-                    }
-                }
-                else
-                {
-                    this._manifestPackage.sourceError(source, 'Failed to parse manifests from stream.');
-                }
-
-            })
-            .catch(reason => {
-                this._manifestPackage.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
-            })
-    }
-
-    private _loadMany(fileOrPatternOrUrls: string[]) : Promise<void>
-    {
-        return Promise.serial(fileOrPatternOrUrls, x => this.loadSingle(x))
-            .then(() => {});
-    }
-
-    public loadSingle(fileOrPatternOrUrl: string, parentSource?: ManifestSource) : Promise<K8sManifest[]>
-    {
-        let finalPath = fileOrPatternOrUrl;
-        if (parentSource &&
-            (parentSource.source.kind === "file" || parentSource.source.kind === "web" ))
+        for(const originalSource of this._inputSourceExtractor.originalSources)
         {
-            finalPath = joinPath(parentSource.source.path, finalPath);
+            if (!originalSource.hasAnyInput) {
+                const source = this._manifestPackage.getSource(originalSource.kind, originalSource.path, originalSource);
+                source.reportError(`No input was found.`);
+            }
         }
 
-        if (isWeb(finalPath))
+        const sources = this._inputSourceExtractor.sources;
+        await MyPromise.serial(sources, x => MyPromise.resolve(this.loadSingle(x)));
+
+        spinner.complete('Manifests loaded.');
+    }
+
+    public async loadFromStream()
+    {
+        this._logger.info("[_loadFromStream] ");
+        const source = this._manifestPackage.getSource("stream", 'stream', null);
+
+        try
         {
-            return this._loadUrl(finalPath);
+            const contents = await readFromInputStream();
+
+            let manifests : any[] | null = null;
+        
+            if (!manifests) {
+                try
+                {
+                    manifests = this._parseYaml(contents);
+                }
+                catch(reason: any)
+                {
+                    source.reportError(reason.message ?? 'Error parsing YAML.');
+                }
+            }
+
+            if (!manifests) {
+                try
+                {
+                    manifests = [JSON.parse(contents)];
+                }
+                catch(reason: any)
+                {
+                    manifests = null;
+                }
+            }                
+
+            if (manifests)
+            {
+                for(const manifest of manifests)
+                {
+                    this.addManifest(source, manifest);
+                }
+            }
+            else
+            {
+                source.reportError('Failed to parse manifests from stream.');
+            }
+        }
+        catch(reason: any)
+        {
+            source.reportError(`Failed to fetch manifest. Reason: ${reason.message ?? 'unknown'}`);
+        }
+    }
+
+    public async loadSingle(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
+    {
+        this._logger.info("[loadSingle] %s :: %s", inputSource.kind, inputSource.path);
+
+        if (inputSource.isPreprocessor) {
+            return await this._loadFromPreProcessor(inputSource, parentSource);
+        }
+
+        if (inputSource.kind == InputSourceKind.web)
+        {
+            return await this._loadUrl(inputSource, parentSource);
         }
         else
         {
-            return this._loadFileOrPattern(finalPath);
+            return await this._loadFile(inputSource, parentSource);
         }
     }
 
-    private _loadFileOrPattern(fileOrPattern: string) : Promise<K8sManifest[]>
+    private async _loadFromPreProcessor(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
-        const pattern = this._makeSearchPattern(fileOrPattern);
-        this._logger.info("[_loadFileOrPattern] pattern: %s", pattern);
-        if (!pattern) {
-            return Promise.resolve([]);
-        }
+        const kind : ManifestSourceType = inputSource.kind;
+        const source = this._manifestPackage.getSource(kind, inputSource.path, inputSource.originalSource, parentSource);
 
-        return Promise.construct<string[]>((resolve, reject) => {
-            return glob(pattern,
-                 {
-                    nodir: true
-                 },
-                 (err, matches) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(matches);
-                    }
-                })
-        })
-        .then(files => {
-            this._logger.info("[_loadFileOrPattern] files: ", files);
-            return Promise.serial(files, file => this._loadFile(file));
-        })
-        .then(results => _.flatten(results))
+        const preprocessor = new PreProcessorExecutor(this._logger, this);
+
+        try
+        {
+            await preprocessor.execute(inputSource, source);
+
+            return source.manifests; // TODO: Include Hierarchy manifests too.
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            source.reportError(`Failed to execute preprocessor: ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+            return [];
+        }
     }
 
-    private _loadFile(path: string) : Promise<K8sManifest[]>
+    private async _loadFile(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
-        const source = this._manifestPackage.getSource("file", path);
+        const path = inputSource.path;
+
+        const source = this._manifestPackage.getSource("file", path, inputSource.originalSource, parentSource);
 
         this._logger.info("[_loadFile] path: %s", path);
 
-        return Promise.resolve()
-            .then(() => fs.promises.readFile(path, { encoding: 'utf8' }))
-            .then(contents => this._parseContents(source, path, contents));
+        try
+        {
+            const contents = await this.rawReadFile(path);
+            return this.parseContents(source, path, contents);
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[_loadFile] ERROR: ", reason);
+            source.reportError('Failed to load manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            return [];
+        }
     }
 
-    private _loadUrl(url: string) : Promise<K8sManifest[]>
+    private async _loadUrl(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
-        const source = this._manifestPackage.getSource("web", url);
+        const url = inputSource.path;
+        const source = this._manifestPackage.getSource("web", url, inputSource.originalSource, parentSource);
 
         this._logger.info("[_loadUrl] url: %s", url);
-        return Promise.resolve()
-            .then(() => axios.get(url))
-            .then(({ data }) => {
-                const contents = data.toString();
-                return this._parseContents(source, url, contents);
-            })
-            .catch(reason => {
-                this._manifestPackage.sourceError(source, 'Failed to fetch manifest. Reason: ' + reason.message);
-                return [];
-            })
+        try
+        {
+            const { data } = await axios.get(url);
+            const contents = data.toString();
+            return this.parseContents(source, url, contents);
+        }
+        catch(reason : any)
+        {
+            // this._logger.error("_loadUrl] ERROR: ", reason);
+            source.reportError('Failed to fetch manifest. Reason: ' + (reason?.message ?? "Unknown"));
+            return [];
+        }
     }
 
-    private _parseContents(source: ManifestSource, path: string, contents: string) : K8sManifest[]
+    public parseContents(source: ManifestSource, path: string, contents: string) : K8sManifest[]
     {
-        this._logger.info("[_parseContents] path: %s", path);
+        this._logger.info("[parseContents] path: %s", path);
         
         const manifests: K8sManifest[] = [];
 
         const extension = Path.extname(path);
+        this._logger.info("[parseContents] extension: %s", extension);
+
         if (extension === '.yaml' || extension === '.yml')
         {
             let configs : any[] | null = [];
             try
             {
-                configs = this._parseYaml(contents);    
+                configs = this._parseYaml(contents);
             }
             catch(reason: any)
             {
-                this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing YAML.');
+                source.reportError(reason.message ?? 'Error parsing YAML.');
             }
 
             if (configs)
             {
-                this._logger.info("[_parseContents] Manifest Count: %s", configs.length);
-                this._logger.silly("[_parseContents] Manifests: ", configs);
+                this._logger.info("[parseContents] Manifest Count: %s", configs.length);
+                this._logger.silly("[parseContents] Manifests: ", configs);
                 for(const config of configs)
                 {
-                    const manifest = this._addManifest(source, config);
+                    const manifest = this.addManifest(source, config);
                     if (manifest) {
                         manifests.push(manifest);
                     }
@@ -228,7 +238,7 @@ export class ManifetsLoader
             }         
             else
             {
-                this._logger.info("[_parseContents] No Manifests Found.");
+                this._logger.info("[parseContents] No Manifests Found.");
             }
             
             
@@ -242,25 +252,26 @@ export class ManifetsLoader
             }
             catch(reason: any)
             {
-                this._manifestPackage.sourceError(source, reason.message ?? 'Error parsing JSON');
+                source.reportError(reason.message ?? 'Error parsing JSON');
             }
             if (configs)
             {
-                const manifest = this._addManifest(source, configs);
+                const manifest = this.addManifest(source, configs);
                 if (manifest) {
                     manifests.push(manifest);
                 }
             }
         } else {
-            this._manifestPackage.sourceError(source, 'Unknown extension. Should be one of: .yaml, .yml or .json');
+            source.reportError('Unknown extension. Should be one of: .yaml, .yml or .json');
         }
 
         if (source.success)
         {
-            if (source.contents.length === 0)
+            if (source.manifests.length === 0)
             {
                 if (!this._options.ignoreNonK8s) {
-                    this._manifestPackage.sourceError(source, 'Contains no manifests');
+                    // TODO: Move this to post parse validation logic
+                    source.reportError('Contains no manifests');
                 }
 
             }
@@ -269,9 +280,10 @@ export class ManifetsLoader
         return manifests;
     }
 
-    private _addManifest(source : ManifestSource, config: any) : K8sManifest | null
+    public addManifest(source : ManifestSource, config: any) : K8sManifest | null
     {
-        this._logger.silly("[_addManifest] file: %s, manifest:", source.source.path, config);
+        this._logger.info("[addManifest] source path: %s", source.id.path);
+        // this._logger.silly("[addManifest] source path: %s, manifest:", source.id.path, config);
         if (!config) {
             return null;
         }
@@ -282,7 +294,7 @@ export class ManifetsLoader
         if (errors.length > 0)
         {
             if (!this._options.ignoreNonK8s) {
-                this._manifestPackage.sourceErrors(source, errors);
+                source.reportErrors(errors);
             }
             return null;
         }
@@ -302,45 +314,41 @@ export class ManifetsLoader
         return errors;
     }
 
-    private _makeSearchPattern(fileOrPattern: string) : string | null
+    public parseYamlRaw(contents: string) : YAML.Document.Parsed<YAML.ParsedNode>[]
     {
-        if (fs.existsSync(fileOrPattern))
-        {
-            const stats = fs.statSync(fileOrPattern);
-            if (stats.isDirectory())
-            {
-                return Path.join(fileOrPattern, '**/*[.yaml|.yml]')
-            }
-
-            if (stats.isFile())
-            {
-                return fileOrPattern;
-            }
-        }
-        else
-        {
-            return fileOrPattern;
-        }
-
-        return null;
-    }
-
-    private _parseYaml(contents: string) : any[] | null
-    {
-        // this._logger.info("[parseYaml] >>>>>>>>>>>>>>>. STR: ", contents);
-
         const result = YAML.parseAllDocuments(contents, {
-        });
+        }); 
 
         if (!result) {
             return [];
         }
-        
-        const jsons = result.map(x => x.toJS({ })); // emptySourceAsObject: false 
-        // for(const json of jsons)
-        // {
-        //     this._logger.info("[parseYaml] *************************** DATA: ", json);
-        // }
+
+        return result;
+    }
+
+    public rawYamlToObj(rawYaml: YAML.Document.Parsed<YAML.ParsedNode>)
+    {
+        return rawYaml.toJS({});
+    }
+
+    public async rawReadFile(path: string)
+    {
+        try
+        {
+            const contents = await fs.promises.readFile(path, { encoding: 'utf8' });
+            return contents;
+        }
+        catch(reason : any)
+        {
+            this._logger.info("[rawReadFile] ERROR: ", reason);
+            throw reason;
+        }
+    }
+
+    private _parseYaml(contents: string) : any[]
+    {
+        const result = this.parseYamlRaw(contents);
+        const jsons = result.map(x => this.rawYamlToObj(x));
         return jsons;
     }
 

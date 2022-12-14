@@ -6,33 +6,52 @@ import { K8sApiSchemaFetcher, K8sApiSchemaFetcherResult } from '../../api-schema
 import { LintCommandData, LintCommandOptions } from './types';
 import { DefaultNamespaceSetter } from '../../processors/default-namespace-setter';
 import { K8sClusterConnector } from '../../k8s-connector/k8s-cluster-connector';
-import { ManifetsLoader } from '../../manifests/manifests-loader';
+import { ManifestLoader } from '../../manifests/manifests-loader';
 import { K8sPackageValidator } from '../../validation/k8s-package-validator';
 import { ManifestPackage } from '../../manifests/manifest-package';
 import { PathResolver } from '../../path-resolver';
+import { spinOperation } from '../../screen/spinner';
+import { InputSourceExtractor } from '../../input/input-source-extractor';
 
 const myLogger = logger.sublogger('LintCommand');
 
-export async function command(path: string[], options: LintCommandOptions) : Promise<LintCommandData>
+export async function command(paths: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
-    logger.info("[PATH] ", path);
+    logger.info("[PATH] ", paths);
 
-    const manifestPackage = new ManifestPackage(logger);
-
-    const loader = new ManifetsLoader(logger, manifestPackage, {
-        ignoreNonK8s: options.ignoreNonK8s
-    });
-
+    const inputSourceExtractor = new InputSourceExtractor(logger);
     {
-        const pathResolver = new PathResolver();
-        await loader.load([pathResolver.cliCrdsDir]);
-    }
+        const sourceExtractorSpinner = spinOperation('Identifying manifest sources...');
 
-    await loader.load(path);
+        {
+            const pathResolver = new PathResolver();
+            inputSourceExtractor.addMany([pathResolver.cliCrdsDir]);
+        }
+    
+        inputSourceExtractor.addMany(paths);
+
+        await inputSourceExtractor.extractSources();
+        await inputSourceExtractor.reconcile();
+
+        sourceExtractorSpinner.complete('Sources identified.');
+    }
+    
+    const manifestPackage = new ManifestPackage(logger);
+    
+    const manifestLoader = new ManifestLoader(logger,
+                                              manifestPackage,
+                                              inputSourceExtractor,
+                                              {
+                                                  ignoreNonK8s: options.ignoreNonK8s
+                                              });
+
+    await manifestLoader.loadFromExtractor();
 
     if (options.stream) {
-        await loader.loadFromStream();
+        await manifestLoader.loadFromStream();
     }
+
+    manifestPackage.debugOutput();
 
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 
@@ -87,34 +106,16 @@ export async function command(path: string[], options: LintCommandOptions) : Pro
 
     manifestPackage.produceNamespaces();
 
-    const success = determineLintSuccess(manifestPackage);
-    myLogger.info("Success: %s", success);
+    manifestPackage.debugOutput();
 
     return {
-        success,
         k8sConnector,
         manifestPackage,
-        k8sSchemaInfo
+        k8sSchemaInfo,
+
+        inputSourceExtractor,
+        manifestLoader
     } 
-}
-
-export function determineLintSuccess(manifestPackage: ManifestPackage)
-{
-    let success = true;
-    for(const source of manifestPackage.sources)
-    {
-        if (!source.success) {
-            success = false;
-        }
-
-        for(const manifest of source.contents)
-        {
-            if (!manifest.success) {
-                success = false;
-            }
-        }
-    }
-    return success;
 }
 
 export function massageLintOptions(options: Partial<LintCommandOptions>) : LintCommandOptions

@@ -4,8 +4,10 @@ import { RulesRuntime } from "../../rules-engine/execution/rules-runtime";
 import { K8sObjectId } from "../../types/k8s";
 import { ManifestSourceId } from "../../types/manifest";
 import { RuleKind } from "../../rules-engine/registry/types";
-import { LintCommandData, LintCommandOptions, LintManifestsResult } from "../lint/types";
+import { LintCommandOptions, LintManifestsResult } from "../lint/types";
 import { LocalK8sRegistry } from "../../registry/local-k8s-registry";
+import { ResultObject, RuleEngineCounters } from "../../types/result";
+import { RuleEngineResult } from "../../types/rules-result";
 
 export interface GuardCommandOptions extends LintCommandOptions {
 
@@ -24,68 +26,24 @@ export interface GuardCommandOptions extends LintCommandOptions {
     skipRuleLibraries: boolean;
 }
 
-export interface GuardCommandData {
-    success: boolean,
-    ruleSuccess: boolean,
+export interface GuardCommandData extends ResultObject {
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
     rulesRuntime: RulesRuntime,
 
     localK8sRegistry: LocalK8sRegistry,
 
-    lintCommandData: LintCommandData,
+    lintResult: LintManifestsResult,
+    rulesResult: RuleEngineResult
 }
 
-export interface GuardResult
+export interface GuardResult extends ResultObject
 {
     success: boolean;
 
     lintResult: LintManifestsResult;
     
-    ruleSuccess: boolean;
-    rules: LintRuleResult[];
+    rules: RuleEngineResult;
 
-    counters: {
-        rules: {
-            total: number,
-            failed: number,
-            passed: number,
-            withErrors: number,
-            withWarnings: number
-        },
-        manifests: {
-            total: number,
-            processed: number,
-            passed: number,
-            withErrors: number,
-            withWarnings: number
-        }
-    }
-    
-}
-
-export interface LintRuleResult
-{
-    source: ManifestSourceId,
-    kind: RuleKind;
-    namespace?: string;
-    rule: string;
-    compiled: boolean;
-    pass: boolean;
-    hasViolationErrors: boolean;
-    hasViolationWarnings: boolean;
-    errors?: string[];
-    violations?: LintRuleViolation[];
-    passed: {
-        manifest: K8sObjectId;
-        source: ManifestSourceId;
-    }[];
-}
-
-export interface LintRuleViolation
-{
-    manifest: K8sObjectId;
-    source: ManifestSourceId;
-    errors?: string[];
-    warnings?: string[];
+    counters: RuleEngineCounters;
 }

@@ -1,12 +1,9 @@
 import _ from 'the-lodash';
+import { BaseObject } from '../types/base-object';
 import { K8sObject, K8sObjectId, makeId, makeK8sKeyStr } from "../types/k8s";
-import { ErrorStatus, ManifestSourceId } from "../types/manifest";
-
-export interface ManifestSource extends Required<ErrorStatus>
-{
-    source: ManifestSourceId;
-    contents: K8sManifest[];
-}
+import { ManifestInfoResult, ManifestResult } from '../types/manifest-result';
+import { SourceInfoResult } from '../types/source-result';
+import { ManifestSource } from './manifest-source';
 
 export interface K8sManifestRuleResult
 {
@@ -15,20 +12,7 @@ export interface K8sManifestRuleResult
     warnings?: boolean;
 }
 
-interface IK8sManifest extends Required<ErrorStatus>
-{
-    id: K8sObjectId;
-
-    isLinted: boolean;
-    rules: K8sManifestRuleResult;
-
-    errorsWithRule?: boolean;
-
-    source: ManifestSource;
-    config: K8sObject;
-}
-
-export class K8sManifest implements IK8sManifest
+export class K8sManifest extends BaseObject 
 {
     private _idKey: string;
     private _id: K8sObjectId;
@@ -39,13 +23,11 @@ export class K8sManifest implements IK8sManifest
     private _isLinted = false;
     private _rules: K8sManifestRuleResult = {};
     private _errorsWithRule?: boolean | undefined;
-        
-    private _success = true;
-    private _errors: string[] = [];
-    private _warnings: string[] = [];
 
     constructor(config: K8sObject, source: ManifestSource)
     {
+        super();
+
         this._config = config;
         this._source = source;
         this._id = makeId(config);
@@ -87,20 +69,41 @@ export class K8sManifest implements IK8sManifest
         return this._rules;
     }
 
-    public get success() {
-        return this._success;
+    exportInfoResult() : ManifestInfoResult
+    {
+        const baseResult = this.extractBaseResult();
+
+        const manifestInfoResult : ManifestInfoResult = {
+            ...this._id,
+            ...baseResult,
+        };
+        
+        return manifestInfoResult;
     }
 
-    public set success(value) {
-        this._success = value;
+    exportSourcesResult() : SourceInfoResult[]
+    {
+        const sources : SourceInfoResult[] = [];
+
+        let source : ManifestSource | null = this._source;
+
+        while(source && source.id.kind !== 'root')
+        {
+            sources.push(source.extractInfoResult());
+            source = source.parentSource;   
+        }
+
+        return sources;
     }
 
-    public get errors(): string[] {
-        return this._errors;
-    }
+    exportResult() : ManifestResult
+    {
+        const manifestResult : ManifestResult = {
+            ...this.exportInfoResult(),
+            sources: this.exportSourcesResult()
+        };
 
-    public get warnings(): string[] {
-        return this._warnings;
+        return manifestResult;
     }
    
 }

@@ -1,134 +1,43 @@
 import _ from 'the-lodash';
 
-import { GuardCommandData, GuardResult,  LintRuleResult } from "./types";
+import { GuardCommandData, GuardResult } from "./types";
 import { logger } from '../../logger';
 
-import { formatResult as lintFormatResult } from '../lint/format';
+import { calculateRuleEngineCounters } from '../../manifests/counters';
 
 const myLogger = logger.sublogger('GuardFormat');
 
 export function formatResult({
-        success,
-        ruleSuccess,
+        severity,
         manifestPackage,
         k8sSchemaInfo,
         rulesRuntime,
-        lintCommandData
+        lintResult,
+        rulesResult,
     } : GuardCommandData) : GuardResult
 {
-    const lintResult = lintFormatResult(lintCommandData);
+    myLogger.info("Severity:  %s", severity);
 
-    myLogger.info("Success: %s", success);
-    myLogger.info("RuleSuccess: %s", ruleSuccess);
-    myLogger.info("LintResult.success: %s", lintResult.success);
+    myLogger.info("LintResult Severity:  %s", lintResult.severity);
+    myLogger.info("LintResult Success: %s", lintResult.success);
+
+    myLogger.info("RulesResult Severity:  %s", rulesResult.severity);
+    myLogger.info("RulesResult Success: %s", rulesResult.success);
+
+    const success = (severity == 'pass') || (severity == 'warning');
 
     const result: GuardResult = {
         success: success,
-        ruleSuccess: ruleSuccess,
-        lintResult : lintResult,
-        rules: [],
+        severity: severity,
 
-        counters: {
-            rules: {
-                total: rulesRuntime.rules.length,
-                passed: 0,
-                failed: 0,
-                withErrors: 0,
-                withWarnings: 0
-            },
-            manifests: {
-                total: manifestPackage.manifests.length,
-                processed: 0,
-                passed: 0,
-                withErrors: 0,
-                withWarnings: 0
-            }
-        }
+        lintResult : lintResult,
+        rules: rulesResult,
+
+        counters: calculateRuleEngineCounters(rulesResult, manifestPackage)
     };
 
-    for(const rule of rulesRuntime.rules)
-    {
-        const ruleResult : LintRuleResult = {
-            source: rule.rule.source,
-            kind: rule.rule.kind,
-            namespace: rule.rule.namespace,
-            rule: rule.rule.name,
-            compiled: rule.isCompiled && !rule.hasRuntimeErrors,
-            pass: true,
-            hasViolationErrors: false,
-            hasViolationWarnings: false,
-            passed: rule.passed.map(x => ({
-                manifest: x.id,
-                source: x.source.source
-            }))
-        };
-
-        ruleResult.errors = rule.ruleErrors.map(x => x.msg) ?? [];
-
-        if (!ruleResult.compiled) {
-            result.counters.rules.failed++;
-        }
-
-        if (rule.violations.length > 0)
-        {
-            ruleResult.violations = [];
-
-            for(const violation of rule.violations)
-            {
-                if (violation.hasErrors) {
-                    ruleResult.pass = false;
-                    ruleResult.hasViolationErrors = true;
-                }
-                if (violation.hasWarnings) {
-                    ruleResult.hasViolationWarnings = true;
-                }
-
-                ruleResult.violations.push({
-                    manifest: violation.manifest.id,
-                    source: violation.manifest.source.source,
-                    errors: violation.errors,
-                    warnings: violation.warnings,
-                });
-            }
-        }
-
-        if (!ruleResult.compiled) {
-            result.counters.rules.failed++;
-        }
-        if (ruleResult.passed) {
-            result.counters.rules.passed++;
-        }
-        if (ruleResult.hasViolationErrors) {
-            result.counters.rules.withErrors++;
-        }
-        if (ruleResult.hasViolationWarnings) {
-            result.counters.rules.withWarnings++;
-        }
-
-        result.rules.push(ruleResult);
-    }
-    
-    for(const manifest of manifestPackage.manifests)
-    {
-        if (manifest.rules.processed)
-        {
-            result.counters.manifests.processed++;
-            if (manifest.rules.errors)
-            {
-                result.counters.manifests.withErrors++;
-            }
-            else
-            {
-                result.counters.manifests.passed++;
-            }
-
-            if (manifest.rules.warnings)
-            {
-                result.counters.manifests.withWarnings++;
-            }
-        }
-    }
-
+    logger.info("RULES RESULT: ", rulesResult);
+    logger.info("RULE COUNTERS: ", result.counters);
 
     return result;
 }

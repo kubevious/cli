@@ -6,11 +6,13 @@ import { LocalRegistryPopulator } from '../../registry/local-registry-populator'
 import { RuleRegistry, RuleRegistryLoadOptions } from '../../rules-engine/registry/rule-registry';
 import { RulesRuntime } from '../../rules-engine/execution/rules-runtime';
 
-import { command as lintCommand, determineLintSuccess, massageLintOptions } from '../lint/command';
+import { command as lintCommand, massageLintOptions } from '../lint/command';
 import { RemoteK8sRegistry } from '../../registry/remote-k8s-registry';
 import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
 import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
+import { formatResult as lintFormatResult } from '../lint/format';
+import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/main/index.yaml';
 
@@ -24,14 +26,14 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     logger.info("[PATH] ", path);
 
-    const lintResult = await lintCommand(path, options);
+    const lintCommandData = await lintCommand(path, options);
 
-    const manifestPackage = lintResult.manifestPackage;
-
-    const k8sConnector = lintResult.k8sConnector;
+    const manifestPackage = lintCommandData.manifestPackage;
+    const manifestLoader = lintCommandData.manifestLoader;
+    const k8sConnector = lintCommandData.k8sConnector;
 
     const registryPopulator = new LocalRegistryPopulator(logger,
-                                                         lintResult.k8sSchemaInfo.k8sJsonSchema!,
+                                                         lintCommandData.k8sSchemaInfo.k8sJsonSchema!,
                                                          manifestPackage);
     registryPopulator.process();
 
@@ -41,11 +43,11 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     let remoteRegistry: RegistryQueryExecutor | undefined;
     if (k8sConnector.isUsed)
     {
-        const myRemoteRegistry = new RemoteK8sRegistry(logger, k8sConnector);
+        const myRemoteRegistry = new RemoteK8sRegistry(logger, k8sConnector, manifestPackage);
         remoteRegistry = new CachedK8sRegistry(logger, myRemoteRegistry);
     }
 
-    const ruleRegistry = new RuleRegistry(logger, manifestPackage);
+    const ruleRegistry = new RuleRegistry(logger, manifestPackage, manifestLoader);
     if (!options.skipRemoteRules)
     {
         if (remoteRegistry)
@@ -108,34 +110,19 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     await rulesRuntime.init();
     await rulesRuntime.execute();
 
-    let ruleSuccess = true;
-    for(const rule of rulesRuntime.rules)
-    {
-        for(const violation of rule.violations)
-        {
-            if (violation.hasErrors)
-            {
-                ruleSuccess = false;
-            }
-        }
-    }
+    const lintResult = lintFormatResult(lintCommandData);
+    const rulesResult = rulesRuntime.exportResult();
 
-    lintResult.success = determineLintSuccess(manifestPackage);
-
-    const success = lintResult.success && ruleSuccess; 
-
-    myLogger.info("Success: %s", success);
-    myLogger.info("RuleSuccess: %s", ruleSuccess);
-    myLogger.info("LintResult.success: %s", lintResult.success);
+    const severity = makeObjectSeverityFromChildren('pass', [lintResult, rulesResult]);
 
     return {
-        success,
-        ruleSuccess,
+        severity: severity,
         manifestPackage: manifestPackage,
-        k8sSchemaInfo: lintResult.k8sSchemaInfo,
+        k8sSchemaInfo: lintCommandData.k8sSchemaInfo,
         rulesRuntime,
         localK8sRegistry: localK8sRegistry,
-        lintCommandData: lintResult
+        lintResult: lintResult,
+        rulesResult: rulesResult
     } 
 }
 

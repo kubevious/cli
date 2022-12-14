@@ -1,32 +1,50 @@
 import _ from 'the-lodash';
 import Path from 'path';
 
-export function isWeb(fileOrPath : string)
+export function isWebPath(fileOrPath : string)
 {
     return _.startsWith(fileOrPath, 'http://') || _.startsWith(fileOrPath, 'https://');
 }
 
-export function parent(fileOrUrl: string)
+export function resolvePath(path: string, parentDirOrPath?: string)
+{
+    if (parentDirOrPath && !isAbsolutePath(path))
+    {
+        if (isWebPath(parentDirOrPath))
+        {
+            if (!_.endsWith('/')) {
+                parentDirOrPath = `${parentDirOrPath}/`;
+            }
+            path = `${parentDirOrPath}${path}`;
+            return path;
+        }
+        else
+        {
+            path = Path.resolve(parentDirOrPath, path);
+            return path;
+        }
+    }
+
+    if (!isWebPath(path))
+    {
+        path = Path.resolve(path);
+    }
+    return path;
+}
+
+export function isAbsolutePath(fileOrPath : string)
+{
+    return _.startsWith(fileOrPath, '/') || isWebPath(fileOrPath);
+}
+
+export function getParentDir(fileOrUrl: string)
 {
     return Path.dirname(fileOrUrl);
 }
 
-export function joinPath(parentFileOrUrl: string, relative: string)
-{
-    const parentDir = parent(parentFileOrUrl);
-    if (isWeb(parentDir)) {
-        if (_.endsWith('/')) {
-            return `${parentDir}${relative}`;
-         } else {
-            return `${parentDir}/${relative}`;
-         }
-    } else {
-        return Path.join(parentDir, relative);
-    }
-}
 export function makeRelativePath(fileOrUrl: string, parentDirOrUrl: string)
 {
-    if (isWeb(fileOrUrl)) {
+    if (isWebPath(fileOrUrl)) {
         return fileOrUrl;
     }
 

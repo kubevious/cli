@@ -14,7 +14,7 @@ export function output(result: InstallHookCommandData)
         }
     }
 
-    printProcessStatus(result.success, 'Install Git Hook');
+    printProcessStatus(result.success ? 'pass' : 'fail', 'Install Git Hook');
 
     printErrors(result.errors, 3);
 

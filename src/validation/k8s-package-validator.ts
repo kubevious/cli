@@ -168,7 +168,7 @@ export class K8sPackageValidator
 
         manifest.isLinted = true;
 
-        this._spinner!.update(`Validating ${manifest.source.source.path}...`);
+        this._spinner!.update(`Validating ${manifest.source.id.path}...`);
 
         {
             const jsonSchema = isCRD(manifest.id) ? this._origK8sJsonSchema : this._k8sJsonSchema;
@@ -177,9 +177,9 @@ export class K8sPackageValidator
             if (!result.success)
             {
                 this._logger.verbose("ERRORS: ", result.errors!);
-                this._manifestPackage.manifestErrors(manifest, result.errors!);
+                manifest.reportErrors(result.errors!);
             }
-            this._manifestPackage.manifestWarnings(manifest, result.warnings);
+            manifest.reportWarnings(result.warnings);
         }
 
         if (isCRD(manifest.id))
@@ -194,9 +194,9 @@ export class K8sPackageValidator
             if (!result.success)
             {
                 this._logger.verbose("[_validateManifest] isCRD ERRORS: ", result.errors!);
-                this._manifestPackage.manifestErrors(manifest, result.errors!);
+                manifest.reportErrors(result.errors!);
             }
-            this._manifestPackage.manifestWarnings(manifest, result.warnings);
+            manifest.reportWarnings(result.warnings);
         }
     }
 

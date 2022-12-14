@@ -56,8 +56,8 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         const libraryRule : LibraryRule = {
             title: (summary.length > 0) ? summary : name,
             name: name,
-            path: makeRelativePath(rule.source.source.path, dir),
-            category: makeRelativePath(Path.dirname(rule.source.source.path), dir),
+            path: makeRelativePath(rule.source.id.path, dir),
+            category: makeRelativePath(Path.dirname(rule.source.id.path), dir),
             summary: summary,
             description: _.trim(ruleConfig.description ?? ""),
         
@@ -73,8 +73,6 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         }
 
         libraryCategoriesDict[libraryRule.category].rules.push(libraryRule);
-        
-
     }
     
     const library: Library = {
@@ -118,7 +116,9 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
     const libraryFilePath = Path.join(dir, 'index.yaml');
 
-    if (guardResult.success)
+    const success = guardResult.severity == 'pass' || guardResult.severity == 'warning';
+
+    if (success)
     {
         await fs.writeFile(libraryFilePath,
             YAML.stringify(libraryObject, {
@@ -130,9 +130,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
         await setupDocs(dir, library);
     }
-
-    const success = guardResult.success;
-
+    
     return {
         success,
         manifestPackage,
