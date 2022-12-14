@@ -1,40 +1,44 @@
 import _ from 'the-lodash';
 import * as Path from 'path';
 
+import { rootLogger } from '../logger';
+
 import { getParentDir, isWebPath, resolvePath } from "../utils/path";
 import { OriginalSource } from './original-source';
 
+const logger = rootLogger.sublogger("InputSource");
+
 export class InputSource {
-    private _key: string;
+    private _originalSource: OriginalSource;
     private _kind: InputSourceKind;
     private _path: string;
+    private _key: string;
     private _file: string;
     private _dir: string;
-    private _originalSource: OriginalSource;
     private _isSkipped = false;
     private _isLoaded = false;
     private _preprocessor : string | null = null;
 
-    constructor(path: string, originalSource: OriginalSource)
+    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string)
     {
-        const parentDir = getParentDir(originalSource.path);
-        path = resolvePath(path, parentDir);
+        logger.info("[construct] kind: %s. path: %s. orig: %s", kind, path, originalSource.originalPath);
 
-        if (isWebPath(path))
-        {
-            this._kind = InputSourceKind.web;
-        }
-        else
-        {
-            this._kind = InputSourceKind.file;
-        }
-
+        this._kind = kind;
         this._path = path;
         this._originalSource = originalSource;
 
         this._key = _.stableStringify([this._kind, this._path]);
-        this._file = Path.basename(path);
-        this._dir = makeDirStr(Path.dirname(path));
+
+        if (kind === InputSourceKind.helm)
+        {
+            this._file = "";
+            this._dir = "";
+        }
+        else
+        {
+            this._file = Path.basename(path);
+            this._dir = makeDirStr(Path.dirname(path));
+        }
 
         // this._logger.verbose('[InputSource] normalPath: %s', this.path);
 
@@ -89,17 +93,36 @@ export class InputSource {
 
     public checkPreprocessor()
     {
+        if (this.kind === 'helm') {
+            this._preprocessor = 'helm';
+            return;
+        }
+
         if (this.file === 'kustomization.yaml') {
             this._preprocessor = 'kustomize';
         } else if (this.file === 'Chart.yaml') {
             this._preprocessor = 'helm';
         }
     }
+
+    public static makeFromPath(originalSource: OriginalSource, path: string) : InputSource
+    {
+        const parentDir = getParentDir(originalSource.path);
+        path = resolvePath(path, parentDir);
+
+        let kind : InputSourceKind = InputSourceKind.file;
+        if (isWebPath(path)) {
+            kind = InputSourceKind.web;
+        }
+
+        return new InputSource(originalSource, kind, path);
+    }
 }
 
 export enum InputSourceKind {
     file = 'file',
     web = 'web',
+    helm = 'helm',
 }
 
 function makeDirStr(str: string) : string

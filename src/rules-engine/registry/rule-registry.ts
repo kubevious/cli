@@ -363,8 +363,8 @@ export class RuleRegistry
     {
         this._logger.info("[_loadLibraryRule] loading: %s...", ruleRef.path);
 
-        const orignalSource = new OriginalSource(library.source.id.kind, library.source.id.path);
-        const inputSource = new InputSource(ruleRef.path, orignalSource);
+        const orignalSource = new OriginalSource(library.source.id.path);
+        const inputSource = InputSource.makeFromPath(orignalSource, ruleRef.path);
 
         const ruleManifests = await this._manifestsLoader.loadSingle(inputSource, library.source);
 

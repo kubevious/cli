@@ -1,18 +1,21 @@
+import _ from "the-lodash";
 import { ManifestSourceType } from "../types/manifest";
-import { InputSource } from "./input-source";
+import { InputSource, InputSourceKind } from "./input-source";
 
 import { logger } from '../logger';
-import { ILogger } from "the-logger/dist";
-import _ from "lodash";
+import { ILogger } from "the-logger";
 
 import FastGlob from 'fast-glob';
 import * as fs from 'fs';
 import * as Path from 'path';
+import { parseUserInputPath } from "./utils";
 
 export class OriginalSource
 {
-    public kind: ManifestSourceType;
-    public path: string;
+    private _kind: ManifestSourceType;
+    private _originalPath: string;
+    private _path: string;
+    private _suffixes: string[];
     private _logger : ILogger = logger.sublogger("OriginalSource");
     private _isExtracted = false;
 
@@ -20,10 +23,31 @@ export class OriginalSource
     private _allSources: Record<string, InputSource> = {};
     private _reconcilerDirsToDelete : Record<string, InputSource[]> = {};
 
-    constructor(kind: ManifestSourceType, path: string)
+    constructor(origPath: string)
     {
-        this.kind = kind;
-        this.path = path;
+        this._originalPath = origPath;
+
+        const parsed = parseUserInputPath(origPath);
+
+        this._kind  = parsed.kind;
+        this._path  = parsed.path;
+        this._suffixes  = parsed.suffixes;
+    }
+
+    get kind() {
+        return this._kind;
+    }
+
+    get originalPath() {
+        return this._originalPath;
+    }
+
+    get path() {
+        return this._path;
+    }
+
+    get suffixes() {
+        return this._suffixes;
     }
  
     get sources() {
@@ -47,7 +71,11 @@ export class OriginalSource
         }
         else if (this.kind === 'web')
         {
-            this._registerInputSource(this.path);
+            InputSource.makeFromPath(this, this.path);
+        }
+        else if (this.kind === 'helm')
+        {
+            new InputSource(this, InputSourceKind.helm, this.path);
         }
     }
     
@@ -97,7 +125,7 @@ export class OriginalSource
 
         for (const file of files)
         {
-            this._registerInputSource(file);
+            InputSource.makeFromPath(this, file);
         }
     }
 
@@ -142,12 +170,6 @@ export class OriginalSource
         source.isSkipped = false;
         this._sources[source.key] = source;
         this._allSources[source.key] = source;
-    }
-
-    private _registerInputSource(sourcePath: string) {
-        this._logger.info("[_registerInputSource] sourcePath: %s. origSource: %s", sourcePath, this.path);
-
-        new InputSource(sourcePath, this);
     }
 
     public debugOutput()

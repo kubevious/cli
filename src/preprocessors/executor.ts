@@ -4,7 +4,7 @@ import { Promise as MyPromise } from "the-promise";
 
 import { exec } from 'child_process';
 import Path from "path";
-import { InputSource } from "../input/input-source";
+import { InputSource, InputSourceKind } from "../input/input-source";
 import { spinOperation } from '../screen/spinner';
 import { ManifestLoader } from "../manifests/manifests-loader";
 import { ManifestSource } from "../manifests/manifest-source";
@@ -62,31 +62,43 @@ export class PreProcessorExecutor
 
     private async _helm(inputSource: InputSource, source: ManifestSource)
     {
-        let helmChartName : string;
+        this._logger.info("[_helm] path: %s, file: %s", inputSource.path, inputSource.file);
+
+        let helmChartName = "";
+        let helmChartPath = "";
+
+        if (inputSource.kind === InputSourceKind.file)
+        {
+            try
+            {
+                const contents = await this._manifestsLoader.rawReadFile(source.id.path);
+                const chart = YAML.parseDocument(contents).toJS({});
+                helmChartName = chart.name;
+            }
+            catch(reason : any)
+            {
+                this._logger.info("[_helm] ERROR: ", reason);
+                source.reportError('Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
+                return;
+            }
+
+            if(!helmChartName) {
+                source.reportError('Invalid Helm Chart manifest. Chart name not set.');
+                return;
+            }
+
+            helmChartPath = Path.dirname(inputSource.path);
+        }
+        else if (inputSource.kind === InputSourceKind.helm)
+        {
+            helmChartPath = inputSource.path;
+        }
+
+        source = source.getSource("helm", helmChartPath, source.originalSource);
+
         try
         {
-            const contents = await this._manifestsLoader.rawReadFile(source.id.path);
-            const chart = YAML.parseDocument(contents).toJS({});
-            helmChartName = chart.name;
-        }
-        catch(reason : any)
-        {
-            this._logger.info("[_loadFile] ERROR: ", reason);
-            source.reportError('Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
-            return;
-        }
-
-        if(!helmChartName) {
-            source.reportError('Invalid Helm Chart manifest. Chart name not set.');
-            return;
-        }
-
-        const dirName = Path.dirname(inputSource.path);
-        source = source.getSource("helm", dirName, source.originalSource);
-
-        try
-        {
-            const command = `helm template ${dirName}`;
+            const command = `helm template ${helmChartPath}`;
             const contents = await await this.executeCommand(command);
             if (!contents)
             {
@@ -111,7 +123,7 @@ export class PreProcessorExecutor
         }
         catch(reason : any)
         {
-            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._logger.info("[_helm] ERROR: ", reason);
             source.reportError(`Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
         }
     }
@@ -129,12 +141,15 @@ export class PreProcessorExecutor
                 let templatePath = matches[1];
                 this._logger.info("[_processHelm] templatePath: %s", templatePath);
 
-                if (_.last(helmChartName) !== '/') {
-                    helmChartName += '/';
-                }
-
-                if (templatePath.startsWith(helmChartName)) {
-                    templatePath = templatePath.substring(helmChartName.length);
+                if (helmChartName && helmChartName.length > 0)
+                {
+                    if (_.last(helmChartName) !== '/') {
+                        helmChartName += '/';
+                    }
+    
+                    if (templatePath.startsWith(helmChartName)) {
+                        templatePath = templatePath.substring(helmChartName.length);
+                    }
                 }
 
                 source = source.getSource('file', templatePath, source.originalSource);

@@ -17,10 +17,14 @@ describe('helper-path-resolve', function() {
 
 
     it('case-02', function() {
-        const result = resolvePath('samples/test.yaml', '/usr/local/sample.yaml');
+        const result = resolvePath('samples/test.yaml', '/usr/local');
         should(result).be.equal('/usr/local/samples/test.yaml');
     });
 
+    it('case-02x', function() {
+        const result = resolvePath('samples/test.yaml', '/usr/local/');
+        should(result).be.equal('/usr/local/samples/test.yaml');
+    });
 
     it('case-03', function() {
         const result = resolvePath('http://samples/test.yaml');

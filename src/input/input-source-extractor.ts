@@ -35,14 +35,12 @@ export class InputSourceExtractor {
     {
         this._logger.info('[addSingle] %s', fileOrPatternOrUrl);
 
-        const isWeb = isWebPath(fileOrPatternOrUrl);
-        const kind: ManifestSourceType = isWeb ? "web" : "file";
-        const key = _.stableStringify([kind, fileOrPatternOrUrl]);
+        const key = fileOrPatternOrUrl;
         if (this._originalSources[key]) {
             return;
         }
-        
-        const orignalSource = new OriginalSource(kind, fileOrPatternOrUrl);
+
+        const orignalSource = new OriginalSource(fileOrPatternOrUrl);
         this._originalSources[key] = orignalSource;
     }
 
