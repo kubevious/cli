@@ -235,4 +235,4 @@ steps:
       - kubevious guard ../crds/gateway-api/standard.yaml ${{SAMPLES_PATH}}/istio/secret-gateway-api-admission.yaml 10-istio-bookinfo/bookinfo.yaml 10-istio-bookinfo/gateway-api/mock-gateway-class.yaml 10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml 10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
       - echo "Validating Traefik Inline Chart..."
       - helm repo add traefik https://traefik.github.io/charts
-      - kubevious guard --detailed \#helm@traefik/traefik@namespace=traefik@release-name=traefik
+      - kubevious guard --detailed \#helm@traefik/traefik@namespace=traefik@release-name=traefik https://raw.githubusercontent.com/traefik/traefik/v2.9/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
