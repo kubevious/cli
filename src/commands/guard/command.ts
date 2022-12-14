@@ -12,6 +12,7 @@ import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
 import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
 import { formatResult as lintFormatResult } from '../lint/format';
+import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/main/index.yaml';
 
@@ -109,36 +110,19 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
     await rulesRuntime.init();
     await rulesRuntime.execute();
 
-    let ruleSuccess = true;
-    // for(const rule of rulesRuntime.rules)
-    // {
-    //     for(const violation of rule.violations)
-    //     {
-    //         if (violation.hasErrors)
-    //         {
-    //             ruleSuccess = false;
-    //         }
-    //     }
-    // }
-
-    myLogger.info("RuleSuccess: %s", ruleSuccess);
-    // myLogger.info("lintCommandData.success: %s", lintCommandData.success);
-
-    // manifestPackage.debugOutput();
-
-    // if (1 + 1 === 2) {
-    //     throw new Error("XXX")
-    // }
-
     const lintResult = lintFormatResult(lintCommandData);
+    const rulesResult = rulesRuntime.exportResult();
+
+    const severity = makeObjectSeverityFromChildren('pass', [lintResult, rulesResult]);
 
     return {
-        ruleSuccess,
+        severity: severity,
         manifestPackage: manifestPackage,
         k8sSchemaInfo: lintCommandData.k8sSchemaInfo,
         rulesRuntime,
         localK8sRegistry: localK8sRegistry,
-        lintResult: lintResult
+        lintResult: lintResult,
+        rulesResult: rulesResult
     } 
 }
 

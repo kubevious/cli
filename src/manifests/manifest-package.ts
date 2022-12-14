@@ -133,10 +133,12 @@ export class ManifestPackage extends BaseObject
 
     exportResult() : ManifestPackageResult
     {
+        const rootSourceResult = this._rootSource.exportResult();
+
         const manifestPackageR : ManifestPackageResult = {
             severity: 'pass',
             manifests: [],
-            sources: [],
+            rootSource: rootSourceResult,
         };
 
         for(const manifest of this._manifests)
@@ -144,10 +146,8 @@ export class ManifestPackage extends BaseObject
             const manifestR = manifest.exportResult();
             manifestPackageR.manifests.push(manifestR);
         }
-        manifestPackageR.severity = makeObjectSeverityFromChildren(manifestPackageR.severity, manifestPackageR.manifests);
 
-        const rootSourceResult = this._rootSource.exportResult();
-        manifestPackageR.sources = rootSourceResult.children ?? [];
+        manifestPackageR.severity = makeObjectSeverityFromChildren(manifestPackageR.severity, manifestPackageR.manifests);
         manifestPackageR.severity = makeObjectSeverityFromChildren(manifestPackageR.severity, [rootSourceResult]);
 
         return manifestPackageR;

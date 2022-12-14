@@ -62,6 +62,12 @@ export function printWarnings(lines?: string[], indent?: number)
 
 export function printSectionTitle(title: string, indent? : number)
 {
+    title = `-= ${title.toUpperCase()} =-`;
+    print(chalk.underline(title), indent);
+}
+
+export function printSubTitle(title: string, indent? : number)
+{
     print(chalk.underline(title), indent);
 }
 
@@ -70,15 +76,15 @@ export function printProcessStatus(severity: ResultObjectSeverity, taskName: str
     print();
     if (severity === 'pass')
     {
-        print(`${emoji.get('white_check_mark')} ${taskName} Succeeded.`);
+        print(`${STATUS_ICONS.passed.get()} ${taskName} Succeeded.`);
     }
     else if (severity === 'warning')
     {
-        print(`${emoji.get('white_check_mark')} ${taskName} Succeeded with Warnings.`);
+        print(`${STATUS_ICONS.warning.get()} ${taskName} Succeeded with Warnings.`);
     }
     else if (severity === 'fail')
     {
-        print(`${emoji.get('x')} ${taskName} Failed`);
+        print(`${STATUS_ICONS.failed.get()} ${taskName} Failed`);
     }
      
 }
@@ -122,6 +128,7 @@ export const STATUS_ICONS = {
 }
 
 export const OBJECT_ICONS = {
+    source: new IconDefinition(emoji.get(':books:')),
     manifest: new IconDefinition(emoji.get(':page_facing_up:')),
     rule: new IconDefinition(emoji.get(':scroll:')),
     ruleCategory: new IconDefinition(emoji.get(':open_file_folder:')),
@@ -131,7 +138,10 @@ export const SOURCE_ICONS = {
     file: new IconDefinition(emoji.get(':page_facing_up:')),
     web: new IconDefinition(emoji.get(':globe_with_meridians:')),
     stream: new IconDefinition(emoji.get(':aquarius:')),
-    k8s: new IconDefinition('☸️ '),
+    // k8s: new IconDefinition('☸️ '),
+    k8s: new IconDefinition(emoji.get(':wheel_of_dharma:')),
+    helm: new IconDefinition(emoji.get(':ship:')),
+    kustomize: new IconDefinition(emoji.get(':wheel_of_dharma:')),
 }
 
 

@@ -8,25 +8,27 @@ import { calculateRuleEngineCounters } from '../../manifests/counters';
 const myLogger = logger.sublogger('GuardFormat');
 
 export function formatResult({
-        ruleSuccess,
+        severity,
         manifestPackage,
         k8sSchemaInfo,
         rulesRuntime,
-        lintResult
+        lintResult,
+        rulesResult,
     } : GuardCommandData) : GuardResult
 {
+    myLogger.info("Severity:  %s", severity);
 
-    const success = lintResult.success;
+    myLogger.info("LintResult Severity:  %s", lintResult.severity);
+    myLogger.info("LintResult Success: %s", lintResult.success);
 
-    myLogger.info("RuleSuccess: %s", ruleSuccess);
-    myLogger.info("LintResult.success: %s", lintResult.success);
+    myLogger.info("RulesResult Severity:  %s", rulesResult.severity);
+    myLogger.info("RulesResult Success: %s", rulesResult.success);
 
-    const rulesResult = rulesRuntime.exportResult();
+    const success = (severity == 'pass') || (severity == 'warning');
 
     const result: GuardResult = {
         success: success,
-        severity: lintResult.severity,
-        ruleSuccess: ruleSuccess,
+        severity: severity,
 
         lintResult : lintResult,
         rules: rulesResult,
@@ -34,8 +36,8 @@ export function formatResult({
         counters: calculateRuleEngineCounters(rulesResult, manifestPackage)
     };
 
-    logger.info("XXX: ", rulesResult);
-    logger.info("COUNTERS: ", result.counters);
+    logger.info("RULES RESULT: ", rulesResult);
+    logger.info("RULE COUNTERS: ", result.counters);
 
     return result;
 }

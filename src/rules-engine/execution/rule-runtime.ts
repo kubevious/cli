@@ -133,7 +133,7 @@ export class RuleRuntime
             ruleManifest: ruleManifestResult,
             namespace: this.rule.namespace,
             compiled: this.isCompiled && !this.hasRuntimeErrors,
-            pass: hasViolationErrors,
+            pass: !hasViolationErrors,
             ruleSeverity: ruleSeverity,
             hasViolationErrors: hasViolationErrors,
             hasViolationWarnings: hasViolationWarnings,

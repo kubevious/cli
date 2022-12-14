@@ -1,18 +1,20 @@
 import { GuardResult } from "./types";
 import { output as lintOutput, } from '../lint/output'
-import { OBJECT_ICONS, print, printFailLine, printInactivePassLine, printPassLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarnings, STATUS_ICONS } from '../../screen';
+import { OBJECT_ICONS, print, printFailLine, printInactivePassLine, printPassLine, printProcessStatus, printSectionTitle, printSubTitle, printSummaryCounter, printWarningLine, printWarnings, STATUS_ICONS } from '../../screen';
 import { RuleEngineResult, RuleResult } from "../../types/rules-result";
 import { outputManifestResult, outputManifestResultSources, outputMessages } from "../../screen/manifest";
 
 
-export function output(result: GuardResult)
+export function output(result: GuardResult, detailed?: boolean)
 {
-    lintOutput(result.lintResult, {
+    detailed = detailed ?? false;
+
+    lintOutput(result.lintResult, detailed, {
         skipSummary: true,
         skipResult: true,
     });
 
-    outputRuleEngineResult(result.rules);
+    outputRuleEngineResult(result.rules, detailed, 0);
 
     outputGuardSummary(result);
 
@@ -27,36 +29,61 @@ export function outputGuardSummary(result: GuardResult)
     const lintCounters = result.lintResult.counters;
     const guardCounters = result.counters;
 
-    print(`Sources: ${lintCounters.sources.total}`, 4);
+    print(`${OBJECT_ICONS.source.get()} Sources: ${lintCounters.sources.total}`, 4);
     printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', lintCounters.sources.withErrors);
 
-    print(`Manifests: ${lintCounters.manifests.total}`, 4);
-    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', lintCounters.manifests.passed);
+    print(`${OBJECT_ICONS.manifest.get()} Manifests: ${lintCounters.manifests.total}`, 4);
+    printSummaryCounter(STATUS_ICONS.passed, 'Valid Manifests', lintCounters.manifests.passed);
     printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', lintCounters.manifests.withErrors);
-    printSummaryCounter(STATUS_ICONS.warning, 'Manifests With Warnings', lintCounters.manifests.withWarnings);
-    printSummaryCounter(OBJECT_ICONS.manifest, 'Manifests Processed for Rules', guardCounters.manifests.processed);
+    printSummaryCounter(STATUS_ICONS.warning, 'Manifests with Warnings', lintCounters.manifests.withWarnings);
+    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Processed for Rules', guardCounters.manifests.processed);
     printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Rule Errors', guardCounters.manifests.withErrors);
-    printSummaryCounter(STATUS_ICONS.warning, 'Manifests with RUle Warnings', guardCounters.manifests.withWarnings);
+    printSummaryCounter(STATUS_ICONS.warning, 'Manifests with Rule Warnings', guardCounters.manifests.withWarnings);
 
-    print(`Rules: ${guardCounters.rules.total}`, 4);
+    print(`${OBJECT_ICONS.rule.get()} Rules: ${guardCounters.rules.total}`, 4);
     printSummaryCounter(STATUS_ICONS.passed, 'Rules Passed', guardCounters.rules.passed);
     printSummaryCounter(STATUS_ICONS.failed, 'Rules Failed', guardCounters.rules.failed);
-    printSummaryCounter(STATUS_ICONS.error, 'Rules With Errors', guardCounters.rules.withErrors);
-    printSummaryCounter(STATUS_ICONS.warning, 'Rules With Warnings', guardCounters.rules.withWarnings);
+    printSummaryCounter(STATUS_ICONS.error, 'Rules with Errors', guardCounters.rules.withErrors);
+    printSummaryCounter(STATUS_ICONS.warning, 'Rules with Warnings', guardCounters.rules.withWarnings);
 }
 
-export function outputRuleEngineResult(rules: RuleEngineResult)
+function outputRuleEngineResult(rules: RuleEngineResult, detailed: boolean, indent: number)
 { 
-    printSectionTitle('RULES:');
-    for(const rule of rules.rules)
+    const nestedIndent = indent + 3;
+
+    printSectionTitle('Rules', indent);
+
+    if (rules.rules.length === 0)
     {
-        outputRuleResult(rule);
+        printWarningLine('No Rules found.', nestedIndent)
     }
+    else
+    {
+        if (!detailed && (rules.severity == 'pass'))
+        {
+            printPassLine('No issues with rules.', nestedIndent);
+        }
+        else
+        {
+            for(const rule of rules.rules)
+            {
+                outputRuleResult(rule, detailed, nestedIndent);
+            }
+        }
+    }
+
+    print();
 }
 
-export function outputRuleResult(rule: RuleResult, indent?: number)
+function outputRuleResult(rule: RuleResult, detailed: boolean, indent: number)
 {
-    const nestedIndent = (indent ?? 0) + 3;
+    if (!detailed) {
+        if (rule.ruleSeverity === 'pass') {
+            return;
+        }
+    }
+
+    const nestedIndent = indent + 3;
     
     if (rule.namespace)
     {
@@ -95,20 +122,20 @@ export function outputRuleResult(rule: RuleResult, indent?: number)
 
     if (rule.passed.length > 0)
     {
-        printSectionTitle('Passed:', nestedIndent);
+        printSubTitle('Passed:', nestedIndent);
         for(const manifest of rule.passed)
         {
-            outputManifestResult(manifest, nestedIndent + 3);
+            outputManifestResult(manifest, detailed, nestedIndent + 3);
         } 
     }
 
-    if (rule.violations)
+    if (rule.violations.length > 0)
     {
-        printSectionTitle('Violations:', nestedIndent);
+        printSubTitle('Violations:', nestedIndent);
 
         for(const violation of rule.violations)
         {
-            outputManifestResult(violation, nestedIndent + 3);
+            outputManifestResult(violation, detailed, nestedIndent + 3);
         } 
     }
 

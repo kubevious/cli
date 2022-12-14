@@ -23,7 +23,7 @@ export function calculateManifestPackageCounters(manifestPackageR: ManifestPacka
         }
     };
 
-    for(const source of manifestPackageR.sources)
+    for(const source of manifestPackageR.rootSource.children ?? [])
     {
         calculateSourceCounters(source, counters);
     }

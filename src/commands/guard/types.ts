@@ -26,8 +26,7 @@ export interface GuardCommandOptions extends LintCommandOptions {
     skipRuleLibraries: boolean;
 }
 
-export interface GuardCommandData {
-    ruleSuccess: boolean,
+export interface GuardCommandData extends ResultObject {
     manifestPackage: ManifestPackage,
     k8sSchemaInfo: K8sApiSchemaFetcherResult,
     rulesRuntime: RulesRuntime,
@@ -35,6 +34,7 @@ export interface GuardCommandData {
     localK8sRegistry: LocalK8sRegistry,
 
     lintResult: LintManifestsResult,
+    rulesResult: RuleEngineResult
 }
 
 export interface GuardResult extends ResultObject
@@ -43,7 +43,6 @@ export interface GuardResult extends ResultObject
 
     lintResult: LintManifestsResult;
     
-    ruleSuccess: boolean;
     rules: RuleEngineResult;
 
     counters: RuleEngineCounters;

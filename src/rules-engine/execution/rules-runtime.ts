@@ -14,7 +14,7 @@ import { RuleDependency, RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { checkKubeviousVersion } from '../../utils/version-checker';
 import { RuleEngineResult } from '../../types/rules-result';
-import { makeObjectSeverityFromChildren } from '../../types/result';
+import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
 
 export class RulesRuntime
 {
@@ -84,7 +84,8 @@ export class RulesRuntime
             rules: this.rules.map(x => x.exportResult()),
         };
         
-        result.severity = makeObjectSeverityFromChildren(result.severity, result.rules.map(x => x.ruleManifest));
+        // result.severity = makeObjectSeverityFromChildren(result.severity, result.rules.map(x => x.ruleManifest));
+        result.severity = makeObjectSeverity(result.severity, result.rules.map(x => x.ruleSeverity));
         result.success = result.severity == 'pass' || result.severity == 'warning';
 
         return result;

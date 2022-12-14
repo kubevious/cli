@@ -116,7 +116,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 
     const libraryFilePath = Path.join(dir, 'index.yaml');
 
-    const success = guardResult.lintResult.severity == 'pass' || guardResult.lintResult.severity == 'warning';
+    const success = guardResult.severity == 'pass' || guardResult.severity == 'warning';
 
     if (success)
     {

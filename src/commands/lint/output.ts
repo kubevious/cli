@@ -1,14 +1,13 @@
-import { print, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, printWarnings, SOURCE_ICONS, STATUS_ICONS } from '../../screen';
+import { OBJECT_ICONS, print, printFailLine, printInfoLine, printProcessStatus, printSectionTitle, printSummaryCounter, printWarningLine, STATUS_ICONS } from '../../screen';
 import { LintManifestsResult } from "./types";
-import { ManifestSourceId } from '../../types/manifest';
-import { outputManifestPackageResult } from '../../screen/manifest';
+import { outputManifestPackageResultManifests, outputManifestPackageResultSources } from '../../screen/manifest';
 
 export interface LintOutputParams {
     skipResult?: boolean,
     skipSummary?: boolean
 }
 
-export function output(result: LintManifestsResult, params?: LintOutputParams)
+export function output(result: LintManifestsResult, detailed?: boolean, params?: LintOutputParams)
 {
     params = params ?? {};
     params.skipSummary = params.skipSummary ?? false;
@@ -25,7 +24,8 @@ export function output(result: LintManifestsResult, params?: LintOutputParams)
     printInfoLine(`Linting against Kubernetes Version: ${result.selectedK8sVersion}`);
     print();
     
-    outputManifestPackageResult(result.packageResult);
+    outputManifestPackageResultSources(result.packageResult, detailed);
+    outputManifestPackageResultManifests(result.packageResult, detailed);
 
     if (!params.skipSummary)
     {
@@ -44,40 +44,12 @@ export function outputLintSummary(result: LintManifestsResult)
 
     const lintCounters = result.counters;
 
-    print(`Sources: ${lintCounters.sources.total}`, 4);
+    print(`${OBJECT_ICONS.source.get()} Sources: ${lintCounters.sources.total}`, 4);
     printSummaryCounter(STATUS_ICONS.failed, 'Sources with Errors', lintCounters.sources.withErrors);
 
-    print(`Manifests: ${lintCounters.manifests.total}`, 4);
-    printSummaryCounter(STATUS_ICONS.passed, 'Manifests Passed', lintCounters.manifests.passed);
+    print(`${OBJECT_ICONS.manifest.get()} Manifests: ${lintCounters.manifests.total}`, 4);
+    printSummaryCounter(STATUS_ICONS.passed, 'Valid Manifests', lintCounters.manifests.passed);
     printSummaryCounter(STATUS_ICONS.failed, 'Manifests with Errors', lintCounters.manifests.withErrors);
     printSummaryCounter(STATUS_ICONS.warning, 'Manifests with Warnings', lintCounters.manifests.withWarnings);
-}
-
-export function produceSourceLine(source: ManifestSourceId)
-{
-    const parts : string[] = [];
-
-    if (source.kind === 'file')
-    {
-        parts.push(SOURCE_ICONS.file.get());
-    }
-    else if (source.kind === 'web')
-    {
-        parts.push(SOURCE_ICONS.web.get());
-    }
-    else if (source.kind === 'stream')
-    {
-        parts.push(SOURCE_ICONS.stream.get());
-    }
-    else if (source.kind === 'k8s')
-    {
-        parts.push(SOURCE_ICONS.k8s.get());
-    }
-
-    parts.push(`${source.kind.toUpperCase()}:`);
-
-    parts.push(source.path);
-    
-    return parts.join(' ');
 }
 

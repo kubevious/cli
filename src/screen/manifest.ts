@@ -1,58 +1,125 @@
-import { SOURCE_ICONS, STATUS_ICONS, print, printErrorLine, printWarningLine, printSectionTitle, IconDefinition } from ".";
+import { SOURCE_ICONS, STATUS_ICONS, print, printErrorLine, printWarningLine, printSectionTitle, IconDefinition, printInfoLine, printPassLine } from ".";
+import { ManifestSourceId } from "../types/manifest";
 import { ManifestInfoResult, ManifestPackageResult, ManifestResult } from "../types/manifest-result";
 import { ResultObject, ResultObjectSeverity } from "../types/result";
 import { SourceInfoResult, SourceResult } from "../types/source-result";
 
-export function outputManifestPackageResult(packageResult: ManifestPackageResult)
-{
-    printSectionTitle('SOURCES:');
-    
-    for(const source of packageResult.sources)
-    {
-        outputSourceResult(source);
-    }
 
-    printSectionTitle('MANIFESTS:');
-
-    for(const manifest of packageResult.manifests)
-    {
-        outputManifestResult(manifest);
-    }
+export interface outputManifestInfoOptions {
+    icon? : IconDefinition
 }
 
-export function outputSourceResult(sourceResult: SourceResult, indent?: number)
+export interface outputHideSeverityOptions {
+    hideSeverityIcon?: boolean
+}
+
+
+export function outputManifestPackageResultSources(packageResult: ManifestPackageResult, detailed?: boolean, indent?: number)
 {
-    outputSourceInfo(sourceResult, indent);
-    outputMessages(sourceResult, (indent ?? 0) + 3);
+    detailed = detailed ?? false;
+    indent = indent ?? 0;
+    printSectionTitle('Sources', indent);
+
+    const nestedIndent = (indent ?? 0) + 3;
+
+    if ((packageResult.rootSource.children ?? []).length === 0)
+    {
+        printWarningLine('No Sources provided', nestedIndent)
+    }
+    else
+    {
+        if (!detailed && (packageResult.rootSource.severity == 'pass'))
+        {
+            printPassLine('No issues with sources.', nestedIndent);
+        }
+        else
+        {
+            outputSourceResult(packageResult.rootSource, detailed, nestedIndent);
+        }
+    }
+
+    print();
+}
+
+export function outputManifestPackageResultManifests(packageResult: ManifestPackageResult, detailed?: boolean, indent?: number)
+{
+    detailed = detailed ?? false;
+    indent = indent ?? 0;
+
+    const nestedIndent = (indent ?? 0) + 3;
+
+    printSectionTitle('Manifests', indent);
+
+    if (packageResult.manifests.length === 0)
+    {
+        printWarningLine('No Manifests found', nestedIndent)
+        print();
+    }
+    else
+    {
+        if (!detailed && (packageResult.severity == 'pass'))
+        {
+            printPassLine('No issues with manifests.', nestedIndent);
+        }
+        else
+        {
+            for(const manifest of packageResult.manifests)
+            {
+                outputManifestResult(manifest, detailed, nestedIndent);
+            }
+        }
+    }
+
+    print();
+}
+
+function outputSourceResult(sourceResult: SourceResult, detailed: boolean, indent: number)
+{
+    if (!detailed) {
+        if (sourceResult.severity == 'pass') {
+            return;
+        }
+    }
+
+    if (sourceResult.kind !== 'root') {
+        outputSourceInfo(sourceResult, indent);
+        indent += 3;
+    }
+
+    outputMessages(sourceResult, indent);
 
     for(const childSource of sourceResult.children ?? [])
     {
-        outputSourceResult(childSource, (indent ?? 0) + 3);
+        outputSourceResult(childSource, detailed, indent);
     }
 
-    for(const manifest of sourceResult.manifests ?? [])
+    if (detailed)
     {
-        outputManifestInfo(manifest, (indent ?? 0) + 3);
+        for(const manifest of sourceResult.manifests ?? [])
+        {
+            outputManifestInfo(manifest, indent);
+            outputMessages(manifest, indent + 3);
+        }
     }
 
     print();
 }
 
 
-export function outputSourceInfo(sourceResult: SourceInfoResult, indent?: number)
+export function outputSourceInfo(sourceResult: SourceInfoResult, indent?: number, options?: outputHideSeverityOptions)
 {
     const parts : string[] = [];
 
-    parts.push(severityStatusIcon(sourceResult.severity).get());
+    // const hideSeverityIcon = options?.hideSeverityIcon ?? false;
+    if (!options?.hideSeverityIcon) {
+        parts.push(severityStatusIcon(sourceResult.severity).get());
+    }
 
     parts.push(produceSourceLine(sourceResult));
     
     print(parts.join(' '), indent);
 }
 
-export interface outputManifestInfoOptions {
-    icon? : IconDefinition
-}
 
 export function outputManifestInfo(manifest: ManifestInfoResult, indent?: number, options?: outputManifestInfoOptions)
 {
@@ -74,22 +141,28 @@ export function outputManifestInfo(manifest: ManifestInfoResult, indent?: number
     print(`${icon.get()} ${line}`, indent);
 }
 
-export function outputManifestResult(manifestResult: ManifestResult, indent?: number, options?: outputManifestInfoOptions)
+export function outputManifestResult(manifestResult: ManifestResult, detailed: boolean, indent?: number, options?: outputManifestInfoOptions)
 {
+    if (!detailed) {
+        if (manifestResult.severity === 'pass') {
+            return;
+        }
+    }
+
     outputManifestInfo(manifestResult, indent, options);
 
-    outputManifestResultSources(manifestResult, (indent ?? 0) + 3);
+    outputManifestResultSources(manifestResult, (indent ?? 0) + 3, { hideSeverityIcon: true });
 
     outputMessages(manifestResult, (indent ?? 0) + 3);
 
     print();
 }
 
-export function outputManifestResultSources(manifestResult: ManifestResult, indent?: number)
+export function outputManifestResultSources(manifestResult: ManifestResult, indent?: number, options?: outputHideSeverityOptions)
 {
     for(const source of manifestResult.sources)
     {
-        outputSourceInfo(source, indent);
+        outputSourceInfo(source, indent, options);
     }
 }
 
@@ -126,6 +199,14 @@ export function produceSourceLine(source: SourceInfoResult)
     else if (source.kind === 'k8s')
     {
         parts.push(SOURCE_ICONS.k8s.get());
+    }
+    else if (source.kind === 'helm')
+    {
+        parts.push(SOURCE_ICONS.helm.get());
+    }
+    else if (source.kind === 'kustomize')
+    {
+        parts.push(SOURCE_ICONS.kustomize.get());
     }
 
     parts.push(`${source.kind.toUpperCase()}:`);

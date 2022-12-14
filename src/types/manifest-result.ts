@@ -15,5 +15,5 @@ export interface ManifestResult extends ManifestInfoResult
 export interface ManifestPackageResult extends ResultObject
 {
     manifests: ManifestResult[];
-    sources: SourceResult[];
+    rootSource: SourceResult;
 }
