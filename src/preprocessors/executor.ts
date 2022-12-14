@@ -97,7 +97,9 @@ export class PreProcessorExecutor
 
         const isLocalChart = fs.existsSync(helmChartPath);
 
-        source = source.getSource("helm", helmChartPath, source.originalSource, !isLocalChart);
+        if (source.id.kind !== 'helm') {
+            source = source.getSource("helm", helmChartPath, source.originalSource, !isLocalChart);
+        }
 
         try
         {

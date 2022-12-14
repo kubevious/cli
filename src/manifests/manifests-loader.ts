@@ -16,6 +16,7 @@ import { sanitizeYaml } from '../utils/k8s-manifest-sanitizer';
 import { InputSourceExtractor } from '../input/input-source-extractor';
 import { InputSource, InputSourceKind } from '../input/input-source';
 import { PreProcessorExecutor } from '../preprocessors/executor';
+import { ManifestSourceType } from '../types/manifest';
 
 export interface ManifestLoaderOptions
 {
@@ -125,7 +126,7 @@ export class ManifestLoader
     public async loadSingle(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
         this._logger.info("[loadSingle] %s :: %s", inputSource.kind, inputSource.path);
-        
+
         if (inputSource.isPreprocessor) {
             return await this._loadFromPreProcessor(inputSource, parentSource);
         }
@@ -142,7 +143,8 @@ export class ManifestLoader
 
     private async _loadFromPreProcessor(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
-        const source = this._manifestPackage.getSource("file", inputSource.path, inputSource.originalSource, parentSource);
+        const kind : ManifestSourceType = inputSource.kind;
+        const source = this._manifestPackage.getSource(kind, inputSource.path, inputSource.originalSource, parentSource);
 
         const preprocessor = new PreProcessorExecutor(this._logger, this);
 
