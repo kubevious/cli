@@ -103,12 +103,29 @@ export class PreProcessorExecutor
 
         try
         {
-            let command = `helm template ${helmChartPath}`;
-            const overridesPath = _.head(inputSource.suffixes);
-            if (overridesPath)
+            let command = `helm template`;
+            for(const suffix of inputSource.suffixes)
             {
-                command += ` -f ${overridesPath}`
+                if (suffix.key === 'values') {
+                    command += ` --values ${suffix.value}`
+                }
+                else if (suffix.key === 'namespace') {
+                    command += ` --namespace ${suffix.value}`
+                } 
+                else if (suffix.key === 'release-name') {
+                    command += ` --release-name ${suffix.value}`
+                } 
+                else
+                {
+                    source.reportError(`Unknown preprocessor key provided: ${suffix.key}`);
+                }
             }
+            if (source.selfErrors.length > 0) {
+                return;
+            }
+
+            command += ` ${helmChartPath}`;
+            
             const contents = await await this.executeCommand(command);
             if (!contents)
             {

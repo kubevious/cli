@@ -36,11 +36,11 @@ describe('helper-user-path-parser', function() {
     });
 
     it('helm-path-with-overrides', function() {
-        const result = parseUserInputPath('helm.git/charts@samples/overrides.yaml');
+        const result = parseUserInputPath('helm.git/charts@values=samples/overrides.yaml');
         should(result).be.ok();
         should(result.kind).be.equal('file');
         should(result.path).be.equal('helm.git/charts');
-        should(result.suffixes).be.eql(['samples/overrides.yaml']);
+        should(result.suffixes).be.eql([{ key: 'values', value: 'samples/overrides.yaml' }]);
         should(result.isInvalid).be.not.ok();
     });
 
@@ -54,11 +54,11 @@ describe('helper-user-path-parser', function() {
     });
 
     it('helm-kind-with-overrides', function() {
-        const result = parseUserInputPath('#helm@charts.git/charts@samples/overrides.yaml');
+        const result = parseUserInputPath('#helm@charts.git/charts@values=samples/overrides.yaml');
         should(result).be.ok();
         should(result.kind).be.equal('helm');
         should(result.path).be.equal('charts.git/charts');
-        should(result.suffixes).be.eql(['samples/overrides.yaml']);
+        should(result.suffixes).be.eql([{ key: 'values', value: 'samples/overrides.yaml' }]);
         should(result.isInvalid).be.not.ok();
     });
 

@@ -8,14 +8,14 @@ import { ILogger } from "the-logger";
 import FastGlob from 'fast-glob';
 import * as fs from 'fs';
 import * as Path from 'path';
-import { parseUserInputPath } from "./utils";
+import { parseUserInputPath, UserPathSuffixes } from "./utils";
 
 export class OriginalSource
 {
     private _kind: ManifestSourceType;
     private _originalPath: string;
     private _path: string;
-    private _suffixes: string[];
+    private _suffixes: UserPathSuffixes;
     private _logger : ILogger = logger.sublogger("OriginalSource");
     private _isExtracted = false;
 
@@ -177,7 +177,7 @@ export class OriginalSource
         this._logger.info('[OrigSource] => %s :: %s', this.kind, this.path);
         if (this.suffixes.length > 0)
         {
-            this._logger.info('              > SUFFIXES: %s', this.suffixes);
+            this._logger.info('              > SUFFIXES: %s', JSON.stringify(this.suffixes));
         }
 
         for (const source of _.values(this._allSources))

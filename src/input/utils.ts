@@ -2,10 +2,18 @@ import _ from 'the-lodash';
 import { ManifestSourceType } from "../types/manifest";
 import { isWebPath } from '../utils/path';
 
+export interface UserPathSuffix
+{
+    key: string,
+    value: string,
+}
+
+export type UserPathSuffixes = UserPathSuffix[];
+
 export interface ParsedUserPath {
     kind: ManifestSourceType,
     path: string,
-    suffixes: string[],
+    suffixes: UserPathSuffixes,
     isInvalid?: boolean,
 }
 
@@ -53,6 +61,23 @@ export function parseUserInputPath(str: string) : ParsedUserPath
     return {
         kind: kind,
         path: head,
-        suffixes: parts
+        suffixes: parts.map(x => parseSuffix(x))
     }
+}
+
+function parseSuffix(str: string) : UserPathSuffix
+{
+    const index = str.indexOf("=");
+    if (index === -1) {
+        return {
+            key: '',
+            value: str
+        }
+    } else {
+        return {
+            key: str.substring(0, index),
+            value: str.substring(index + 1)
+        }
+    }
+
 }

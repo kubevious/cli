@@ -5,6 +5,7 @@ import { rootLogger } from '../logger';
 
 import { getParentDir, isWebPath, resolvePath } from "../utils/path";
 import { OriginalSource } from './original-source';
+import { UserPathSuffixes } from './utils';
 
 const logger = rootLogger.sublogger("InputSource");
 
@@ -12,7 +13,7 @@ export class InputSource {
     private _originalSource: OriginalSource;
     private _kind: InputSourceKind;
     private _path: string;
-    private _suffixes: string[];
+    private _suffixes: UserPathSuffixes;
 
     private _key: string;
     private _file: string;
@@ -21,7 +22,7 @@ export class InputSource {
     private _isLoaded = false;
     private _preprocessor : string | null = null;
 
-    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string, suffixes: string[])
+    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string, suffixes: UserPathSuffixes)
     {
         logger.info("[construct] kind: %s. path: %s. orig: %s", kind, path, originalSource.originalPath);
 
