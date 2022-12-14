@@ -175,7 +175,7 @@ export class OriginalSource
     public debugOutput()
     {
         this._logger.info('[OrigSource] => %s :: %s', this.kind, this.path);
-        if (this.suffixes)
+        if (this.suffixes.length > 0)
         {
             this._logger.info('              > SUFFIXES: %s', this.suffixes);
         }

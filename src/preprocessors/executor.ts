@@ -10,6 +10,7 @@ import { ManifestLoader } from "../manifests/manifests-loader";
 import { ManifestSource } from "../manifests/manifest-source";
 import { ManifestPackage } from "../manifests/manifest-package";
 import YAML from "yaml";
+import fs from 'fs';
 
 export class PreProcessorExecutor
 {
@@ -67,7 +68,6 @@ export class PreProcessorExecutor
         let helmChartName = "";
         let helmChartPath = "";
 
-        let isAbsolutePath = false;
         if (inputSource.kind === InputSourceKind.file)
         {
             try
@@ -93,10 +93,11 @@ export class PreProcessorExecutor
         else if (inputSource.kind === InputSourceKind.helm)
         {
             helmChartPath = inputSource.path;
-            // isAbsolutePath = true;
         }
 
-        source = source.getSource("helm", helmChartPath, source.originalSource, isAbsolutePath);
+        const isLocalChart = fs.existsSync(helmChartPath);
+
+        source = source.getSource("helm", helmChartPath, source.originalSource, !isLocalChart);
 
         try
         {
@@ -118,7 +119,7 @@ export class PreProcessorExecutor
                     const rawYamls = this._manifestsLoader.parseYamlRaw(contents);
                     for(const rawYaml of rawYamls)
                     {
-                        this._processHelm(inputSource, source, rawYaml, helmChartName);
+                        this._processHelm(inputSource, source, rawYaml, helmChartName, isLocalChart);
                     }
                 }
                 catch(reason: any)
@@ -135,7 +136,11 @@ export class PreProcessorExecutor
         }
     }
 
-    private _processHelm(inputSource: InputSource, source: ManifestSource, rawYaml: YAML.Document.Parsed<YAML.ParsedNode>, helmChartName : string)
+    private _processHelm(inputSource: InputSource,
+                         source: ManifestSource,
+                         rawYaml: YAML.Document.Parsed<YAML.ParsedNode>,
+                         helmChartName : string,
+                         isLocalChart: boolean)
     {
         const comment = rawYaml.contents?.commentBefore;
 
@@ -148,7 +153,6 @@ export class PreProcessorExecutor
                 let templatePath = matches[1];
                 this._logger.info("[_processHelm] templatePath: %s", templatePath);
 
-                let isAbsolutePath = false;
                 if (inputSource.kind === InputSourceKind.file)
                 {
                     if (helmChartName && helmChartName.length > 0)
@@ -162,12 +166,8 @@ export class PreProcessorExecutor
                         }
                     }
                 }
-                // else if (inputSource.kind === InputSourceKind.helm)
-                // {
-                //     isAbsolutePath = true;
-                // }
 
-                source = source.getSource('file', templatePath, source.originalSource, isAbsolutePath);
+                source = source.getSource('file', templatePath, source.originalSource, !isLocalChart);
             }
         }
 

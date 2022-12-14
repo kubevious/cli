@@ -56,6 +56,7 @@ export class ManifestSource extends BaseObject
     getSource(kind: ManifestSourceType, path: string, originalSource: OriginalSource | null, isAbsolutePath?: boolean) : ManifestSource
     {
         let childPath = path;
+        isAbsolutePath = isAbsolutePath ?? false;
         if (!isAbsolutePath) {
             if (this.id.path.length > 0) {
                 childPath = resolvePath(path, this.id.path);

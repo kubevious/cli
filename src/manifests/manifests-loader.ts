@@ -124,6 +124,8 @@ export class ManifestLoader
 
     public async loadSingle(inputSource: InputSource, parentSource?: ManifestSource) : Promise<K8sManifest[]>
     {
+        this._logger.info("[loadSingle] %s :: %s", inputSource.kind, inputSource.path);
+        
         if (inputSource.isPreprocessor) {
             return await this._loadFromPreProcessor(inputSource, parentSource);
         }
