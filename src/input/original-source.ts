@@ -75,7 +75,7 @@ export class OriginalSource
         }
         else if (this.kind === 'helm')
         {
-            new InputSource(this, InputSourceKind.helm, this.path);
+            new InputSource(this, InputSourceKind.helm, this.path, this.suffixes);
         }
     }
     
@@ -175,6 +175,11 @@ export class OriginalSource
     public debugOutput()
     {
         this._logger.info('[OrigSource] => %s :: %s', this.kind, this.path);
+        if (this.suffixes)
+        {
+            this._logger.info('              > SUFFIXES: %s', this.suffixes);
+        }
+
         for (const source of _.values(this._allSources))
         {
             if (source.isSkipped) {

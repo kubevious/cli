@@ -53,16 +53,19 @@ export class ManifestSource extends BaseObject
         return _.values(this._childSources);
     }
 
-    getSource(kind: ManifestSourceType, path: string, originalSource: OriginalSource | null) : ManifestSource
+    getSource(kind: ManifestSourceType, path: string, originalSource: OriginalSource | null, isAbsolutePath?: boolean) : ManifestSource
     {
-        const sourceKey = makeSourceKey(kind, path);
-
-        let source = this._childSources[sourceKey];
-        if (!source) {
-            let childPath = path;
+        let childPath = path;
+        if (!isAbsolutePath) {
             if (this.id.path.length > 0) {
                 childPath = resolvePath(path, this.id.path);
             } 
+        }
+        
+        const sourceKey = makeSourceKey(kind, childPath);
+
+        let source = this._childSources[sourceKey];
+        if (!source) {
             source = new ManifestSource(kind, childPath, originalSource);
             this._childSources[sourceKey] = source;
             source._parentSource = this;

@@ -67,6 +67,7 @@ export class PreProcessorExecutor
         let helmChartName = "";
         let helmChartPath = "";
 
+        let isAbsolutePath = false;
         if (inputSource.kind === InputSourceKind.file)
         {
             try
@@ -92,13 +93,19 @@ export class PreProcessorExecutor
         else if (inputSource.kind === InputSourceKind.helm)
         {
             helmChartPath = inputSource.path;
+            // isAbsolutePath = true;
         }
 
-        source = source.getSource("helm", helmChartPath, source.originalSource);
+        source = source.getSource("helm", helmChartPath, source.originalSource, isAbsolutePath);
 
         try
         {
-            const command = `helm template ${helmChartPath}`;
+            let command = `helm template ${helmChartPath}`;
+            const overridesPath = _.head(inputSource.suffixes);
+            if (overridesPath)
+            {
+                command += ` -f ${overridesPath}`
+            }
             const contents = await await this.executeCommand(command);
             if (!contents)
             {
@@ -111,7 +118,7 @@ export class PreProcessorExecutor
                     const rawYamls = this._manifestsLoader.parseYamlRaw(contents);
                     for(const rawYaml of rawYamls)
                     {
-                        this._processHelm(source, rawYaml, helmChartName);
+                        this._processHelm(inputSource, source, rawYaml, helmChartName);
                     }
                 }
                 catch(reason: any)
@@ -128,7 +135,7 @@ export class PreProcessorExecutor
         }
     }
 
-    private _processHelm(source: ManifestSource, rawYaml: YAML.Document.Parsed<YAML.ParsedNode>, helmChartName : string)
+    private _processHelm(inputSource: InputSource, source: ManifestSource, rawYaml: YAML.Document.Parsed<YAML.ParsedNode>, helmChartName : string)
     {
         const comment = rawYaml.contents?.commentBefore;
 
@@ -141,18 +148,26 @@ export class PreProcessorExecutor
                 let templatePath = matches[1];
                 this._logger.info("[_processHelm] templatePath: %s", templatePath);
 
-                if (helmChartName && helmChartName.length > 0)
+                let isAbsolutePath = false;
+                if (inputSource.kind === InputSourceKind.file)
                 {
-                    if (_.last(helmChartName) !== '/') {
-                        helmChartName += '/';
-                    }
-    
-                    if (templatePath.startsWith(helmChartName)) {
-                        templatePath = templatePath.substring(helmChartName.length);
+                    if (helmChartName && helmChartName.length > 0)
+                    {
+                        if (_.last(helmChartName) !== '/') {
+                            helmChartName += '/';
+                        }
+        
+                        if (templatePath.startsWith(helmChartName)) {
+                            templatePath = templatePath.substring(helmChartName.length);
+                        }
                     }
                 }
+                // else if (inputSource.kind === InputSourceKind.helm)
+                // {
+                //     isAbsolutePath = true;
+                // }
 
-                source = source.getSource('file', templatePath, source.originalSource);
+                source = source.getSource('file', templatePath, source.originalSource, isAbsolutePath);
             }
         }
 

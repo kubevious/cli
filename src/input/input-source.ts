@@ -12,6 +12,8 @@ export class InputSource {
     private _originalSource: OriginalSource;
     private _kind: InputSourceKind;
     private _path: string;
+    private _suffixes: string[];
+
     private _key: string;
     private _file: string;
     private _dir: string;
@@ -19,13 +21,14 @@ export class InputSource {
     private _isLoaded = false;
     private _preprocessor : string | null = null;
 
-    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string)
+    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string, suffixes: string[])
     {
         logger.info("[construct] kind: %s. path: %s. orig: %s", kind, path, originalSource.originalPath);
 
+        this._originalSource = originalSource;
         this._kind = kind;
         this._path = path;
-        this._originalSource = originalSource;
+        this._suffixes = suffixes;
 
         this._key = _.stableStringify([this._kind, this._path]);
 
@@ -59,6 +62,10 @@ export class InputSource {
 
     public get path() {
         return this._path;
+    }
+
+    public get suffixes() {
+        return this._suffixes;
     }
 
     public get file() {
@@ -115,7 +122,7 @@ export class InputSource {
             kind = InputSourceKind.web;
         }
 
-        return new InputSource(originalSource, kind, path);
+        return new InputSource(originalSource, kind, path, []);
     }
 }
 
