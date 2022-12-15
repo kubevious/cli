@@ -20,7 +20,7 @@ RUN mv kubevious-$(node -p -e "require('./package.json').version").tgz kubevious
 # Step 2 : Runner image
 FROM node:14-alpine
 RUN apk update && apk upgrade && \
-    apk --no-cache add ca-certificates bash openssl curl wget
+    apk --no-cache add ca-certificates bash openssl git curl wget 
 # HELM 
 WORKDIR /tmp
 ADD https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 install_helm.sh
