@@ -5,7 +5,7 @@ cd $MY_DIR
 
 source configuration.sh
 
-docker run -i -v ${MY_DIR}/samples:/src ${IMAGE_NAME} $@
+docker run -it -v ${MY_DIR}/samples:/src ${IMAGE_NAME} $@
 
 RESULT=$?
 echo "RESULT: $RESULT"

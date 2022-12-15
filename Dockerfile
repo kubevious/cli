@@ -19,6 +19,24 @@ RUN mv kubevious-$(node -p -e "require('./package.json').version").tgz kubevious
 ###############################################################################
 # Step 2 : Runner image
 FROM node:14-alpine
+RUN apk update && apk upgrade && \
+    apk --no-cache add ca-certificates bash openssl curl wget
+# HELM 
+WORKDIR /tmp
+ADD https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 install_helm.sh
+RUN chmod +x install_helm.sh
+RUN bash install_helm.sh
+RUN rm install_helm.sh
+# KUSTOMIZE
+WORKDIR /tmp
+ADD https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh install_kustomize.sh
+RUN chmod +x install_kustomize.sh
+RUN ls -la .
+RUN bash install_kustomize.sh
+RUN ls -la .
+RUN mv ./kustomize /usr/local/bin/ 
+RUN rm install_kustomize.sh
+# Kubevious CLI
 WORKDIR /app
 COPY --from=0 /app/kubevious.tgz ./
 RUN npm install -g ./kubevious.tgz

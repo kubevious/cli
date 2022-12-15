@@ -141,7 +141,7 @@ export const SOURCE_ICONS = {
     // k8s: new IconDefinition('☸️ '),
     k8s: new IconDefinition(`${emoji.get(':wheel_of_dharma:')} `),
     helm: new IconDefinition(emoji.get(':ship:')),
-    kustomize: new IconDefinition(emoji.get(':wheel_of_dharma:')),
+    kustomize: new IconDefinition(`${emoji.get(':wheel_of_dharma:')} `),
 }
 
 
