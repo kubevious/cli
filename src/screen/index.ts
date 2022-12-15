@@ -139,7 +139,7 @@ export const SOURCE_ICONS = {
     web: new IconDefinition(emoji.get(':globe_with_meridians:')),
     stream: new IconDefinition(emoji.get(':aquarius:')),
     // k8s: new IconDefinition('☸️ '),
-    k8s: new IconDefinition(emoji.get(':wheel_of_dharma:')),
+    k8s: new IconDefinition(`${emoji.get(':wheel_of_dharma:')} `),
     helm: new IconDefinition(emoji.get(':ship:')),
     kustomize: new IconDefinition(emoji.get(':wheel_of_dharma:')),
 }

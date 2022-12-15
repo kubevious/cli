@@ -45,7 +45,7 @@ describe('helper-user-path-parser', function() {
     });
 
     it('helm-kind-no-overrides', function() {
-        const result = parseUserInputPath('#helm@traefik/traefik');
+        const result = parseUserInputPath('@helm@traefik/traefik');
         should(result).be.ok();
         should(result.kind).be.equal('helm');
         should(result.path).be.equal('traefik/traefik');
@@ -54,7 +54,7 @@ describe('helper-user-path-parser', function() {
     });
 
     it('helm-kind-with-overrides', function() {
-        const result = parseUserInputPath('#helm@charts.git/charts@values=samples/overrides.yaml');
+        const result = parseUserInputPath('@helm@charts.git/charts@values=samples/overrides.yaml');
         should(result).be.ok();
         should(result.kind).be.equal('helm');
         should(result.path).be.equal('charts.git/charts');
@@ -63,10 +63,30 @@ describe('helper-user-path-parser', function() {
     });
 
     it('bad-kind', function() {
-        const result = parseUserInputPath('#kustomize@the-path/');
+        const result = parseUserInputPath('@kustomize@the-path/');
         // console.log(result);
         should(result).be.ok();
         should(result.isInvalid).be.true();
     });
 
+    it('no-helm-chart-name', function() {
+        const result = parseUserInputPath('@helm');
+        // console.log(result);
+        should(result).be.ok();
+        should(result.isInvalid).be.true();
+    });
+
+    it('empty', function() {
+        const result = parseUserInputPath('');
+        // console.log(result);
+        should(result).be.ok();
+        should(result.isInvalid).be.true();
+    });
+
+    it('empty-2', function() {
+        const result = parseUserInputPath('@');
+        // console.log(result);
+        should(result).be.ok();
+        should(result.isInvalid).be.true();
+    });
 });

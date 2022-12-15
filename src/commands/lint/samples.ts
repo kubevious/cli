@@ -25,10 +25,9 @@ export const SAMPLES : ToolUsageSamples = [
         title: 'Lint Custom Resources towards already configured CRDs in K8s Clutser',
         code: 'kubevious lint my-resouce.yaml --live-k8s',
     },
-
     {
         title: 'Detailed output',
-        code: 'kubevious lint --detailed #helm@traefik/traefik@namespace=traefik@release-name=traefik',
+        code: 'kubevious lint --detailed @helm@traefik/traefik@namespace=traefik@release-name=traefik',
     },
 
 ]

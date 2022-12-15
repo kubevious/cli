@@ -20,22 +20,17 @@ export interface ParsedUserPath {
 export function parseUserInputPath(str: string) : ParsedUserPath
 {
     let parts = str.split("@");
-    if (parts.length === 0) {
-        return {
-            isInvalid: true,
-            kind: 'file',
-            path: '',
-            suffixes: []
-        }
-    }
 
-    let head = _.head(parts) ?? "";
-    parts = _.drop(parts);
-
+    let head : string = '';
     let kind : ManifestSourceType = 'file';
-    if (head.startsWith("#"))
+
+    if (_.startsWith(str, '@'))
     {
-        head = head.substring(1);
+        parts = _.drop(parts);
+
+        head = _.head(parts) ?? '';
+        parts = _.drop(parts);
+
         kind = head as ManifestSourceType;
 
         if (kind !== 'helm') {
@@ -49,20 +44,35 @@ export function parseUserInputPath(str: string) : ParsedUserPath
 
         head = _.head(parts) ?? "";
         parts = _.drop(parts);
+
     }
     else
     {
+        head = _.head(parts) ?? "";
+        parts = _.drop(parts);
+
         const isWeb = isWebPath(head);
         if (isWeb) {
             kind = 'web';
         }
     }
 
-    return {
+    if (!head) {
+        return {
+            isInvalid: true,
+            kind: kind,
+            path: '',
+            suffixes: []
+        }
+    }
+
+    const result = {
         kind: kind,
         path: head,
         suffixes: parts.map(x => parseSuffix(x))
     }
+
+    return result;
 }
 
 function parseSuffix(str: string) : UserPathSuffix
