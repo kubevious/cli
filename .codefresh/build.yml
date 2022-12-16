@@ -114,9 +114,9 @@ steps:
       - npm pack
       - ls -la
 
-  package_sample_tests:
-    title: Run Package Sample Tests
-    stage: test
+  npm_package_sample_tests:
+    title: NPM Package Sample Tests
+    stage: package
     image: 'kubevious/node-with-tools:v14.1'
     working_directory: "${{DEMOS_REPO_PATH}}/guard"
     commands:
@@ -140,6 +140,23 @@ steps:
     image_name: "${{IMAGE_NAME}}"
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
+
+
+  docker_image_sample_tests:
+    title: Docker Image Sample Tests
+    stage: package
+    image: "${{docker_build}}"
+    working_directory: "${{DEMOS_REPO_PATH}}/guard"
+    commands:    
+      - kubevious --version
+      - echo "Linting Hipster Shop..."
+      - kubevious lint 01-hipster-shop/hipster-chart/templates/manifests.yaml
+      - echo "Linting Hipster Shop From Stream..."
+      - cat 01-hipster-shop/hipster-chart/templates/manifests.yaml | kubevious lint --stream 
+      - echo "Guarding Voter App..."
+      - kubevious guard 02-voter-app/voter-chart/templates
+      - echo "Guarding Hipster Shop Helm Chart..."
+      - kubevious guard 01-hipster-shop/hipster-chart
 
 
   prepare_chart_traefik:
