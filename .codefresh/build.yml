@@ -114,6 +114,25 @@ steps:
       - npm pack
       - ls -la
 
+  package_sample_tests:
+    title: Run Package Sample Tests
+    stage: test
+    image: 'kubevious/node-with-tools:v14.1'
+    working_directory: "${{DEMOS_REPO_PATH}}/guard"
+    commands:
+      - source ${{MAIN_REPO_PATH}}/version.sh
+      - npm install -g ${{MAIN_REPO_PATH}}/kubevious-${PRODUCT_VERSION}.tgz
+      - kubevious --version
+      - echo "Linting Hipster Shop..."
+      - kubevious lint 01-hipster-shop/hipster-chart/templates/manifests.yaml
+      - echo "Linting Hipster Shop From Stream..."
+      - cat 01-hipster-shop/hipster-chart/templates/manifests.yaml | kubevious lint --stream 
+      - echo "Guarding Voter App..."
+      - kubevious guard 02-voter-app/voter-chart/templates
+      - echo "Guarding Hipster Shop Helm Chart..."
+      - kubevious guard 01-hipster-shop/hipster-chart
+
+
   docker_build:
     title: Building Kubevious CLI Image
     stage: package
