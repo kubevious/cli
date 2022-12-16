@@ -204,19 +204,9 @@ steps:
         working_directory: ${{SAMPLES_PATH}}
         commands:
           - ls -la
-          - rm -rf kubeflow
           - rm -rf kubeflow-pipelines.git
-          - mkdir kubeflow
           - git clone https://github.com/kubeflow/pipelines.git kubeflow-pipelines.git
-          - |
-            cat >kubeflow/webhook-server-tls.yaml <<EOL
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              name: webhook-server-tls
-              namespace: kubeflow
-            EOL
-          - kubevious guard kubeflow-pipelines.git/manifests/kustomize/cluster-scoped-resources kubeflow-pipelines.git/manifests/kustomize/env/platform-agnostic kubeflow/webhook-server-tls.yaml
+          - kubevious guard kubeflow-pipelines.git/manifests/kustomize/cluster-scoped-resources kubeflow-pipelines.git/manifests/kustomize/env/platform-agnostic ${{DEMOS_REPO_PATH}}/mocks/kubeflow/webhook-server-tls.yaml
           
       validate_istio:
         title: Validate Istio Chart
@@ -225,17 +215,7 @@ steps:
         working_directory: ${{SAMPLES_PATH}}
         commands:
           - ls -la
-          - rm -rf istio
-          - mkdir istio        
-          - |
-            cat >istio/secret-gateway-api-admission.yaml <<EOL
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              name: gateway-api-admission
-              namespace: gateway-system
-            EOL
           - echo "Validating Istio Classic..."
           - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/destination-rule-all.yaml
           - echo "Validating Istio Gateway API..."
-          - kubevious guard ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml istio/secret-gateway-api-admission.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/mock-gateway-class.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-versions.yaml
+          - kubevious guard ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/mock-gateway-class.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-versions.yaml ${{DEMOS_REPO_PATH}}/mocks/istio/secret-gateway-api-admission.yaml 

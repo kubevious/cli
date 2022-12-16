@@ -15,15 +15,15 @@ export const SAMPLES : ToolUsageSamples = [
     }, 
     {
         title: 'Lint HELM Chart with overrides',
-        code: 'kubevious lint #helm@the-helm-chart@values=path/to/overrides.yaml',
+        code: 'kubevious lint @helm@the-helm-chart@values=path/to/overrides.yaml',
     },   
     {
         title: 'Lint Custom Resource and CRD',
-        code: 'kubevious lint my-resouce.yaml my-crd.yaml',
+        code: 'kubevious lint my-resource.yaml my-crd.yaml',
     },  
     {
         title: 'Lint Custom Resources towards already configured CRDs in K8s Clutser',
-        code: 'kubevious lint my-resouce.yaml --live-k8s',
+        code: 'kubevious lint my-resource.yaml --live-k8s',
     },
     {
         title: 'Detailed output',
