@@ -219,3 +219,35 @@ steps:
           - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/destination-rule-all.yaml
           - echo "Validating Istio Gateway API..."
           - kubevious guard ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/mock-gateway-class.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-versions.yaml ${{DEMOS_REPO_PATH}}/mocks/istio/secret-gateway-api-admission.yaml 
+
+      validate_hipster_simple:
+        title: Validate Hipster Chart
+        stage: package
+        image: "${{docker_build}}"
+        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        commands:
+          - kubevious guard hipster-chart
+
+      validate_hipster_network_policies:
+        title: Validate Hipster Network Policies
+        stage: package
+        image: "${{docker_build}}"
+        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        commands:
+          - kubevious guard hipster-chart network-policies-chart
+
+      validate_hipster_network-policies:
+        title: Validate Hipster Istio
+        stage: package
+        image: "${{docker_build}}"
+        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        commands:
+          - kubevious guard hipster-chart istio-chart https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml
+
+      validate_voter:
+        title: Validate Voter App
+        stage: package
+        image: "${{docker_build}}"
+        working_directory: ${{DEMOS_REPO_PATH}}
+        commands:
+          - kubevious guard 02-voter-app/voter-chart
