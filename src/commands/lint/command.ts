@@ -18,8 +18,13 @@ const myLogger = logger.sublogger('LintCommand');
 export async function command(paths: string[], options: LintCommandOptions) : Promise<LintCommandData>
 {
     logger.info("[PATH] ", paths);
+    logger.info("[OPTIONS] ", options);
 
-    const inputSourceExtractor = new InputSourceExtractor(logger);
+    const inputSourceExtractor = new InputSourceExtractor(logger, {
+        gitignore: options.gitignore
+    });
+    await inputSourceExtractor.init();
+
     {
         const sourceExtractorSpinner = spinOperation('Identifying manifest sources...');
 
@@ -131,5 +136,6 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
     
         liveK8s: options.liveK8s ?? false,
         kubeconfig: options.kubeconfig,
+        gitignore : options.gitignore,
     }
 }

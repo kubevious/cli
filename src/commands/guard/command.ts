@@ -12,7 +12,7 @@ import { RegistryQueryExecutor } from '../../rules-engine/query-executor';
 import { CombinedK8sRegistry } from '../../registry/combined-k8s-registry';
 import { CachedK8sRegistry } from '../../registry/cached-k8s-registry';
 import { formatResult as lintFormatResult } from '../lint/format';
-import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
+import { makeObjectSeverityFromChildren } from '../../types/result';
 
 const COMMUNITY_RULES_PATH = 'https://raw.githubusercontent.com/kubevious/rules-library/main/index.yaml';
 

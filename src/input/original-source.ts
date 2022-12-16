@@ -10,6 +10,11 @@ import * as fs from 'fs';
 import * as Path from 'path';
 import { parseUserInputPath, UserPathSuffixes } from "./utils";
 
+export interface OriginalSourceOptions
+{
+    ignorePatters?: string[];
+}
+
 export class OriginalSource
 {
     private _kind: ManifestSourceType;
@@ -18,13 +23,16 @@ export class OriginalSource
     private _suffixes: UserPathSuffixes;
     private _logger : ILogger = logger.sublogger("OriginalSource");
     private _isExtracted = false;
+    private _options : OriginalSourceOptions;
 
     private _sources: Record<string, InputSource> = {};
     private _allSources: Record<string, InputSource> = {};
     private _reconcilerDirsToDelete : Record<string, InputSource[]> = {};
 
-    constructor(origPath: string)
+    constructor(origPath: string, options? : OriginalSourceOptions)
     {
+        this._options = options ?? {};
+        
         this._originalPath = origPath;
 
         const parsed = parseUserInputPath(origPath);
@@ -117,10 +125,14 @@ export class OriginalSource
             return;
         }
 
+        const ignorePatterns = this._options.ignorePatters ?? [];
+
         const files = await FastGlob(pattern, {
             onlyFiles: true,
-            absolute: true
+            absolute: true,
+            ignore: ignorePatterns
         });
+        
         // this._logger.info("[_addFromFileOrPattern] files: %s", files);
 
         for (const file of files)

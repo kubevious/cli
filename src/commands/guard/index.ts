@@ -10,7 +10,7 @@ import { formatResult } from './format';
 import { output } from './output';
 
 import { DESCRIPTION, SUMMARY } from './docs';
-import { ARG_PATH, OPTION_DETAILED, OPTION_IGNORE_NON_K8S, OPTION_IGNORE_UNKNOWN, OPTION_JSON, OPTION_K8S_VERSION, OPTION_KUBECONFIG, OPTION_LIVE_K8S, OPTION_SKIP_APPLY_CRDS, OPTION_STREAM } from '../lint/docs';
+import { ARG_PATH, OPTION_DETAILED, OPTION_IGNORE_FILE, OPTION_IGNORE_NON_K8S, OPTION_IGNORE_UNKNOWN, OPTION_JSON, OPTION_K8S_VERSION, OPTION_KUBECONFIG, OPTION_LIVE_K8S, OPTION_SKIP_APPLY_CRDS, OPTION_STREAM } from '../lint/docs';
 
 export default function (program: Command)
 {
@@ -33,6 +33,7 @@ export default function (program: Command)
         .option('--namespaces [namespace...]', 'Or specify multiple namespaces to process.')
         .option('--skip-cluster-scope', 'Skip processing clustered manifests and rules.')
         .option('--skip-community-rules', 'Skip community rules library.')
+        .option('--gitignore <path>', OPTION_IGNORE_FILE)
         .option('--detailed', OPTION_DETAILED)
         .option('--json', OPTION_JSON)
         .action(
