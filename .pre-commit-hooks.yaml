@@ -7,16 +7,16 @@
   entry: 'kubevious/cli:1.0.35'
   args: ['index-library', '/src']
 - id: kubevious-lint
-  name: kubevious lint manifests
-  description: Lint Kuberentes manifests
+  name: Kubevious Lint checking for manifest API validity
+  description: Kubevious Lint checks for manifest API validity
   types: [file, yaml]
   language: docker_image
   pass_filenames: false
   entry: 'kubevious/cli:1.0.35'
   args: ['lint', '/src']
 - id: kubevious-guard
-  name: kubevious guard manifests
-  description: Guard Kuberentes manifests
+  name: Kubevious Guard checking for manifest validity and violations
+  description: Kubevious Guard checks for manifest API validity and violations of best practices
   types: [file, yaml]
   language: docker_image
   pass_filenames: false
