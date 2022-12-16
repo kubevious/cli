@@ -4,7 +4,6 @@ stages:
   - "clone"
   - "build"
   - "package"
-  - "testprep"
   - "test"
 
 steps:
@@ -212,19 +211,19 @@ steps:
         title: Validate Istio Chart
         stage: package
         image: "${{docker_build}}"
-        working_directory: ${{SAMPLES_PATH}}
+        working_directory: ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo
         commands:
           - ls -la
           - echo "Validating Istio Classic..."
-          - kubevious guard https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/istio-classic/destination-rule-all.yaml
+          - kubevious guard bookinfo.yaml istio-classic/bookinfo-gateway.yaml istio-classic/destination-rule-all.yaml https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml 
           - echo "Validating Istio Gateway API..."
-          - kubevious guard ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/bookinfo.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/mock-gateway-class.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-gateway.yaml ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo/gateway-api/bookinfo-versions.yaml ${{DEMOS_REPO_PATH}}/mocks/istio/secret-gateway-api-admission.yaml 
+          - kubevious guard bookinfo.yaml gateway-api/mock-gateway-class.yaml gateway-api/bookinfo-gateway.yaml gateway-api/bookinfo-versions.yaml ${{DEMOS_REPO_PATH}}/mocks/istio/secret-gateway-api-admission.yaml ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml
 
       validate_hipster_simple:
         title: Validate Hipster Chart
         stage: package
         image: "${{docker_build}}"
-        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
           - kubevious guard hipster-chart
 
@@ -232,7 +231,7 @@ steps:
         title: Validate Hipster Network Policies
         stage: package
         image: "${{docker_build}}"
-        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
           - kubevious guard hipster-chart network-policies-chart
 
@@ -240,7 +239,7 @@ steps:
         title: Validate Hipster Istio
         stage: package
         image: "${{docker_build}}"
-        working_directory: ${{DEMOS_REPO_PATH}}/01-hipster-shop
+        working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
           - kubevious guard hipster-chart istio-chart https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml
 
@@ -248,6 +247,6 @@ steps:
         title: Validate Voter App
         stage: package
         image: "${{docker_build}}"
-        working_directory: ${{DEMOS_REPO_PATH}}
+        working_directory: ${{DEMOS_REPO_PATH}}/guard/02-voter-app
         commands:
-          - kubevious guard 02-voter-app/voter-chart
+          - kubevious guard voter-chart
