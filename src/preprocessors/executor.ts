@@ -66,13 +66,23 @@ export class PreProcessorExecutor
         this._logger.info("[_helm] path: %s, file: %s", inputSource.path, inputSource.file);
 
         let helmChartName = "";
-        let helmChartPath = "";
+        let helmChartPath = inputSource.path;
 
-        if (inputSource.kind === InputSourceKind.file)
+        const isLocalChart = fs.existsSync(helmChartPath);
+        this._logger.info("[_helm] isLocalChart: %s", isLocalChart);
+
+        if (isLocalChart)
         {
+            let chartYamlFilePath : string = helmChartPath;
+            if (isDir(helmChartPath))
+            {
+                chartYamlFilePath = Path.join(chartYamlFilePath, 'Chart.yaml');
+            }
+            this._logger.info("[_helm] chartYamlFilePath: %s", chartYamlFilePath);
+            
             try
             {
-                const contents = await this._manifestsLoader.rawReadFile(source.id.path);
+                const contents = await this._manifestsLoader.rawReadFile(chartYamlFilePath);
                 const chart = YAML.parseDocument(contents).toJS({});
                 helmChartName = chart.name;
             }
@@ -82,20 +92,21 @@ export class PreProcessorExecutor
                 source.reportError('Failed to load Helm Chart manifest. Reason: ' + (reason?.message ?? "Unknown"));
                 return;
             }
+            this._logger.info("[_helm] helmChartName: %s", helmChartName);
 
             if(!helmChartName) {
                 source.reportError('Invalid Helm Chart manifest. Chart name not set.');
                 return;
             }
 
-            helmChartPath = Path.dirname(inputSource.path);
+            helmChartPath = Path.dirname(chartYamlFilePath);
         }
         else if (inputSource.kind === InputSourceKind.helm)
         {
             helmChartPath = inputSource.path;
         }
 
-        const isLocalChart = fs.existsSync(helmChartPath);
+        this._logger.info("[_helm] helmChartPath: %s", helmChartPath);
 
         if (source.id.kind !== 'helm') {
             source = source.getSource("helm", helmChartPath, source.originalSource, !isLocalChart);
@@ -115,6 +126,15 @@ export class PreProcessorExecutor
                 else if (suffix.key === 'release-name') {
                     command += ` --release-name ${suffix.value}`
                 } 
+                else if (suffix.key === 'crds') {
+                    if (suffix.value === 'include') {
+                        command += ` --include-crds`;
+                    } else if (suffix.value === 'skip') {
+                        command += ` --skip-crds`;
+                    } else {
+                        source.reportError(`Unknown preprocessor key provided: ${suffix.key}=${suffix.value}`);
+                    }
+                }
                 else
                 {
                     source.reportError(`Unknown preprocessor key provided: ${suffix.key}`);
@@ -172,7 +192,7 @@ export class PreProcessorExecutor
                 let templatePath = matches[1];
                 this._logger.info("[_processHelm] templatePath: %s", templatePath);
 
-                if (inputSource.kind === InputSourceKind.file)
+                if (isLocalChart)
                 {
                     if (helmChartName && helmChartName.length > 0)
                     {
@@ -231,4 +251,10 @@ export class PreProcessorExecutor
         return null;
 
     }
+}
+
+function isDir(path: string)
+{
+    const stats = fs.statSync(path);
+    return stats.isDirectory();
 }

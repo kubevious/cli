@@ -36,7 +36,7 @@ export function formatResult({
         counters: calculateRuleEngineCounters(rulesResult, manifestPackage)
     };
 
-    logger.info("RULES RESULT: ", rulesResult);
+    logger.verbose("RULES RESULT: ", rulesResult);
     logger.info("RULE COUNTERS: ", result.counters);
 
     return result;

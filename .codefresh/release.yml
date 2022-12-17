@@ -223,6 +223,7 @@ steps:
           - helm template traefik/traefik --include-crds > traefik.yaml
           - kubevious lint traefik.yaml
           - kubevious guard traefik.yaml
+          - kubevious guard @helm@traefik/traefik@crds=include
 
       validate_prometheus_chart:
         title: Validate Prometheus Chart
