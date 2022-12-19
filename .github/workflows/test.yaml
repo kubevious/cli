@@ -7,6 +7,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Checkout Mock Repo
+        uses: actions/checkout@v3        
+        with:
+          repository: kubevious/mock-data
+          path: mock-data.git
+      - name: 'Prepare Packages'
+        run: './scripts/prepare-package.sh'
+      - name: 'Build'
+        run: 'docker build -t kubevious/cli .'
       - name: Validation of manifest files
         id: file-validation
         uses: kubevious/cli@main
