@@ -7,24 +7,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          path: cli.git
       - name: Checkout Mock Repo
         uses: actions/checkout@v3        
         with:
           repository: kubevious/mock-data
           path: mock-data.git
       - name: 'Prepare Packages'
+        working-directory: ./cli.git
         run: './scripts/prepare-package.sh'
       - name: 'Build'
+        working-directory: ./cli.git
         run: 'docker build -t kubevious/cli .'
       - name: Validation of manifest files
         id: file-validation
         uses: kubevious/cli@main
+        working-directory: ./cli.git
         with:
           manifests: samples/argo-rollout
           crds: https://raw.githubusercontent.com/kubevious/demos/main/crds/argo-rollouts/crds.yaml        
       - name: Validation of Helm Charts
         id: chart-validation
         uses: kubevious/cli@main
+        working-directory: ./cli.git
         with:
           helm_repo_url: https://helm.kubevious.io
           helm_repo_name: kubevious
