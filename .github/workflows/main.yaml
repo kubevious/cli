@@ -1,0 +1,22 @@
+on: [push]
+
+jobs:
+  kubevious_validation:
+    runs-on: ubuntu-latest
+    name: Kubevious CLI Validation Run
+    steps:
+      - name: Validation of manifest files
+        id: file-validation
+        uses: kubevious/cli@action
+        with:
+          manifests: samples/argo-rollout
+          crds: https://raw.githubusercontent.com/kubevious/demos/main/crds/argo-rollouts/crds.yaml        
+      - name: Validation of Helm Charts
+        id: chart-validation
+        uses: kubevious/cli@action
+        with:
+          helm_repo_url: https://helm.kubevious.io
+          helm_repo_name: kubevious
+          helm_chart: kubevious
+          helm_namespace: kubevious
+          helm_include_crds: true

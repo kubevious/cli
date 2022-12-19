@@ -1,0 +1,71 @@
+name: Kubevious CLI
+description: Use the Kubevious CLI in a github action
+author: kubevious
+inputs:
+  helm_repo_url:
+    description: Helm repository URL
+    required: false
+    default: ''
+  helm_repo_name:
+    description: Name alias for Helm repository URL
+    required: false
+    default: ''
+  helm_chart:
+    description: Helm repository chart name
+    required: false
+    default: ''
+  helm_namespace:
+    description: Helm release namespace
+    required: false
+    default: ''
+  helm_include_crds:
+    description: Indicates whether or not to include CRDs in Helm release
+    required: false
+    default: 'false'
+  helm_override:
+    description: Helm overrides
+    required: false
+    default: ''
+  manifests:
+    description: Path to manifest files, directories or URLs to validate
+    required: false  
+    default: ''
+  crds:
+    description: Path to CRDs to include in validation
+    required: false  
+    default: ''
+  mocks:
+    description: Path to mocked manifests to include in validation
+    required: false  
+    default: ''
+  k8s_version:
+    description: Version of Kubernetes to validate againts
+    required: false  
+    default: ''
+  live_k8s:
+    description: Validate againts live Kubernetes version
+    required: false  
+    default: 'false'
+  ignore_unknown:
+    description: Ignore unknown Kubernetes resources
+    required: false  
+    default: 'false'
+  ignore_non_k8s:
+    description: Ignore non-Kubernetes YAML files
+    required: false  
+    default: 'false'
+  detailed_output:
+    description: Output in details
+    required: false  
+    default: 'false'
+  json_output:
+    description: Output in JSON format
+    required: false  
+    default: 'false'
+runs:
+  using: docker
+  image: docker://kubevious/cli:latest
+  # image: Dockerfile
+branding:
+  icon: 'shield'
+  color: 'green'
