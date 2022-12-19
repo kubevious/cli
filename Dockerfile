@@ -8,10 +8,18 @@ WORKDIR /app
 COPY ./package*.json ./
 COPY ./yarn.lock ./
 RUN yarn install --frozen-lockfile
-COPY ./assets ./assets
 COPY ./bin ./bin
 COPY ./src ./src
 COPY ./tsconfig.json ./
+# COPY ASSESTS FROM MOCK-DATA
+RUN git clone https://github.com/kubevious/mock-data.git mock-data.git
+RUN mkdir -p ./assets/k8s-api-json-schema
+RUN cp mock-data.git/k8s-api-json-schema/*.json ./assets/k8s-api-json-schema/
+RUN rm -rf mock-data.git
+# COPY CRD ASSETS
+COPY ./crds ./assets/crds
+RUN find ./assets
+# BUILD
 RUN npm run build
 RUN npm pack
 RUN mv kubevious-$(node -p -e "require('./package.json').version").tgz kubevious.tgz

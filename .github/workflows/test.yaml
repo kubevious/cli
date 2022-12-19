@@ -5,21 +5,21 @@ jobs:
     runs-on: ubuntu-latest
     name: Kubevious CLI Validation Run
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: cli.git
-      - name: Checkout Mock Repo
-        uses: actions/checkout@v3        
-        with:
-          repository: kubevious/mock-data
-          path: mock-data.git
-      - name: 'Prepare Packages'
-        working-directory: ./cli.git
-        run: './scripts/prepare-package.sh'
-      - name: 'Build'
-        working-directory: ./cli.git
-        run: 'docker build -t kubevious/cli .'
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     path: cli.git
+      # - name: Checkout Mock Repo
+      #   uses: actions/checkout@v3        
+      #   with:
+      #     repository: kubevious/mock-data
+      #     path: mock-data.git
+      # - name: 'Prepare Packages'
+      #   working-directory: ./cli.git
+      #   run: './scripts/prepare-package.sh'
+      # - name: 'Build'
+      #   working-directory: ./cli.git
+      #   run: 'docker build -t kubevious/cli .'
       - name: Validation of manifest files
         id: file-validation
         uses: kubevious/cli@main
