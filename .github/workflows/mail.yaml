@@ -7,7 +7,7 @@ jobs:
     steps:
       - name: Kubevious CLI run
         id: kubevious
-        uses: kubevious/cli
+        uses: kubevious/cli@latest
         # with:
           # who-to-greet: 'Mona the Octocat'
       # Use the output from the `hello` step
