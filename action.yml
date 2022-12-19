@@ -64,7 +64,7 @@ inputs:
     default: 'false'
 runs:
   using: docker
-  image: Dockerfile
+  image: kubevious/cli@latest
   args:
     - guard
     - samples/argo-rollout
