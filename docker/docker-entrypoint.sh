@@ -17,6 +17,14 @@ isTrue() {
 if isTrue "$CI"
 then
 
+    echo "CURRENT DIRECTORY: "
+    pwd
+    echo "---"
+
+    echo "CONTENTS: "
+    ls -la
+    echo "---"
+
     if isTrue "$DRONE"
     then
         echo "Running in Drone..."
