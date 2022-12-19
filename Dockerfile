@@ -30,7 +30,15 @@ RUN mv kubevious-$(node -p -e "require('./package.json').version").tgz kubevious
 FROM node:14-alpine
 RUN apk update && apk upgrade && \
     apk --no-cache add ca-certificates bash openssl git curl wget 
+# DATA
+RUN mkdir -p /data
 # HELM 
+ENV HELM_CACHE_HOME=/data/helm/cache
+ENV HELM_CONFIG_HOME=/data/helm/config
+ENV HELM_DATA_HOME=/data/helm/data
+RUN mkdir -p ${HELM_CACHE_HOME}
+RUN mkdir -p ${HELM_CONFIG_HOME}
+RUN mkdir -p ${HELM_DATA_HOME}
 WORKDIR /tmp
 ADD https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 install_helm.sh
 RUN chmod +x install_helm.sh
@@ -53,5 +61,6 @@ RUN rm -rf /app
 WORKDIR /src
 COPY ./docker/docker-entrypoint.sh /
 RUN addgroup -S kubevious && adduser -S kubevious -G kubevious -h /src
+RUN chown -R kubevious:kubevious /data
 USER kubevious
 ENTRYPOINT ["/docker-entrypoint.sh"]
