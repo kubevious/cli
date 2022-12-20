@@ -165,7 +165,7 @@ steps:
 
       validate_traefik_chart:
         title: Validate Traefik Chart
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{SAMPLES_PATH}}
         commands:    
@@ -178,7 +178,7 @@ steps:
 
       validate_prometheus_chart:
         title: Validate Prometheus Chart
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{SAMPLES_PATH}}
         commands:    
@@ -188,7 +188,7 @@ steps:
 
       validate_grafana_chart:
         title: Validate Prometheus Chart
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{SAMPLES_PATH}}
         commands:    
@@ -199,7 +199,7 @@ steps:
 
       validate_kubeflow:
         title: Validate Kubeflow
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{SAMPLES_PATH}}
         commands:
@@ -210,7 +210,7 @@ steps:
           
       validate_istio:
         title: Validate Istio Chart
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/10-istio-bookinfo
         commands:
@@ -222,7 +222,7 @@ steps:
 
       validate_hipster_simple:
         title: Validate Hipster Chart
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
@@ -230,7 +230,7 @@ steps:
 
       validate_hipster_network_policies:
         title: Validate Hipster Network Policies
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
@@ -238,7 +238,7 @@ steps:
 
       validate_hipster_network-policies:
         title: Validate Hipster Istio
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
@@ -246,7 +246,7 @@ steps:
 
       validate_voter:
         title: Validate Voter App
-        stage: package
+        stage: test
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/02-voter-app
         commands:
