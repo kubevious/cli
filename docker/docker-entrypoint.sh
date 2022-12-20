@@ -14,16 +14,8 @@ isTrue() {
 
 # MAIN
 
-if isTrue "$CI"
+if isTrue "${CI}"
 then
-
-    echo "CURRENT DIRECTORY: "
-    pwd
-    echo "---"
-
-    echo "CONTENTS: "
-    ls -la
-    echo "---"
 
     if isTrue "$DRONE"
     then
@@ -45,6 +37,7 @@ then
         MY_DETAILED_OUTPUT="${PLUGIN_DETAILED_OUTPUT}"
         MY_JSON_OUTPUT="${PLUGIN_JSON_OUTPUT}"
         MY_OTHER_ARGS="${PLUGIN_OTHER_ARGS}"
+        MY_IS_DEBUG="${PLUGIN_IS_DEBUG}"
 
     elif isTrue "$GITHUB_ACTIONS"
     then
@@ -66,6 +59,7 @@ then
         MY_DETAILED_OUTPUT="${INPUT_DETAILED_OUTPUT}"
         MY_JSON_OUTPUT="${INPUT_JSON_OUTPUT}"
         MY_OTHER_ARGS="${INPUT_OTHER_ARGS}"
+        MY_IS_DEBUG="${INPUT_IS_DEBUG}"
 
     else  
         echo "Unknown CI Run..."
@@ -86,8 +80,19 @@ then
         MY_DETAILED_OUTPUT=""
         MY_JSON_OUTPUT=""
         MY_OTHER_ARGS=""
+        MY_IS_DEBUG=""
     fi  
 
+    if isTrue "${MY_IS_DEBUG}"
+    then
+        echo "CURRENT DIRECTORY: "
+        pwd
+        echo "---"
+
+        echo "CONTENTS: "
+        ls -la
+        echo "---"    
+    fi
 
     if [[ ! -z "${MY_HELM_REPO_NAME}" ]] && [[ ! -z "${MY_HELM_REPO_URL}" ]]
     then

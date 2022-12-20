@@ -1,0 +1,26 @@
+on: [push]
+
+jobs:
+  kubevious_validation:
+    runs-on: ubuntu-latest
+    name: Validation Run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Checkout Carvel-YTT
+        uses: actions/checkout@v3
+        with:
+          repository: vmware-tanzu/carvel-ytt
+          path: carvel-ytt.git
+
+      - name: Run Carvel-YTT
+        id: carvel-ytt-template
+        uses: vmware-tanzu/carvel-setup-action@v1
+      - run: |
+          ytt -f carvel-ytt.git/examples/playground/getting-started/example-hello-world/config.yml > ytt-example.yaml
+      - name: Validate Carvel-YTT
+        id: carvel-ytt-validation
+        uses: kubevious/cli@main
+        with:
+          manifests: ytt-example.yaml
