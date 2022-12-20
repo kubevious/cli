@@ -1,2 +1,2 @@
 # This file is generated and updated from CI/CD
-export PRODUCT_VERSION=1.0.42
+export PRODUCT_VERSION=1.0.43
