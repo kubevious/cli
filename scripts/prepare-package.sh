@@ -17,3 +17,6 @@ export SNAPSHOT_CRDs_DIR=${MY_DIR}/assets/crds
 rm -rf ${SNAPSHOT_CRDs_DIR}
 mkdir -p ${SNAPSHOT_CRDs_DIR}
 cp -rf ${MY_DIR}/crds/*.yaml ${SNAPSHOT_CRDs_DIR}
+
+echo "   >>> Assets: "
+find ${MY_DIR}/assets
