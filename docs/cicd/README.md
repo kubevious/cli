@@ -5,4 +5,7 @@ We support out-of-the-box integration with the following CI/CD pipelines and pro
 - [GitHub Actions](/docs/cicd/github.md)
 - [Drone](/docs/cicd/drone.md)
 
-Let us know if you're using another CI/CD platform and need help with integration by opening an issue here: https://github.com/kubevious/cli/issues
+You can also use [kubevious-cli](https://github.com/kubevious/cli/releases) binaries or [kubevious/cli](https://hub.docker.com/u/kubevious) docker image to manually into any CI/CD processes. 
+
+Feel free to let us know if you need help with integration by opening an issue here: https://github.com/kubevious/cli/issues or talking to us in [Slack](https://kubevious.io/slack).
+

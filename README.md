@@ -10,12 +10,16 @@
   - [👇 Homebrew](#-option-2-homebrew)
   - [👇 Precompiled Binaries](#-option-3-precompiled-binaries)
   - [👇 In Docker Container](#-option-4-in-a-docker-container)
+  - [👇 CI/CD Integration](#-option-5-ci-cd-integration)
 - [🃏 Usage and Use Cases](#-usage-and-use-cases)
   - [💂 Guard - Comprehensive Cross-Manifest Semantical Validation](#-guard---comprehensive-cross-manifest-semantical-validation)
   - [✅ Lint - Validation of YAML syntax, K8s schema, and CRD/CR](#-lint---validation-of-yaml-syntax-k8s-schema-and-crdcr)
+  - [☸️ Validating Helm Charts](#-validating-helm-charts)
+  - [☸️ Validating Kustomize Templates](#-validating-kustomize-templates)
   - [🩻 Troubleshoot Live Cluster](#-troubleshoot-live-cluster)
   - [🕹 Input from a Variety of Sources](#-running-inside-a-container)
   - [🪝 Git Pre-Commit Hook](#-git-pre-commit-hook)
+  - [📦 Running Inside a Container](#-running-inside-a-container)
 - [✍️ Writing Custom Rules](#%EF%B8%8F-writing-custom-rules)
 
 ![Kubevious CLI Video](https://raw.githubusercontent.com/kubevious/media/master/cli/intro/demo_light.gif)
@@ -25,7 +29,7 @@
 ### 🔘 Best Practices Validation
 
 - Community-driven [Rules Library](https://github.com/kubevious/rules-library).
-  - Validates K8s native manifests and the popular project uses such as CertManager, Traefik, Istio, etc.
+  - Validates K8s native manifests and popular projects uses such as CertManager, Traefik, Kong, Istio, etc.
 - Your own custom validation rules:
   - from the file system
   - from live Kubernetes cluster
@@ -50,6 +54,7 @@ Kubevous CLI validates manifests from a variety of sources:
 - search patterns
 - web URLs
 - stdin pipe - used to validate package managers such as Helm, Kustomize, Ytt, etc.
+- native support with Helm & Kustomize
 - live manifests already present in the Kubernetes cluster
 - combination of all of the above
 
@@ -77,8 +82,7 @@ $ kubevious guard samples/
 
 ### 👇 Option 3: (Precompiled Binaries)
 All-in-one executables for Linux, Alpine, Mac OS, and Windows, including x64 and arm64 architectures.
-Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) or 
-[Binary Repo](https://github.com/kubevious/cli-releases)
+Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) or [Binary Repo](https://github.com/kubevious/cli-releases)
 
 ### 👇 Option 4: (In a Docker container)
 Run in a container:
@@ -91,11 +95,12 @@ Validate the entire manifests directory:
 $ docker run --rm -v ${PWD}/samples:/src kubevious/cli guard /src
 ```
 
-Validate Helm Chart or any manifests from pipe stream:
+Validate manifests from pipe stream:
 ```sh
-$ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream
-$ kustomize build config/default | docker run --rm -i kubevious/cli guard --stream
+$ cat manifests.yaml | docker run --rm -i kubevious/cli guard --stream
 ```
+### 👇 Option 5: (CI/CD Integration)
+Kubevious CLI Integrates with modern CI/CD platforms. Learn more [here](/docs/cicd).
 
 ## 🃏 Usage and Use Cases
 Try it yourself:
@@ -246,7 +251,41 @@ $ kubevious lint cr-good.yaml crd.yaml
    ✅ API: apiextensions.k8s.io/v1, Kind: CustomResourceDefinition, Name: myplatforms.example.com
 ```
 
+### ☸️ Validating Helm Charts
+Kubevious CLI executes the Helm template whenever a Helm chart is discovered.
+```sh
+$ kubevious guard path-to-helm-chart-directory
+```
+
+It is also possible to pass remote Helm repos to validate
+```sh
+$ helm repo add traefik https://helm.traefik.io/traefik
+$ kubevious guard @helm@traefik/traefik
+```
+
+Use **values** to specify Helm overrides.
+```sh
+$ kubevious guard @helm@traefik/traefik@values=overrides/prod.yaml
+```
+
+Supported Helm parameters:
+| Key          | Description                          |
+| ------------ | ------------------------------------ |
+| values       | Path to Helm overrides path          |
+| namespace    | The namespace                        |
+| release-name | The release name                     |
+| crds         | Possible values: "include" or "skip" |
+
+### ☸️ Validating Kustomize Templates
+
+Kubevious CLI executes Kustomize build as soon as it discovers kustomization.yaml files. Every files within that directory will be ignored. 
+
+```sh
+$ kubevious guard path-to-kustomize-directory-or-file
+```
+
 ### 🩻 Troubleshoot Live Cluster
+
 The tool can be used to troubleshoot existing clusters and manifests:
 ```sh
 kubevious guard --live-k8s --include-remote-targets --namespace default
@@ -265,33 +304,19 @@ $ kubevious guard sveltos/ pepsi/
 Primary usage is to validate template outputs such as Helm Charts, Kuztomize, Carvel, etc.
 
 ```sh
-$ helm repo add traefik https://helm.traefik.io/traefik
-$ helm template traefik/traefik | kubevious guard --stream
+$ ytt -f my-app/ | kubevious guard --stream
 
 ❌ ♒ STREAM: stream
-   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
-   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
-   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
    ❌ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
       🔴 Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
-   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
 ```
 
 Also can pass additional manifests, such as CRDs, Rules, etc., for validation along with the steam input.
 
 ```sh
-$ helm template traefik/traefik | kubevious guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
+$ ytt -f my-app/ | kubevious guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
 
-✅ ♒ STREAM: stream
-   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
-   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
-   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
-   ✅ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
-   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+✅ Guard Succeeded.
 ```
 
 ### 📦 Running Inside a Container
@@ -322,14 +347,8 @@ Don't forget the **-i** argument.
 $ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream
 
 ❌ ♒ STREAM: stream
-   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
-   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
-   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
    ❌ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
       🔴 Unknown API Resource. apiVersion: traefik.containo.us/v1alpha1, kind: IngressRoute.
-   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
 ```
 
 Passing CRDs as input would fix the issue:
@@ -337,14 +356,7 @@ Passing CRDs as input would fix the issue:
 ```sh
 $ helm template traefik/traefik | docker run --rm -i kubevious/cli guard --stream https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/crds/ingressroute.yaml
 
-✅ ♒ STREAM: stream
-   ✅ Namespace: default, API: v1, Kind: Service, Name: release-name-traefik
-   ✅ Namespace: default, API: v1, Kind: ServiceAccount, Name: release-name-traefik
-   ✅ Namespace: default, API: apps/v1, Kind: Deployment, Name: release-name-traefik
-   ✅ Namespace: default, API: traefik.containo.us/v1alpha1, Kind: IngressRoute, Name: release-name-traefik-dashboard
-   ✅ API: networking.k8s.io/v1, Kind: IngressClass, Name: release-name-traefik
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRole, Name: release-name-traefik-default
-   ✅ API: rbac.authorization.k8s.io/v1, Kind: ClusterRoleBinding, Name: release-name-traefik-default
+✅ Guard Succeeded.
 ```
 
 ### 🪝 Git Pre-Commit Hook
