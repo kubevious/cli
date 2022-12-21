@@ -13,10 +13,13 @@ jobs:
         with:
           repository: vmware-tanzu/carvel-ytt
           path: carvel-ytt.git
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Carvel-YTT
         id: carvel-ytt-template
         uses: vmware-tanzu/carvel-setup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           ytt -f carvel-ytt.git/examples/playground/getting-started/example-hello-world/config.yml > ytt-example.yaml
       - name: Validate Carvel-YTT
