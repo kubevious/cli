@@ -87,7 +87,13 @@ Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) o
 ```sh
 curl https://get.kubevious.io/cli.sh | bash
 ```
-*The script above would download the binary to /usr/local/bin/*.
+The script above would download the binary to */usr/local/bin/*
+
+
+Some environments have the */usr/local/bin/* path owned by *root*, so it may require running like this:
+```sh
+curl https://get.kubevious.io/cli.sh -o install-kubevious.sh && chmod +x install-kubevious.sh && sudo ./install-kubevious.sh && rm install-kubevious.sh
+```
 
 ### 👇 Option 4: (In a Docker container)
 Run in a container:
