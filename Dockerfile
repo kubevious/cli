@@ -45,14 +45,14 @@ RUN chmod +x install_helm.sh
 RUN bash install_helm.sh
 RUN rm install_helm.sh
 # KUSTOMIZE
+ENV KUSTOMIZE_VER 4.5.7
 WORKDIR /tmp
-ADD https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh install_kustomize.sh
-RUN chmod +x install_kustomize.sh
-RUN ls -la .
-RUN bash install_kustomize.sh
-RUN ls -la .
-RUN mv ./kustomize /usr/local/bin/ 
-RUN rm install_kustomize.sh
+RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
+RUN tar -xvf kustomize.tar.gz
+RUN chmod +x kustomize
+RUN rm kustomize.tar.gz
+RUN mv kustomize /usr/local/bin/
+RUN ls -la /usr/local/bin/kustomize
 # Kubevious CLI
 WORKDIR /app
 COPY --from=0 /app/kubevious.tgz ./
