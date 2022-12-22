@@ -14,7 +14,7 @@ import { RuleDependency, RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { checkKubeviousVersion } from '../../utils/version-checker';
 import { RuleEngineResult } from '../../types/rules-result';
-import { makeObjectSeverity, makeObjectSeverityFromChildren } from '../../types/result';
+import { makeObjectSeverity } from '../../types/result';
 
 export class RulesRuntime
 {

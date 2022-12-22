@@ -9,7 +9,7 @@ import { RuleCompiler } from '../compiler/rule-compiler';
 import { RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { RuleResult } from '../../types/rules-result';
-import { ManifestInfoResult, ManifestResult } from '../../types/manifest-result';
+import { ManifestResult } from '../../types/manifest-result';
 import { ResultObjectSeverity, setupBaseObjectSeverity } from '../../types/result';
 import { ManifestViolation } from './manifest-violation';
 

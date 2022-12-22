@@ -5,6 +5,10 @@ export class NameLookupDict
 {
     private _dict : Record<string, ScriptItem> = {};
 
+    get length() {
+        return _.keys(this._dict).length;
+    }
+
     add(item: ScriptItem)
     {
         this._dict[item.name ?? ""] = item;
