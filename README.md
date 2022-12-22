@@ -82,7 +82,12 @@ $ kubevious guard samples/
 
 ### 👇 Option 3: (Precompiled Binaries)
 All-in-one executables for Linux, Alpine, Mac OS, and Windows, including x64 and arm64 architectures.
-Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) or [Binary Repo](https://github.com/kubevious/cli-releases)
+Download from the [GitHub Releases](https://github.com/kubevious/cli/releases) or install using:
+
+```sh
+curl https://get.kubevious.io/cli.sh | bash
+```
+*The script above would download the binary to /usr/local/bin/*.
 
 ### 👇 Option 4: (In a Docker container)
 Run in a container:
