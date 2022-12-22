@@ -28,39 +28,39 @@ inputs:
     default: ''
   manifests:
     description: Path to manifest files, directories or URLs to validate
-    required: false  
+    required: false
     default: ''
   crds:
     description: Path to CRDs to include in validation
-    required: false  
+    required: false
     default: ''
   mocks:
     description: Path to mocked manifests to include in validation
-    required: false  
+    required: false
     default: ''
   k8s_version:
     description: Version of Kubernetes to validate againts
-    required: false  
+    required: false
     default: ''
   live_k8s:
     description: Validate againts live Kubernetes version
-    required: false  
+    required: false
     default: 'false'
   ignore_unknown:
     description: Ignore unknown Kubernetes resources
-    required: false  
+    required: false
     default: 'false'
   ignore_non_k8s:
     description: Ignore non-Kubernetes YAML files
-    required: false  
+    required: false
     default: 'false'
   detailed_output:
     description: Output in details
-    required: false  
+    required: false
     default: 'false'
   json_output:
     description: Output in JSON format
-    required: false  
+    required: false
     default: 'false'
 runs:
   using: docker

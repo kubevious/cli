@@ -124,6 +124,7 @@ steps:
       - source version.sh
       - cf_export PRODUCT_VERSION=${PRODUCT_VERSION}
       - cf_export DOCKER_TAG=${PRODUCT_VERSION}
+      - ./scripts/setup-google-action-version.sh
       - ./scripts/setup-pre-commit-hook-version.sh
       - git status
 
