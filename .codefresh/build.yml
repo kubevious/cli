@@ -132,23 +132,22 @@ steps:
       - kubevious guard 01-hipster-shop/hipster-chart
 
 
-   build_packager:
-     title: Building Docker image
-     type: build
-     image_name: codefresh-io/cli
-     working_directory: '~'
-     tag: latest
-     dockerfile:
-       content: |-
-         FROM node:14.17.6-alpine
-         RUN apk update && apk upgrade && \
-             apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash git openssh
-         RUN npm install node-gyp -g
-         RUN npm install mocha -g
-         RUN npm install typescript -g
-         RUN npm install -g pkg
-     stage: package
-     name: build_packager
+  build_packager:
+    title: Building Docker image
+    stage: package
+    type: build
+    image_name: kubevious-builder
+    working_directory: "${{MAIN_REPO_PATH}}"
+    tag: latest
+    dockerfile:
+      content: |-
+        FROM node:14.17.6-alpine
+        RUN apk update && apk upgrade && \
+            apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash git openssh
+        RUN npm install node-gyp -g
+        RUN npm install mocha -g
+        RUN npm install typescript -g
+        RUN npm install -g pkg
 
   build_all_in_one_binaries:
     title: Build all in one binaries
