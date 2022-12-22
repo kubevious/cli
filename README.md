@@ -395,8 +395,10 @@ $ kubevious install-git-hook lint
 ```
 
 ## ✍️ Writing Custom Rules
-
 Kubevious rules are expressed in a domain-specific language called [Kubik](https://github.com/kubevious/kubik). A great way to start writing your own rules is to learn from the [community-driven rules library](https://github.com/kubevious/rules-library).
+
+## ☎️ Support
+Need help writing custom rules or policies? Need help with integration into your CI/CD platforms? Or urgently need a new feature or bug fix? Reach out to us at [support@kubevious.io](mailto:support@kubevious.io) 
 
 ## 💬 Slack
 Join the [Kubevious Slack workspace](https://kubevious.io/slack) to chat with Kubevious developers and users. This is a good place to learn about Kubevious, ask questions, and share your experiences.
