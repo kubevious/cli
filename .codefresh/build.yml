@@ -131,15 +131,15 @@ steps:
       - echo "Guarding Hipster Shop Helm Chart..."
       - kubevious guard 01-hipster-shop/hipster-chart
 
-  build_all_in_one_binaries:
-    title: Build all in one binaries
-    stage: package
-    image: 'kubevious/node-executable-builder:v1'
-    working_directory: "${{MAIN_REPO_PATH}}"
-    commands:
-      - pkg . --debug
-      - ls -la
-      - ls -la binary/
+  # build_all_in_one_binaries:
+  #   title: Build all in one binaries
+  #   stage: package
+  #   image: 'kubevious/node-executable-builder:v1'
+  #   working_directory: "${{MAIN_REPO_PATH}}"
+  #   commands:
+  #     - pkg . --debug
+  #     - ls -la
+  #     - ls -la binary/
 
   docker_build:
     title: Building Kubevious CLI Image
