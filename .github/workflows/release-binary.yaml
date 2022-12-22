@@ -22,7 +22,7 @@ jobs:
 
       - name: Build all in one binaries
         id: build-binary-package
-        uses: docker://kubevious/node-builder:14
+        uses: docker://kubevious/node-executable-builder:v1
       - run: pkg . --debug
       - run: ls -la
       - run: ls -la binary/
