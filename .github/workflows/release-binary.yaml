@@ -1,0 +1,28 @@
+name: Kubevious CLI Binary Release
+
+on:
+  workflow_dispatch:
+    branches: [ main ]
+
+jobs:
+  binary_release:
+    runs-on: ubuntu-latest
+    name: Kubevious CLI Binary Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Prepare Kubevious Package
+        id: prepare-kubevious
+        uses: docker://kubevious/node-builder:14
+      - run: yarn install --frozen-lockfile
+      - run: npm run build
+      - run: npm test
+      - run: npm pack
+
+      - name: Build all in one binaries
+        id: build-binary-package
+        uses: docker://kubevious/node-builder:14
+      - run: pkg . --debug
+      - run: ls -la
+      - run: ls -la binary/

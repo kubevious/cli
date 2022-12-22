@@ -1,3 +1,5 @@
+name: Guard Test
+
 on: [push]
 
 jobs:
