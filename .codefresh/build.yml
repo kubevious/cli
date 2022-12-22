@@ -139,6 +139,7 @@ steps:
     image_name: kubevious-builder
     working_directory: "${{MAIN_REPO_PATH}}"
     tag: latest
+    disable_push: true
     dockerfile:
       content: |-
         FROM node:14.17.6-alpine
