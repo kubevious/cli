@@ -135,7 +135,6 @@ steps:
   build_all_in_one_binaries:
     title: Build all in one binaries
     stage: package
-    image: ${{build_packager}}
     image: 'kubevious/node-executable-builder:16-v1'
     # image: 'kubevious/node-executable-builder:v1'
     working_directory: "${{MAIN_REPO_PATH}}"
