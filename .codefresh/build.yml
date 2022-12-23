@@ -138,6 +138,8 @@ steps:
     image: 'kubevious/node-executable-builder:v1'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
+      - npm install pa11y
+      - pa11y --environment
       - export PKG_CACHE_PATH="${{MAIN_REPO_PATH}}"
       - pkg . --debug
       - ls -la
