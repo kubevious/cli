@@ -64,7 +64,7 @@ inputs:
     default: 'false'
 runs:
   using: docker
-  image: docker://kubevious/cli:latest
+  image: docker://kubevious/cli:1.0.45
   # image: Dockerfile
 branding:
   icon: 'shield'
