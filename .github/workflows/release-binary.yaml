@@ -20,6 +20,8 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: npm pack
+      - run: npm install pa11y
+      - run: ./node_modules/pa11y/bin/pa11y.js --environment
 
       - name: Build all in one binaries
         # id: build-binary-package
