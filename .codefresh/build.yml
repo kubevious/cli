@@ -139,7 +139,7 @@ steps:
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - npm install pa11y
-      - pa11y --environment
+      - node_modules/pa11y/bin/pa11y.js --environment
       - export PKG_CACHE_PATH="${{MAIN_REPO_PATH}}"
       - pkg . --debug
       - ls -la
