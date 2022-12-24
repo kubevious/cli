@@ -15,6 +15,7 @@ export type RuleDependencies = RuleDependency[];
 export interface BaseRuleK8sSpec
 {
     target: string,
+    globalCache?: string,
     cache?: string,
     rule: string,
 

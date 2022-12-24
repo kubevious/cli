@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { Promise } from 'the-promise';
+import { Promise as MyPromise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { RuleApplicationScope, RuleObject } from '../registry/types';
 import { ValidationProcessorResult } from '../compiler/validator/processor';
@@ -7,7 +7,7 @@ import { ScriptItem } from '../script-item';
 import { RuleOverrideValues } from '../spec/rule-spec';
 import { K8sManifest } from '../../manifests/k8s-manifest';
 import { ManifestViolation } from './manifest-violation';
-import { RuleRuntime } from './rule-runtime';
+import { CacheRunResult, RuleRuntime } from './rule-runtime';
 
 export class RuleExecutionRuntime
 {
@@ -20,10 +20,6 @@ export class RuleExecutionRuntime
     
     private _ruleRuntime: RuleRuntime;
     
-    private _ruleCacheData : RuleCache = {
-        cluster: null,
-        namespaces: {} 
-    }
 
     constructor(logger: ILogger,
                 manifest: K8sManifest,
@@ -64,146 +60,86 @@ export class RuleExecutionRuntime
         return this._ruleRuntime.ruleEngineReporter;
     }
 
-    execute()
+    async execute()
     {
         this._logger.info('[execute] %s :: %s :: %s...', this._ruleObject.kind, this._ruleObject.namespace, this._ruleObject.name);
 
-        return Promise.resolve()
-            .then(() => {
-                if (!this.compiler) {
-                    return;
-                }
+        if (!this.compiler) {
+            return;
+        }
 
-                if (this.compiler.isCompiled) {
-                    return this._processTarget()
-                        .then(results => {
-                            this._logger.info('[execute] Targets Count: %s', results.length);
-                            return Promise.serial(results, x => this._processItem(x));
-                        });
-                }
-            })
-            .then(() => {
-                if (!this.compiler) {
-                    return;
-                }
+        if (this.compiler.isCompiled) {
+            const results = await this._processTarget();
+            this._logger.info('[execute] Targets Count: %s', results.length);
 
-                if (!this.isCompiled  || this.hasRuntimeErrors)
-                {
-                    if (!(this._manifest.errorsWithRule ?? false))
-                    {
-                        this._manifest.errorsWithRule = true;
-                        this._manifest.reportError("Failed to compile the rule.");
-                    }
-                }
-            })
+            const cacheResult = await this._ruleRuntime.processGlobalCache(this._values)
+            if (!cacheResult.success) {
+                return;
+            }
+
+            await MyPromise.serial(results, x => MyPromise.resolve(this._processItem(x, cacheResult)));
+        }
+
+        if (!this.isCompiled  || this.hasRuntimeErrors)
+        {
+            if (!(this._manifest.errorsWithRule ?? false))
+            {
+                this._manifest.errorsWithRule = true;
+                this._manifest.reportError("Failed to compile the rule.");
+            }
+        }
     }
 
-    private _processTarget() : Promise<ScriptItem[]>
+    private async _processTarget() : Promise<ScriptItem[]>
     {
-        return Promise.resolve()
-            .then(() => {
-                return this.compiler.targetProcessor.execute(this._application, this._values)
-            })
-            .catch(reason => {
-                this._logger.error("Failed to execute the rule %s", this._ruleObject.name, reason);
-                this.compiler.reportScriptErrors('rule', [reason.message]);
-                return [];
-            });
+        try
+        {
+            return await this.compiler.targetProcessor.execute(this._application, this._values)
+        }
+        catch(reason: any)
+        {
+            this._logger.error("Failed to execute the rule %s", this._ruleObject.name, reason);
+            this.compiler.reportScriptErrors('rule', [reason.message]);
+            return [];
+        }
     }
 
-    private _processItem(item: ScriptItem)
+    private async _processItem(item: ScriptItem, globalCacheResult: CacheRunResult)
     {
         this._logger.info("[_processItem] %s :: %s", item.apiVersion, item.kind);
 
-        return Promise.resolve()
-            .then(() => {
-                return this._processCache(item);
-            })
-            .then(result => {
-                if (!result.success) {
-                    return;
-                }
-                return this._processValidation(item, result);
-            })
+        const cacheResult = await this._ruleRuntime.processLocalCache(item, this._values)
+        if (!cacheResult.success) {
+            return;
+        }
+        return this._processValidation(item, globalCacheResult, cacheResult);
     }
 
-    private _processValidation(item: ScriptItem, cacheResult: CacheRunResult)
+    private async _processValidation(item: ScriptItem, globalCacheResult: CacheRunResult, localCacheResult: CacheRunResult)
     {
         this._logger.info("[_processValidation] %s :: %s", item.apiVersion, item.kind);
 
-        return this.compiler.validationProcessor.execute(item, cacheResult.cache, this._values)
-            .then(result => {
-                this._logger.info("[_processValidation]  result: ", result);
+        const result = await this.compiler.validationProcessor.execute(item,
+                                                                       globalCacheResult.cache,
+                                                                       localCacheResult.cache,
+                                                                       this._values)
+        this._logger.debug("[_processValidation]  result: ", result);
 
-                if (result.success)
-                {
-                    this._processValidationResult(item.manifest, result);
-                }
-                else
-                {
-                    if (result.messages && (result.messages.length > 0))
-                    {
-                        this.compiler.reportScriptErrors('rule', result.messages);
-                    }
-                    else
-                    {
-                        this.compiler.reportScriptErrors('rule', 
-                            ['Unknown error executing the rule.']);
-                    }
-                }
-            });
-    }
-
-    private _processCache(item: ScriptItem) : Promise<CacheRunResult>
-    {
-        if (!this.compiler.cacheProcessor) {
-            return Promise.resolve({
-                success: true,
-                cache: {}
-            });
-        }
-
-        this._logger.info("[_processCache] %s :: %s", item.apiVersion, item.kind);
-
-        const namespace = item.namespace;
-        if (namespace)
+        if (result.success)
         {
-            return this.compiler.cacheProcessor.execute(namespace, this._values)
-                .then(result => {
-                    const namespaceData : RuleCacheScope = {
-                        cache: result.cache
-                    };
-        
-                    this._ruleCacheData.namespaces[namespace] = namespaceData;
-
-                    return {
-                        success: true,
-                        cache: namespaceData.cache
-                    }
-                });
+            this._processValidationResult(item.manifest, result);
         }
         else
         {
-            if (this._ruleCacheData.cluster) {
-                return Promise.resolve({
-                    success: true,
-                    cache: this._ruleCacheData.cluster.cache
-                });
+            if (result.messages && (result.messages.length > 0))
+            {
+                this.compiler.reportScriptErrors('rule', result.messages);
             }
-
-            return this.compiler.cacheProcessor.execute(null, this._values)
-                .then(result => {
-
-                    const clusterData : RuleCacheScope = {
-                        cache: result.cache
-                    };
-                    this._ruleCacheData.cluster = clusterData;
-
-                    return {
-                        success: true,
-                        cache: clusterData.cache
-                    }
-                });
+            else
+            {
+                this.compiler.reportScriptErrors('rule', 
+                    ['Unknown error executing the rule.']);
+            }
         }
     }
 
@@ -255,22 +191,4 @@ export class RuleExecutionRuntime
     }
 }
 
-
-interface RuleCache
-{
-    cluster: RuleCacheScope | null;
-    namespaces: Record<string, RuleCacheScope>;
-}
-
-interface RuleCacheScope
-{
-    cache: Record<string, any>;
-}
-
-
-interface CacheRunResult
-{
-    success: boolean,
-    cache: Record<string, any>
-}
 

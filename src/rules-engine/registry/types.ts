@@ -14,6 +14,7 @@ export interface RuleObject {
     namespace?: string;
     name: string;
     target: string;
+    globalCache?: string;
     cache?: string;
     script: string;
     values: RuleOverrideValues;
@@ -31,6 +32,7 @@ export interface CommonRule {
     name: string;
 
     target: string;
+    globalCache?: string;
     cache?: string;
     script: string;
 

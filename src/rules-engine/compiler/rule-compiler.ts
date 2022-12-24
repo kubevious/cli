@@ -15,7 +15,8 @@ export class RuleCompiler
 
     private _targetProcessor: TargetProcessor;
     private _validationProcessor: ValidationProcessor;
-    private _cacheProcessor?: CacheProcessor;
+    private _globalCacheProcessor?: CacheProcessor;
+    private _localCacheProcessor?: CacheProcessor;
 
     private _isCompiled = false;
     private _hasRuntimeErrors = false;
@@ -32,8 +33,11 @@ export class RuleCompiler
         this._targetProcessor = new TargetProcessor(this._ruleObject.target, targetExecutionContext);
         this._validationProcessor = new ValidationProcessor(this._ruleObject.script, validatorExecutionContext);
 
+        if (this._ruleObject.globalCache) {
+            this._globalCacheProcessor = new CacheProcessor(this._ruleObject.globalCache, validatorExecutionContext);
+        }
         if (this._ruleObject.cache) {
-            this._cacheProcessor = new CacheProcessor(this._ruleObject.cache, validatorExecutionContext);
+            this._localCacheProcessor = new CacheProcessor(this._ruleObject.cache, validatorExecutionContext);
         }
     }
 
@@ -61,8 +65,12 @@ export class RuleCompiler
         return this._validationProcessor;
     }
 
-    get cacheProcessor() {
-        return this._cacheProcessor;
+    get globalCacheProcessor() {
+        return this._globalCacheProcessor;
+    }
+
+    get localCacheProcessor() {
+        return this._localCacheProcessor;
     }
 
     compile()
@@ -91,12 +99,25 @@ export class RuleCompiler
                 })
             })
             .then(() => {
-                if (!this._cacheProcessor) {
+                if (!this._globalCacheProcessor) {
                     return;
                 }
 
-                return this._cacheProcessor!.prepare().then((result) => {
-                    this._logger.verbose("[compile] _cacheProcessor prepare: ", result);
+                return this._globalCacheProcessor!.prepare().then((result) => {
+                    this._logger.verbose("[compile] _globalCacheProcessor prepare: ", result);
+                    if (!result.success) {
+                        this._isCompiled = false;
+                        this.reportScriptErrors('globalCache', result.messages);
+                    }
+                })
+            })
+            .then(() => {
+                if (!this._localCacheProcessor) {
+                    return;
+                }
+
+                return this._localCacheProcessor!.prepare().then((result) => {
+                    this._logger.verbose("[compile] _localCacheProcessor prepare: ", result);
                     if (!result.success) {
                         this._isCompiled = false;
                         this.reportScriptErrors('cache', result.messages);
