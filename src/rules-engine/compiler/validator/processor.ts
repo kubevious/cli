@@ -93,8 +93,8 @@ export class ValidationProcessor {
 
     private _validate() {}
 
-    execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult> {
-
+    execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult>
+    {
         this._logger.info("[execute] item: %s", item.manifest.idKey);
         this._logger.info("[execute] item: %s", item.manifest.idKey);
 
