@@ -148,6 +148,8 @@ steps:
         RUN npm install mocha -g
         RUN npm install typescript -g
         RUN npm install -g pkg
+        RUN cd ${{MAIN_REPO_PATH}}
+        RUN ls -la
         RUN pkg . --debug
         RUN ls -la
         RUN ls -la binary/
