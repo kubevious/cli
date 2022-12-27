@@ -131,44 +131,15 @@ steps:
       - echo "Guarding Hipster Shop Helm Chart..."
       - kubevious guard 01-hipster-shop/hipster-chart
 
-  # build_packager:
-  #   title: Building Docker image
+  # build_all_in_one_binaries:
+  #   title: Build all in one binaries
   #   stage: package
-  #   type: build
-  #   image_name: kubevious-builder
+  #   image: 'kubevious/node-executable-builder:v1'
   #   working_directory: "${{MAIN_REPO_PATH}}"
-  #   tag: latest
-  #   disable_push: true
-  #   dockerfile:
-  #     content: |-
-  #       FROM node:14.17.6-alpine
-  #       RUN apk update && apk upgrade && \
-  #           apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash git openssh
-  #       RUN npm install node-gyp -g
-  #       RUN npm install mocha -g
-  #       RUN npm install typescript -g
-  #       RUN npm install -g pkg
-  #       RUN pwd
-  #       RUN ls -la
-  #       RUN pkg . --debug
-  #       RUN ls -la
-  #       RUN ls -la binary/
-
-  build_all_in_one_binaries:
-    title: Build all in one binaries
-    stage: package
-    # image: 'kubevious/node-executable-builder:16-v1'
-    image: 'kubevious/node-executable-builder:v1'
-    working_directory: "${{MAIN_REPO_PATH}}"
-    commands:
-      # - npm install pa11y
-      # - node_modules/pa11y/bin/pa11y.js --environment
-      # - export PKG_CACHE_PATH="${{MAIN_REPO_PATH}}"
-      - pkg . --debug --no-bytecode
-      # - npm install pkg
-      # - node_modules/pkg/lib-es5/bin.js . --debug
-      - ls -la
-      - ls -la binary/
+  #   commands:
+  #     - pkg . --debug --no-bytecode
+  #     - ls -la
+  #     - ls -la binary/
 
   docker_build:
     title: Building Kubevious CLI Image
@@ -177,7 +148,6 @@ steps:
     image_name: "${{IMAGE_NAME}}"
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
-
 
   docker_image_sample_tests:
     title: Docker Image Sample Tests

@@ -20,7 +20,7 @@ docker run \
     -h "kubevious-cli" \
     -v ${MY_DIR}:/repo \
     -w /repo \
-    kubevious/node-executable-builder:v1 bash -c 'pkg . --debug'
+    kubevious/node-executable-builder:v1 bash -c 'pkg . --debug --no-bytecode'
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
   echo "Failed to Build Packages"
