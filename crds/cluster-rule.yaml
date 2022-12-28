@@ -26,6 +26,8 @@ spec:
                   type: string
                 target:
                   type: string
+                globalCache:
+                  type: string
                 cache:
                   type: string
                 rule:
@@ -71,6 +73,10 @@ spec:
                         type: string
                     required:
                       - name
+                categories:
+                  type: array
+                  items:
+                    type: string
               required:
                 - target
                 - rule

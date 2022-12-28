@@ -39,7 +39,7 @@ export class QueryExecutor implements IQueryExecutor<BaseTargetQuery>
 
     execute(query: BaseTargetQuery, limiter: QueryScopeLimiter) : QueryResult
     {
-        this._logger.info("[execute] %s", query.kind);
+        this._logger.debug("[execute] %s", query.kind);
 
         const resolver = this._resolvers[query.kind];
         if (!resolver) {

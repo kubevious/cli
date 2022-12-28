@@ -1,6 +1,6 @@
 import _ from 'the-lodash'
 import { ILogger } from 'the-logger';
-import { Promise, Resolvable } from 'the-promise'
+import { Resolvable } from 'the-promise'
 import { ScriptItem } from '../../script-item'
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
@@ -63,39 +63,40 @@ export class ValidationProcessor {
             .then(() => result)
     }
 
-    private _loadModule() {
-        return Promise.resolve().then(() => {
-            const compilerValues: CompilerScopeDict = {
-                _: _,
-                item: null,
-                config: null,
-                cache: null,
-                values: null,
-                error: null,
-                warning: null,
-                mark: null,
-                helpers: null,
-            }
+    private async _loadModule() {
+        const compilerValues: CompilerScopeDict = {
+            _: _,
+            item: null,
+            config: null,
+            globalCache: null,
+            cache: null,
+            values: null,
+            error: null,
+            warning: null,
+            mark: null,
+            helpers: null,
+        }
 
-            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
-            {
-                compilerValues[x] = null;
-            }
+        for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
+        {
+            compilerValues[x] = null;
+        }
 
-            const compiler = new Compiler(
-                this._src,
-                'RULE_VALIDATOR',
-                compilerValues
-            )
-            return compiler.compile()
-        })
+        const compiler = new Compiler(
+            this._src,
+            'RULE_VALIDATOR',
+            compilerValues
+        )
+        return await compiler.compile()
     }
 
     private _validate() {}
 
-    execute(item: ScriptItem, cache: Record<string, any>, values: Record<string, any>) : Promise<ValidationProcessorResult> {
-
-        this._logger.info("[execute] item: %s", item.manifest.idKey);
+    async execute(item: ScriptItem,
+                  globalCache: Record<string, any>,
+                  cache: Record<string, any>,
+                  values: Record<string, any>) : Promise<ValidationProcessorResult>
+    {
         this._logger.info("[execute] item: %s", item.manifest.idKey);
 
         const result: ValidationProcessorResult = {
@@ -109,51 +110,51 @@ export class ValidationProcessor {
             },
         }
 
-        return Promise.resolve()
-            .then(() => {
+        try
+        {
+            const valueMap : Record<string, any> = {
+                _: _,
+                item: item,
+                values: values,
+                config: item.config,
+                globalCache: globalCache,
+                cache: cache,
+                helpers: RULE_HELPERS,
+                error: (msg: string) => {
+                    result.validation.hasErrors = true
+                    if (msg) {
+                        result.validation.errorMsgs[msg] = true
+                    }
+                },
+                warning: (msg: string) => {
+                    result.validation.hasWarnings = true
+                    if (msg) {
+                        result.validation.warnMsgs[msg] = true
+                    }
+                },
+                mark: (kind: string) => {
+                    if (!result.validation.marks) {
+                        result.validation.marks = {}
+                    }
+                    result.validation.marks[kind] = true
+                },
+            }
+            
+            this._setupQueryBuilders(valueMap, item);
 
-                const valueMap : Record<string, any> = {
-                    _: _,
-                    item: item,
-                    values: values,
-                    config: item.config,
-                    cache: cache,
-                    helpers: RULE_HELPERS,
-                    error: (msg: string) => {
-                        result.validation.hasErrors = true
-                        if (msg) {
-                            result.validation.errorMsgs[msg] = true
-                        }
-                    },
-                    warning: (msg: string) => {
-                        result.validation.hasWarnings = true
-                        if (msg) {
-                            result.validation.warnMsgs[msg] = true
-                        }
-                    },
-                    mark: (kind: string) => {
-                        if (!result.validation.marks) {
-                            result.validation.marks = {}
-                        }
-                        result.validation.marks[kind] = true
-                    },
-                }
-                
-                this._setupQueryBuilders(valueMap, item);
+            // console.log("HEADERS: ", _.keys(valueMap))
 
-                // console.log("HEADERS: ", _.keys(valueMap))
-
-                return this._runnable!.run(valueMap);
-            })
-            .then(() => {
-                result.success = true
-            })
-            .catch((reason: Error) => {
-                this._logger.info("[execute] error: ", reason);
-                result.success = false
-                this._addError(result.messages!, reason.message)
-            })
-            .then(() => result)
+            await this._runnable!.run(valueMap);
+            result.success = true
+        }
+        catch(reason: any)
+        {
+            this._logger.info("[execute] error: ", reason);
+            result.success = false
+            this._addError(result.messages!, reason.message)
+        }
+        
+        return result;
     }
 
     private _setupQueryBuilders(valueMap: Record<string, any>, item: ScriptItem)

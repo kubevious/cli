@@ -138,6 +138,7 @@ export class RuleRegistry
             kind: RuleKind.ClusterRule,
             name: name,
             target: spec.target,
+            globalCache: spec.globalCache,
             cache: spec.cache,
             script: spec.rule,
             values: spec.values,
@@ -232,6 +233,7 @@ export class RuleRegistry
                 namespace: namespace
             },
             target: spec.target,
+            globalCache: spec.globalCache,
             cache: spec.cache,
             script: spec.rule,
             values: spec.values,

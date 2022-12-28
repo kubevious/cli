@@ -88,6 +88,8 @@ export class CacheProcessor
             cache: {}
         }
 
+        this._logger.info("[execute] Namespace: %s", namespace);
+
         return Promise.resolve()
             .then(() => {
 

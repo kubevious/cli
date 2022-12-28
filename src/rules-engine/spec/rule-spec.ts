@@ -12,17 +12,23 @@ export interface RuleDependency
 
 export type RuleDependencies = RuleDependency[];
 
-export interface ClusterRuleK8sSpec
+export interface BaseRuleK8sSpec
 {
     target: string,
+    globalCache?: string,
     cache?: string,
     rule: string,
+
     summary?: string,
     description?: string,
     disabled?: boolean,
-    application?: ClusterRuleApplication,
+
     values?: RuleOverrideValues,
     dependencies?: RuleDependencies,
+}
+export interface ClusterRuleK8sSpec extends BaseRuleK8sSpec
+{
+    application?: ClusterRuleApplication,
 }
 
 export interface ClusterRuleApplication {
@@ -35,16 +41,9 @@ export interface ClusterRuleApplication {
     }[],
 }
 
-export interface RuleK8sSpec
+export interface RuleK8sSpec extends BaseRuleK8sSpec
 {
-    target: string,
-    cache?: string,
-    rule: string,
-    summary?: string,
-    description?: string,
-    disabled?: boolean,
-    values?: RuleOverrideValues,
-    dependencies?: RuleDependencies,
+    
 }
 
 export interface RuleApplicatorK8sSpec

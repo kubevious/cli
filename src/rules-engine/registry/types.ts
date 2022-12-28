@@ -14,6 +14,7 @@ export interface RuleObject {
     namespace?: string;
     name: string;
     target: string;
+    globalCache?: string;
     cache?: string;
     script: string;
     values: RuleOverrideValues;
@@ -26,21 +27,24 @@ export interface RuleApplicationScope {
 export interface CommonRule {
     manifest: K8sManifest,
 
+    source: ManifestSourceId,
+    kind: RuleKind;
+    name: string;
+
+    target: string;
+    globalCache?: string;
+    cache?: string;
+    script: string;
+
+    values: RuleOverrideValues;
+
     isDisabled: boolean;
     dependencies: RuleDependencies;
     hasUnmedDependency: boolean;
 }
 
 export interface ClusterRule extends CommonRule {
-    source: ManifestSourceId,
-    kind: RuleKind;
-    name: string;
     application?: RuleApplicationScope; 
-    target: string;
-    cache?: string;
-    script: string;
-    values: RuleOverrideValues;
-
 
     clustered: boolean;
     useApplicator: boolean;
@@ -53,19 +57,11 @@ export interface ClusterRule extends CommonRule {
 }
 
 export interface NamespaceRule extends CommonRule {
-    source: ManifestSourceId,
-    kind: RuleKind;
     namespace: string;
-    name: string;
     application?: RuleApplicationScope; 
-    target: string;
-    cache?: string;
-    script: string;
-    values: RuleOverrideValues;
 
     spec: RuleK8sSpec;
 }
-
 
 export interface ApplicatorRule {
     manifest: K8sManifest,
