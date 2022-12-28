@@ -21,11 +21,17 @@ export interface BaseRuleK8sSpec
 
     summary?: string,
     description?: string,
+
     disabled?: boolean,
 
     values?: RuleOverrideValues,
     dependencies?: RuleDependencies,
 }
+export interface ClusterRuleK8sSpec extends BaseRuleK8sSpec
+{
+    application?: ClusterRuleApplication,
+}
+
 export interface ClusterRuleK8sSpec extends BaseRuleK8sSpec
 {
     application?: ClusterRuleApplication,
@@ -43,7 +49,6 @@ export interface ClusterRuleApplication {
 
 export interface RuleK8sSpec extends BaseRuleK8sSpec
 {
-    
 }
 
 export interface RuleApplicatorK8sSpec
@@ -60,8 +65,9 @@ export interface LibraryRuleRefK8sSpec
 {
     name: string,
     path: string,
-    category: string,
+    location: string,
     summary: string,
+    categories: string[]
 }
 
 export interface LibraryK8sSpec

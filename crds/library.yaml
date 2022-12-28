@@ -29,7 +29,9 @@ spec:
                         type: string
                       path:
                         type: string
-                      category:
+                      category:       # TODO: Retire
+                        type: string                        
+                      location:
                         type: string
                       summary:
                         type: string

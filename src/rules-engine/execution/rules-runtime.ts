@@ -126,11 +126,12 @@ export class RulesRuntime
     {
         if (dependency.name === 'kubevious')
         {
-            if (!checkKubeviousVersion(dependency.minVersion, dependency.maxVersion, dependency.range))
+            const issues = checkKubeviousVersion(dependency.minVersion, dependency.maxVersion, dependency.range);
+            if (issues.length > 0)
             {
                 if (!rule.hasUnmedDependency)
                 {
-                    rule.manifest.reportWarning('Has unmet Kubevious CLI version dependency. Try updating to latest Kubevious CLI version.');
+                    rule.manifest.reportWarning(`Has unsupported Kubevious CLI dependency. ${issues.join(". ")}`);
                     rule.hasUnmedDependency = true;
                     rule.isDisabled = true;
                 }

@@ -32,9 +32,11 @@ export interface LibraryRule
     title: string,
     name: string,
     path: string,
-    category: string,
+    category: string, // TODO: RETIRE
+    location: string,
     summary: string,
     description: string,
+    categories: string[],
 
     ruleSpec: ClusterRuleK8sSpec,
 }

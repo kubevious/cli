@@ -57,22 +57,24 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
             title: (summary.length > 0) ? summary : name,
             name: name,
             path: makeRelativePath(rule.source.id.path, dir),
-            category: makeRelativePath(Path.dirname(rule.source.id.path), dir),
+            location: makeRelativePath(Path.dirname(rule.source.id.path), dir),
+            category: makeRelativePath(Path.dirname(rule.source.id.path), dir), // TODO: Retire
             summary: summary,
             description: _.trim(ruleConfig.description ?? ""),
+            categories: [],
         
             ruleSpec: ruleConfig,
         }
 
-        if (!libraryCategoriesDict[libraryRule.category]) {
-            libraryCategoriesDict[libraryRule.category] = {
-                name: libraryRule.category,
+        if (!libraryCategoriesDict[libraryRule.location]) {
+            libraryCategoriesDict[libraryRule.location] = {
+                name: libraryRule.location,
                 count: 0,
                 rules: []
             }
         }
 
-        libraryCategoriesDict[libraryRule.category].rules.push(libraryRule);
+        libraryCategoriesDict[libraryRule.location].rules.push(libraryRule);
     }
     
     const library: Library = {
@@ -107,8 +109,9 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
             libraryObject.spec.rules.push({
                 name: rule.name,
                 path: rule.path,
-                category: rule.category,
+                location: rule.location,
                 summary: rule.summary,
+                categories: []
             });
         }
     }
