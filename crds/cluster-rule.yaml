@@ -26,6 +26,8 @@ spec:
                   type: string
                 target:
                   type: string
+                globalCache:
+                  type: string
                 cache:
                   type: string
                 rule:
