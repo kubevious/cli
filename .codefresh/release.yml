@@ -383,11 +383,14 @@ steps:
   github_release:
     type: github-release
     title: CLI GitHub Release
+    stage: release
     description: |-
       # Kubevious v${{PRODUCT_VERSION}}
     arguments:
       release_name: v${{PRODUCT_VERSION}}
       release_tag: v${{PRODUCT_VERSION}}
       draft: true
+      git_context_name: github
+      repo_owner: ${{CF_REPO_OWNER}}
       files:
         - '${{MAIN_REPO_PATH}}/kubevious-*'
