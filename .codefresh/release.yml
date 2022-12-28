@@ -391,6 +391,7 @@ steps:
       release_tag: v${{PRODUCT_VERSION}}
       draft: true
       git_context_name: github
+      repo_name: cli
       repo_owner: ${{CF_REPO_OWNER}}
       files:
         - '${{MAIN_REPO_PATH}}/kubevious-*'
