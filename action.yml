@@ -54,6 +54,22 @@ inputs:
     description: Ignore non-Kubernetes YAML files
     required: false
     default: 'false'
+  skip_rules:
+    description: Skip rules by name
+    required: false
+    default: ''
+  only_rules:
+    description: Run only specified rules
+    required: false
+    default: ''
+  skip_rule_categories:
+    description: Skip rules by category 
+    required: false
+    default: ''
+  only_rule_categories:
+    description: Run only specified rules by category
+    required: false
+    default: ''
   detailed_output:
     description: Output in details
     required: false
@@ -62,6 +78,10 @@ inputs:
     description: Output in JSON format
     required: false
     default: 'false'
+  other_args:
+    description: Additional arguments
+    required: false
+    default: ''    
 runs:
   using: docker
   image: docker://kubevious/cli:1.0.49

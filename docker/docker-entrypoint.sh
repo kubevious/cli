@@ -34,6 +34,10 @@ then
         MY_K8S_VERSION="${PLUGIN_K8S_VERSION}"
         MY_IGNORE_NON_K8S="${PLUGIN_IGNORE_NON_K8S}"
         MY_IGNORE_UNKNOWN="${PLUGIN_IGNORE_UNKNOWN}"
+        MY_SKIP_RULES="${PLUGIN_SKIP_RULES}"
+        MY_ONLY_RULES="${PLUGIN_ONLY_RULES}"
+        MY_SKIP_RULE_CATEGORIES="${PLUGIN_SKIP_RULE_CATEGORIES}"
+        MY_ONLY_RULE_CATEGORIES="${PLUGIN_ONLY_RULE_CATEGORIES}"
         MY_DETAILED_OUTPUT="${PLUGIN_DETAILED_OUTPUT}"
         MY_JSON_OUTPUT="${PLUGIN_JSON_OUTPUT}"
         MY_OTHER_ARGS="${PLUGIN_OTHER_ARGS}"
@@ -56,6 +60,10 @@ then
         MY_K8S_VERSION="${INPUT_K8S_VERSION}"
         MY_IGNORE_NON_K8S="${INPUT_IGNORE_NON_K8S}"
         MY_IGNORE_UNKNOWN="${INPUT_IGNORE_UNKNOWN}"
+        MY_SKIP_RULES="${INPUT_SKIP_RULES}"
+        MY_ONLY_RULES="${INPUT_ONLY_RULES}"
+        MY_SKIP_RULE_CATEGORIES="${INPUT_SKIP_RULE_CATEGORIES}"
+        MY_ONLY_RULE_CATEGORIES="${INPUT_ONLY_RULE_CATEGORIES}"
         MY_DETAILED_OUTPUT="${INPUT_DETAILED_OUTPUT}"
         MY_JSON_OUTPUT="${INPUT_JSON_OUTPUT}"
         MY_OTHER_ARGS="${INPUT_OTHER_ARGS}"
@@ -77,6 +85,10 @@ then
         MY_K8S_VERSION=""
         MY_IGNORE_NON_K8S=""
         MY_IGNORE_UNKNOWN=""
+        MY_SKIP_RULES=""
+        MY_ONLY_RULES=""
+        MY_SKIP_RULE_CATEGORIES=""
+        MY_ONLY_RULE_CATEGORIES=""        
         MY_DETAILED_OUTPUT=""
         MY_JSON_OUTPUT=""
         MY_OTHER_ARGS=""
@@ -174,6 +186,26 @@ then
     if isTrue "${MY_JSON_OUTPUT}"
     then
         KUBEVIOUS_CMD="${KUBEVIOUS_CMD} --json"
+    fi
+
+    if [[ ! -z "${MY_SKIP_RULES}" ]]
+    then
+        KUBEVIOUS_CMD="${KUBEVIOUS_CMD} --skip-rules ${MY_SKIP_RULES}"
+    fi
+
+    if [[ ! -z "${MY_ONLY_RULES}" ]]
+    then
+        KUBEVIOUS_CMD="${KUBEVIOUS_CMD} --only-rules ${MY_ONLY_RULES}"
+    fi
+
+    if [[ ! -z "${MY_SKIP_RULE_CATEGORIES}" ]]
+    then
+        KUBEVIOUS_CMD="${KUBEVIOUS_CMD} --skip-rule-categories ${MY_SKIP_RULE_CATEGORIES}"
+    fi
+
+    if [[ ! -z "${MY_SKIP_RULE_CATEGORIES}" ]]
+    then
+        KUBEVIOUS_CMD="${KUBEVIOUS_CMD} --only-rule-categories ${MY_ONLY_RULE_CATEGORIES}"
     fi
 
     if [[ ! -z "${MY_OTHER_ARGS}" ]]
