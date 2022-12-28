@@ -11,7 +11,9 @@ export interface RuleEngineResult extends ResultObject
 export interface RuleResult
 {
     ruleManifest: ManifestResult,
+    ruleCategories: string[],
     namespace?: string,
+    isSkipped: boolean,
     compiled: boolean;
     pass: boolean;
     ruleSeverity : ResultObjectSeverity;

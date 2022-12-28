@@ -1,5 +1,5 @@
 import { IndexLibraryResult } from "./types";
-import { OBJECT_ICONS, print, printProcessStatus, printSectionTitle, printSubTitle } from '../../screen';
+import { OBJECT_ICONS, print, printProcessStatus, printSubTitle } from '../../screen';
 
 import { output as guardOutput } from '../guard/output'
 
@@ -11,16 +11,19 @@ export function output(result: IndexLibraryResult)
 
     printSubTitle('Rule Library');
     print(`Rule Count: ${result.library.count}`)
-    print(`Category Count: ${result.library.categoryCount}`)
+    print(`Location Count: ${result.library.locationCount}`)
     print();
 
-    for(const category of result.library.categories)
+    for(const location of result.library.locations)
     {
-        print(`${OBJECT_ICONS.ruleCategory.get()} ${category.name}`, 2);
-        print(`Rule Count: ${category.count}`, 5)
-        for(const rule of category.rules)
+        print(`${OBJECT_ICONS.ruleLocation.get()} ${location.name}`, 2);
+        print(`Rule Count: ${location.count}`, 5)
+        for(const rule of location.rules)
         {
             print(`${OBJECT_ICONS.rule.get()} ${rule.title}`, 5);
+            if (rule.categories.length > 0) {
+                print(rule.categories.map(x => `${OBJECT_ICONS.ruleCategory.get()} ${x}`).join(' '), 9);
+            }
             print(`Name: ${rule.name}`, 9);
             print(`Path: ${rule.path}`, 9);
             print();

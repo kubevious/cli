@@ -21,6 +21,7 @@ export interface BaseRuleK8sSpec
 
     summary?: string,
     description?: string,
+    categories?: string[],
 
     disabled?: boolean,
 

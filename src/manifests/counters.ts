@@ -70,7 +70,7 @@ export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult, manif
 {
     const counters : RuleEngineCounters = {
         rules: {
-            total: ruleEngineR.rules.length,
+            total: 0,
             passed: 0,
             failed: 0,
             withErrors: 0,
@@ -100,6 +100,11 @@ export function calculateRuleEngineCounters(ruleEngineR: RuleEngineResult, manif
 
 function calculateRuleCounters(ruleResult: RuleResult, counters: RuleEngineCounters)
 {
+    if (ruleResult.isSkipped) {
+        return;
+    }
+    counters.rules.total++;
+
     if (!ruleResult.compiled)
     {
         counters.rules.failed++;

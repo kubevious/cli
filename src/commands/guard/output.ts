@@ -99,24 +99,35 @@ function outputRuleResult(rule: RuleResult, detailed: boolean, indent: number)
         print(`${OBJECT_ICONS.rule.get()} [${rule.ruleManifest.kind}] ${rule.ruleManifest.name}`, indent);
     }
 
-    outputManifestResultSources(rule.ruleManifest, nestedIndent, { hideSeverityIcon: true });
-
-    if (!rule.compiled)
-    {
-        printFailLine(`Failed to compile`, nestedIndent);
+    if (rule.ruleCategories.length > 0) {
+        print(rule.ruleCategories.map(x => `${OBJECT_ICONS.ruleCategory.get()} ${x}`).join(' '), nestedIndent);
     }
 
-    outputMessages(rule.ruleManifest, nestedIndent);
+    outputManifestResultSources(rule.ruleManifest, nestedIndent, { hideSeverityIcon: true });
 
-    if (rule.pass && rule.compiled)
+    if (rule.isSkipped)
     {
-        if (rule.passed.length > 0)
+        printInactivePassLine('Rule skipped.', nestedIndent);
+    }
+    else
+    {
+        if (!rule.compiled)
         {
-            printPassLine('Rule passed', nestedIndent);
+            printFailLine(`Failed to compile`, nestedIndent);
         }
-        else
+
+        outputMessages(rule.ruleManifest, nestedIndent);
+
+        if (rule.pass && rule.compiled)
         {
-            printInactivePassLine('Rule passed. No manifests found to check.', nestedIndent);
+            if (rule.passed.length > 0)
+            {
+                printPassLine('Rule passed', nestedIndent);
+            }
+            else
+            {
+                printInactivePassLine('Rule passed. No manifests found to check.', nestedIndent);
+            }
         }
     }
 

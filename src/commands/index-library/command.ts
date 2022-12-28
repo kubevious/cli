@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import Path from 'path';
 import { promises as fs, existsSync } from 'fs';
 
-import { IndexLibraryCommandData, IndexLibraryCommandOptions, Library, LibraryCategory, LibraryRule } from './types';
+import { IndexLibraryCommandData, IndexLibraryCommandOptions, Library, LibraryLocation, LibraryRule } from './types';
 
 import { command as guardCommand } from '../guard/command';
 import { KubeviousKinds, KUBEVIOUS_API_NAME, KUBEVIOUS_API_VERSION } from '../../types/kubevious';
@@ -32,6 +32,11 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         skipClusterScope: false,
         skipCommunityRules: true,
         skipRuleLibraries: true,
+
+        skipRules: [],
+        onlyRules: [],
+        skipRuleCategories: [],
+        onlyRuleCategories: [],
     });
 
     const manifestPackage = guardResult.manifestPackage;
@@ -42,7 +47,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         kind: KubeviousKinds.ClusterRule
     });
 
-    const libraryCategoriesDict : Record<string, LibraryCategory> = {};
+    const libraryLocationDict : Record<string, LibraryLocation> = {};
 
     for(const rule of rules)
     {
@@ -61,57 +66,57 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
             category: makeRelativePath(Path.dirname(rule.source.id.path), dir), // TODO: Retire
             summary: summary,
             description: _.trim(ruleConfig.description ?? ""),
-            categories: [],
+            categories: ruleConfig.categories ?? [],
         
             ruleSpec: ruleConfig,
         }
 
-        if (!libraryCategoriesDict[libraryRule.location]) {
-            libraryCategoriesDict[libraryRule.location] = {
+        if (!libraryLocationDict[libraryRule.location]) {
+            libraryLocationDict[libraryRule.location] = {
                 name: libraryRule.location,
                 count: 0,
                 rules: []
             }
         }
 
-        libraryCategoriesDict[libraryRule.location].rules.push(libraryRule);
+        libraryLocationDict[libraryRule.location].rules.push(libraryRule);
     }
     
     const library: Library = {
-        count: _.sum(_.values(libraryCategoriesDict).map(x => x.rules.length)),
-        categoryCount: _.keys(libraryCategoriesDict).length,
-        categories: 
-            _.chain(libraryCategoriesDict)
+        count: _.sum(_.values(libraryLocationDict).map(x => x.rules.length)),
+        locationCount: _.keys(libraryLocationDict).length,
+        locations: 
+            _.chain(libraryLocationDict)
                 .values()
                 .orderBy(x => x.name)
-                .value()
+                .value(),
     }
-    for(const category of library.categories)
+    for(const location of library.locations)
     {
-        category.count = category.rules.length;
-        category.rules = _.orderBy(category.rules, x => x.name);
+        location.count = location.rules.length;
+        location.rules = _.orderBy(location.rules, x => x.name);
     }
 
     const libraryObject : LibraryK8sObject = {
         apiVersion: `${KUBEVIOUS_API_NAME}/${KUBEVIOUS_API_VERSION}`,
         kind: KubeviousKinds.Library,
         metadata: {
-            name: 'community'
+            name: options.name
         },
         spec: {
             rules: []
         }
     }
-    for(const category of library.categories)
+    for(const location of library.locations)
     {
-        for(const rule of category.rules)
+        for(const rule of location.rules)
         {
             libraryObject.spec.rules.push({
                 name: rule.name,
                 path: rule.path,
                 location: rule.location,
                 summary: rule.summary,
-                categories: []
+                categories: rule.categories
             });
         }
     }
@@ -148,6 +153,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
 export function massageIndexOptions(options: Partial<IndexLibraryCommandOptions>) : IndexLibraryCommandOptions
 {
     return {
+        name: options.name ?? 'library'
     }
 }
 
@@ -205,28 +211,33 @@ function generateMDDocs(library : Library)
     contents += `Total Rules: ${library.count}`;
     contents += '\n';
 
-    contents += `### Categories:`;
+    contents += `### Locations:`;
     contents += '\n';
 
-    for(const category of library.categories)
+    for(const location of library.locations)
     {
-
-        contents += `- [${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)} (${category.count})](#-${makeMdLink(category.name)})`;
+        contents += `- [${OBJECT_ICONS.ruleLocation.get()} ${_.toUpper(location.name)} (${location.count})](#-${makeMdLink(location.name)})`;
         contents += '\n';
     }
 
     contents += `### Rules:`;
     contents += '\n';
 
-    for(const category of library.categories)
+    for(const location of library.locations)
     {
-        contents += `#### ${OBJECT_ICONS.ruleCategory.get()} ${_.toUpper(category.name)}`;
+        contents += `#### ${OBJECT_ICONS.ruleLocation.get()} ${_.toUpper(location.name)}`;
         contents += '\n';
 
-        for(const rule of category.rules)
+        for(const rule of location.rules)
         {
             contents += `${OBJECT_ICONS.rule.get()} **[${rule.title}](${rule.path})**`;
             contents += '\n';
+
+            if (rule.categories.length > 0)
+            {
+                contents += '- ' + rule.categories.map(x => `${OBJECT_ICONS.ruleCategory.get()} ${x}`).join(' ');
+                contents += '\n';
+            }
 
             if (rule.description.length > 0)
             {

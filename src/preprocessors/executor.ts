@@ -135,6 +135,9 @@ export class PreProcessorExecutor
                         source.reportError(`Unknown preprocessor key provided: ${suffix.key}=${suffix.value}`);
                     }
                 }
+                else if (suffix.key === 'set') {
+                    command += ` --set ${suffix.value}`;
+                }
                 else
                 {
                     source.reportError(`Unknown preprocessor key provided: ${suffix.key}`);

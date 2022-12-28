@@ -394,4 +394,4 @@ steps:
       repo_name: cli
       repo_owner: ${{CF_REPO_OWNER}}
       files:
-        - '${{MAIN_REPO_PATH}}/kubevious-*'
+        - '${{MAIN_REPO_PATH}}/binary/kubevious-*'

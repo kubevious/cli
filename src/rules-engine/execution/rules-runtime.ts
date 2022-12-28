@@ -14,6 +14,14 @@ import { RuleEngineResult } from '../../types/rules-result';
 import { makeObjectSeverity } from '../../types/result';
 import { makeValues, RuleRuntime } from './rule-runtime';
 
+export interface RuleSkipOptions
+{
+    skipRules: string[];
+    onlyRules: string[];
+    skipRuleCategories: string[];
+    onlyRuleCategories: string[];
+}
+
 export class RulesRuntime
 {
     private _logger: ILogger;
@@ -21,6 +29,11 @@ export class RulesRuntime
 
     private _rules : RuleRuntime[] = [];
     private _clusterRulesDict : Record<string, RuleRuntime> = {};
+
+    private _skipRulesDict : Record<string, boolean>;
+    private _onlyRulesDict : Record<string, boolean>;
+    private _skipRuleCategoriesDict : Record<string, boolean>;
+    private _onlyRuleCategoriesDict : Record<string, boolean>;
 
     private _manifestPackage: ManifestPackage;
     private _namespaces: string[];
@@ -34,7 +47,8 @@ export class RulesRuntime
                 manifestPackage: ManifestPackage,
                 namespaces: string[],
                 targetQueryExecutor: RegistryQueryExecutor,
-                validatorQueryExecutor: RegistryQueryExecutor)
+                validatorQueryExecutor: RegistryQueryExecutor,
+                skipOptions: RuleSkipOptions)
     {
         this._logger = logger.sublogger('RulesRuntime');
         this._ruleRegistry = ruleRegistry;
@@ -43,6 +57,11 @@ export class RulesRuntime
         this._targetExecutionContext = new ExecutionContext(this._logger, targetQueryExecutor, manifestPackage);
         this._validatorExecutionContext = new ExecutionContext(this._logger, validatorQueryExecutor, manifestPackage);
         this._ruleEngineReporter = new RuleEngineReporter(this._logger, manifestPackage);
+
+        this._skipRulesDict = _.makeBoolDict(skipOptions.skipRules);
+        this._onlyRulesDict = _.makeBoolDict(skipOptions.onlyRules);
+        this._skipRuleCategoriesDict = _.makeBoolDict(skipOptions.skipRuleCategories);
+        this._onlyRuleCategoriesDict = _.makeBoolDict(skipOptions.onlyRuleCategories);
     }
 
     get rules() {
@@ -96,6 +115,34 @@ export class RulesRuntime
         result.success = result.severity == 'pass' || result.severity == 'warning';
 
         return result;
+    }
+
+    isRuleSkipped(rule: CommonRule)
+    {
+        if (this._skipRulesDict[rule.name]) {
+            return true;
+        }
+        if (_.keys(this._onlyRulesDict).length > 0) {
+            if (!this._onlyRulesDict[rule.name]) {
+                return true;
+            }
+        }
+
+        for(const category of rule.categories)
+        {
+            if (this._skipRuleCategoriesDict[category]) {
+                return true;
+            }
+        }
+
+        for(const category of _.keys(this._onlyRuleCategoriesDict))
+        {
+            if (!rule.categoryDict[category]) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private _checkDependencies()
@@ -256,17 +303,14 @@ export class RulesRuntime
             return;
         }
 
-        if (!clusterRuleRuntime.compiler) {
-            this._logger.info("[_initRuleApplicator] Cluster Rule not compiled: %s", clusterRefName);
-            applicator.manifest.reportError(`ClusterRule ${clusterRefName} not compiled`);
-            return;
+        if (clusterRuleRuntime.compiler) {
+            if (!clusterRuleRuntime.compiler.isCompiled) {
+                this._logger.info("[_initRuleApplicator] Cluster Rule has compilation errors: %s", clusterRefName);
+                applicator.manifest.reportError(`ClusterRule ${clusterRefName} has compilation errors`);
+                return;
+            }
         }
 
-        if (!clusterRuleRuntime.compiler.isCompiled) {
-            this._logger.info("[_initRuleApplicator] Cluster Rule has compilation errors: %s", clusterRefName);
-            applicator.manifest.reportError(`ClusterRule ${clusterRefName} has compilation errors`);
-            return;
-        }
 
         const ruleNamespaceInfo = clusterRule.namespaces[applicator.namespace];
         if (clusterRule.onlySelectedNamespaces) {

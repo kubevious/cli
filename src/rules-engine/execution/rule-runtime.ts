@@ -26,12 +26,13 @@ export class RuleRuntime
     private _violations : ManifestViolation[] = [];
     private _passed : K8sManifest[] = [];
 
+    private _isSkipped = false;
+
     private _ruleCacheData : RuleCache = {
         global: null,
         cluster: null,
         namespaces: {} 
     }
-
 
     constructor(logger: ILogger,
                 rule: CommonRule,
@@ -91,6 +92,13 @@ export class RuleRuntime
 
         if (this._rule.isDisabled) {
             this._logger.info("[init] skipping %s. Is Disabled.", this.rule.name);
+            this._isSkipped = true;
+            return;
+        }
+
+        if (this._rulesRuntime.isRuleSkipped(this._rule) ) {
+            this._logger.info("[init] skipping %s. Is Skipped.", this.rule.name);
+            this._isSkipped = true;
             return;
         }
 
@@ -187,6 +195,8 @@ export class RuleRuntime
 
         const result : RuleResult = {
             ruleManifest: ruleManifestResult,
+            ruleCategories: this._rule.categories,
+            isSkipped: this._isSkipped,
             compiled: this.isCompiled && !this.hasRuntimeErrors,
             pass: !hasViolationErrors,
             ruleSeverity: ruleSeverity,

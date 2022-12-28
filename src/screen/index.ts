@@ -131,7 +131,8 @@ export const OBJECT_ICONS = {
     source: new IconDefinition(emoji.get(':books:')),
     manifest: new IconDefinition(emoji.get(':page_facing_up:')),
     rule: new IconDefinition(emoji.get(':scroll:')),
-    ruleCategory: new IconDefinition(emoji.get(':open_file_folder:')),
+    ruleLocation: new IconDefinition(emoji.get(':open_file_folder:')),
+    ruleCategory: new IconDefinition(emoji.get(':label:')),
 }
 
 export const SOURCE_ICONS = {

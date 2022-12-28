@@ -106,7 +106,13 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
                                           manifestPackage,
                                           executionNamespaces,
                                           targetQueryRegistry,
-                                          validatorQueryRegistry);
+                                          validatorQueryRegistry,
+                                          {
+                                            skipRules: options.skipRules,
+                                            onlyRules: options.onlyRules,
+                                            skipRuleCategories: options.skipRuleCategories,
+                                            onlyRuleCategories: options.onlyRuleCategories
+                                          });
     await rulesRuntime.init();
     await rulesRuntime.execute();
 
@@ -157,5 +163,9 @@ export function massageGuardOptions(options: Partial<GuardCommandOptions>) : Gua
         namespaces: namespaces,
         skipClusterScope: options.skipClusterScope ?? false,
         skipRuleLibraries: false,
+        skipRules: options.skipRules ?? [],
+        onlyRules: options.onlyRules ?? [],
+        skipRuleCategories: options.skipRuleCategories ?? [],
+        onlyRuleCategories: options.onlyRuleCategories ?? [],
     }
 }

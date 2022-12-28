@@ -3,7 +3,7 @@ import { ClusterRuleK8sSpec } from "../../rules-engine/spec/rule-spec";
 import { GuardCommandData, GuardResult } from "../guard/types";
 
 export interface IndexLibraryCommandOptions  {
-
+    name: string
 }
 
 export interface IndexLibraryCommandData {
@@ -41,7 +41,7 @@ export interface LibraryRule
     ruleSpec: ClusterRuleK8sSpec,
 }
 
-export interface LibraryCategory
+export interface LibraryLocation
 {
     name: string;
     count: number;
@@ -51,6 +51,6 @@ export interface LibraryCategory
 export interface Library
 {
     count: number;
-    categoryCount: number;
-    categories: LibraryCategory[];
+    locationCount: number;
+    locations: LibraryLocation[];
 }

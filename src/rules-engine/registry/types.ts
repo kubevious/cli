@@ -30,6 +30,8 @@ export interface CommonRule {
     source: ManifestSourceId,
     kind: RuleKind;
     name: string;
+    categories: string[];
+    categoryDict: Record<string, boolean>;
 
     target: string;
     globalCache?: string;

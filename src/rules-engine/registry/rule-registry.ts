@@ -137,6 +137,8 @@ export class RuleRegistry
             source: manifest.source.id,
             kind: RuleKind.ClusterRule,
             name: name,
+            categories: spec.categories ?? [],
+            categoryDict: _.makeBoolDict(spec.categories ?? []),
             target: spec.target,
             globalCache: spec.globalCache,
             cache: spec.cache,
@@ -229,6 +231,8 @@ export class RuleRegistry
             kind: RuleKind.Rule,
             namespace: namespace,
             name: name,
+            categories: spec.categories ?? [],
+            categoryDict: _.makeBoolDict(spec.categories ?? []),
             application: {
                 namespace: namespace
             },
