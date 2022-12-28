@@ -73,6 +73,10 @@ spec:
                         type: string
                     required:
                       - name
+                categories:
+                  type: array
+                  items:
+                    type: string
               required:
                 - target
                 - rule

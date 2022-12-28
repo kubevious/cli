@@ -33,6 +33,10 @@ spec:
                         type: string
                       summary:
                         type: string
+                      categories:
+                        type: array
+                        items:
+                          type: string                        
                     required:
                       - name
                       - path
