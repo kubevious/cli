@@ -274,9 +274,9 @@ $ helm repo add traefik https://helm.traefik.io/traefik
 $ kubevious guard @helm@traefik/traefik
 ```
 
-Use **values** to specify Helm overrides.
+Use **values** to specify Helm overrides file and inline values
 ```sh
-$ kubevious guard @helm@traefik/traefik@values=overrides/prod.yaml
+$ kubevious guard @helm@traefik/traefik@values=overrides/prod.yaml@set=persistence.enabled=true
 ```
 
 Supported Helm parameters:
@@ -286,6 +286,7 @@ Supported Helm parameters:
 | namespace    | The namespace                        |
 | release-name | The release name                     |
 | crds         | Possible values: "include" or "skip" |
+| set          | Inline value overrides "key=value"   |
 
 ### ☸️ Validating Kustomize Templates
 
