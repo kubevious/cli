@@ -8,18 +8,20 @@ import { OriginalSource } from '../input/original-source';
 export interface InputSourceExtractorOptions
 {
     gitignore?: string;
+    ignorePatterns: string[];
 }
 
 export class InputSourceExtractor {
     private _logger: ILogger;
     private _options : InputSourceExtractorOptions;
     
-    private ignorePatters: string[] = [];
+    private _ignorePatterns: string[];
     private _originalSources : Record<string, OriginalSource> = {};
 
     constructor(logger: ILogger, options : InputSourceExtractorOptions) {        
         this._logger = logger.sublogger('InputSourcesExtractor');
         this._options = options;
+        this._ignorePatterns = _.clone(options.ignorePatterns);
     }
 
     public async init()
@@ -56,7 +58,7 @@ export class InputSourceExtractor {
         }
 
         const orignalSource = new OriginalSource(fileOrPatternOrUrl, {
-            ignorePatters: this.ignorePatters
+            ignorePatterns: this._ignorePatterns
         });
         this._originalSources[key] = orignalSource;
     }
@@ -101,7 +103,7 @@ export class InputSourceExtractor {
             lines = lines.filter(x => x.length > 0);
             lines = lines.filter(x => !_.startsWith(x, '#'));
 
-            this.ignorePatters = lines;
+            this._ignorePatterns = _.concat(this._ignorePatterns, lines);
         }
         catch(reason)
         {

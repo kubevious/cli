@@ -16,6 +16,7 @@ export interface LintCommandOptions {
     liveK8s: boolean;
     kubeconfig?: string;
     gitignore?: string;
+    ignorePatterns : string[];
 }
 
 

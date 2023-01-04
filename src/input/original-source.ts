@@ -12,7 +12,7 @@ import { parseUserInputPath, UserPathSuffixes } from "./utils";
 
 export interface OriginalSourceOptions
 {
-    ignorePatters?: string[];
+    ignorePatterns?: string[];
 }
 
 export class OriginalSource
@@ -125,7 +125,7 @@ export class OriginalSource
             return;
         }
 
-        const ignorePatterns = this._options.ignorePatters ?? [];
+        const ignorePatterns = this._options.ignorePatterns ?? [];
 
         const files = await FastGlob(pattern, {
             onlyFiles: true,

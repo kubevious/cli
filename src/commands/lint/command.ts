@@ -21,7 +21,8 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     logger.info("[OPTIONS] ", options);
 
     const inputSourceExtractor = new InputSourceExtractor(logger, {
-        gitignore: options.gitignore
+        gitignore: options.gitignore,
+        ignorePatterns: options.ignorePatterns
     });
     await inputSourceExtractor.init();
 
@@ -137,5 +138,6 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
         liveK8s: options.liveK8s ?? false,
         kubeconfig: options.kubeconfig,
         gitignore : options.gitignore,
+        ignorePatterns: options.ignorePatterns ?? []
     }
 }

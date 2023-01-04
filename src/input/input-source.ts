@@ -44,8 +44,6 @@ export class InputSource {
             this._dir = makeDirStr(Path.dirname(path));
         }
 
-        // this._logger.verbose('[InputSource] normalPath: %s', this.path);
-
         originalSource.includeRawSource(this);
     }
 
