@@ -63,7 +63,7 @@ inputs:
     required: false
     default: ''
   skip_rule_categories:
-    description: Skip rules by category 
+    description: Skip rules by category
     required: false
     default: ''
   only_rule_categories:
@@ -81,10 +81,10 @@ inputs:
   other_args:
     description: Additional arguments
     required: false
-    default: ''    
+    default: ''
 runs:
   using: docker
-  image: docker://kubevious/cli:1.0.49
+  image: docker://kubevious/cli:1.0.50
   # image: Dockerfile
 branding:
   icon: 'shield'
