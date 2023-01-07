@@ -156,7 +156,7 @@ export class ManifestLoader
         }
         catch(reason : any)
         {
-            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._logger.info("[_loadFromPreProcessor] ERROR: ", reason);
             source.reportError(`Failed to execute preprocessor: ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
             return [];
         }

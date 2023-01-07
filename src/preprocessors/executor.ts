@@ -4,13 +4,16 @@ import { Promise as MyPromise } from "the-promise";
 
 import { exec } from 'child_process';
 import Path from "path";
+import YAML from "yaml";
+import fs from 'fs';
+import * as tmp from 'tmp';
+import FastGlob from 'fast-glob';
+
 import { InputSource, InputSourceKind } from "../input/input-source";
 import { spinOperation } from '../screen/spinner';
 import { ManifestLoader } from "../manifests/manifests-loader";
 import { ManifestSource } from "../manifests/manifest-source";
 import { ManifestPackage } from "../manifests/manifest-package";
-import YAML from "yaml";
-import fs from 'fs';
 
 export class PreProcessorExecutor
 {
@@ -44,10 +47,13 @@ export class PreProcessorExecutor
 
         source = source.getSource("kustomize", dirName, source.originalSource);
 
+        let tmpKustomizeFile : tmp.FileResult | null = null;
         try
         {
-            const command = `kustomize build ${dirName}`;
-            const contents = await await this.executeCommand(command);
+            tmpKustomizeFile = tmp.fileSync();
+            const command = `kustomize build ${dirName} -o ${tmpKustomizeFile.name}`;
+            await this.executeCommand(command);
+            const contents = await fs.promises.readFile(tmpKustomizeFile.name, { encoding: 'utf8' });
             if (!contents) {
                 source.reportError(`Could not extract manifest contents from ${inputSource.preprocessor}`);
             } else {
@@ -56,8 +62,14 @@ export class PreProcessorExecutor
         }
         catch(reason : any)
         {
-            this._logger.info("[_loadFile] ERROR: ", reason);
+            this._logger.info("[_kustomize] ERROR: ", reason);
             source.reportError(`Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
+        }
+        finally
+        {
+            if (tmpKustomizeFile) {
+                tmpKustomizeFile.removeCallback();
+            }
         }
     }
 
@@ -112,6 +124,7 @@ export class PreProcessorExecutor
             source = source.getSource("helm", helmChartPath, source.originalSource, !isLocalChart);
         }
 
+        let tmpHelmDir : tmp.DirResult | null = null;
         try
         {
             let command = `helm template`;
@@ -149,8 +162,14 @@ export class PreProcessorExecutor
 
             command += ` ${helmChartPath}`;
             
-            const contents = await await this.executeCommand(command);
-            if (!contents)
+            tmpHelmDir = tmp.dirSync({ unsafeCleanup: true });
+            command += ` --output-dir ${tmpHelmDir.name}`;
+
+            await this.executeCommand(command);
+
+            const contentList = await this._readYamlsFromDir(tmpHelmDir.name);
+
+            if (!contentList || contentList.length === 0)
             {
                 source.reportError(`Could not extract manifest contents from ${inputSource.preprocessor}`);
             }
@@ -158,10 +177,13 @@ export class PreProcessorExecutor
             {
                 try
                 {
-                    const rawYamls = this._manifestsLoader.parseYamlRaw(contents);
-                    for(const rawYaml of rawYamls)
+                    for(const contents of contentList)
                     {
-                        this._processHelm(inputSource, source, rawYaml, helmChartName, isLocalChart);
+                        const rawYamls = this._manifestsLoader.parseYamlRaw(contents);
+                        for(const rawYaml of rawYamls)
+                        {
+                            this._processHelm(inputSource, source, rawYaml, helmChartName, isLocalChart);
+                        }
                     }
                 }
                 catch(reason: any)
@@ -176,6 +198,23 @@ export class PreProcessorExecutor
             this._logger.info("[_helm] ERROR: ", reason);
             source.reportError(`Failed to extract manifest from ${inputSource.preprocessor}. Reason: ${reason?.message ?? "Unknown"}`);
         }
+        finally
+        {
+            if (tmpHelmDir) {
+                tmpHelmDir.removeCallback();
+            }
+        }
+    }
+
+    private async _readYamlsFromDir(dir: string)
+    {
+        const files = await FastGlob(`**/*.{yaml,yml}`, { 
+            cwd: dir,
+            absolute: true
+        });
+        return await MyPromise.serial(files, (x) => {
+            return MyPromise.resolve(fs.promises.readFile(x, { encoding: 'utf-8' }));
+        })
     }
 
     private _processHelm(inputSource: InputSource,
