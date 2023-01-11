@@ -1184,10 +1184,10 @@ jsonfile@^6.0.1:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-k8s-super-client@^2.0.50:
-  version "2.0.50"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.50.tgz#192325a79d0897643634ff6ef991d3240548a119"
-  integrity sha512-90gQMk/KCkkgBfyCnOju4teI24lX3afDWWlibWOd2xDz5fifJ2intc58VqefAxjMnOAH4sXQI2gn4eUz3Fb+Bg==
+k8s-super-client@^2.0.51:
+  version "2.0.51"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.0.51.tgz#dad3a83e128cd848930a43862c9f30d02c9832f1"
+  integrity sha512-bTMoTUhPEEmYJlWsFx63/cP9jzBMTWiRyhuIHepAMfV4Cw9Kmgg+RfUrDwpvTibROzbKmFBlq/nfRDz1B4n+iA==
   dependencies:
     "@types/ndjson" "^2.0.0"
     "@types/uuid" "^8.3.0"
@@ -1197,7 +1197,7 @@ k8s-super-client@^2.0.50:
     js-yaml "^4.1.0"
     kubernetes-types "^1.21.0-beta.1"
     ndjson "^2.0.0"
-    the-lodash "^2.0.9"
+    the-lodash "^2.0.12"
     the-logger "^2.0.14"
     the-promise "^2.0.15"
     uuid "^8.2.0"

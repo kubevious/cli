@@ -54,7 +54,7 @@
     "commander": "^9.4.1",
     "express-openapi-validate": "^0.6.1",
     "fast-glob": "^3.2.12",
-    "k8s-super-client": "^2.0.50",
+    "k8s-super-client": "^2.0.51",
     "kubernetes-types": "^1.25.0",
     "node-emoji": "^1.11.0",
     "openapi-schema-validator": "^12.0.2",
@@ -87,7 +87,7 @@
     "the-lodash": "^2.0.12",
     "the-logger": "^2.0.14",
     "the-promise": "^2.0.15",
-    "k8s-super-client": "^2.0.50",
+    "k8s-super-client": "^2.0.51",
     "@kubevious/state-registry": "^1.0.17",
     "@kubevious/kubik": "^1.0.32",
     "@kubevious/entity-meta": "^1.0.80"
