@@ -4,8 +4,8 @@ metadata:
   name: hpa-rollout-example
   namespace: argo-test
 spec:
-  maxReplicas: 6
-  minReplicas: 2
+  maxReplicas: 10
+  minReplicas: 5
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout

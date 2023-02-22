@@ -40,3 +40,7 @@ spec:
         ports:
         - name: node
           containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: db-config
+
