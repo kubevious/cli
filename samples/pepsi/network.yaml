@@ -1,0 +1,25 @@
+---
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRuleApplicator
+metadata:
+  name: service-
+spec:
+  source:
+    app: email-service
+  dest:
+    app: mysql
+  action: allow
+  enforce: 
+    - tls
+
+---
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRuleApplicator
+metadata:
+  name: service-
+spec:
+  sources:
+    # - backend
+    # - backend2
+  dest:
+    app: mysql

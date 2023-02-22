@@ -1,0 +1,12 @@
+---
+apiVersion: kubevious.io/v1alpha1
+kind: ClusterRuleApplicator
+metadata:
+  name: lb-white-list
+spec:
+  clusterRuleRef:
+    name: lb-white-list
+  values:
+    allowed-apps:
+      - app: emailservice
+      - app: important-service
