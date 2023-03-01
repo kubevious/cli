@@ -224,24 +224,7 @@ export class ManifestLoader
                 source.reportError(reason.message ?? 'Error parsing YAML.');
             }
 
-            if (configs)
-            {
-                this._logger.info("[parseContents] Manifest Count: %s", configs.length);
-                this._logger.silly("[parseContents] Manifests: ", configs);
-                for(const config of configs)
-                {
-                    const manifest = this.addManifest(source, config);
-                    if (manifest) {
-                        manifests.push(manifest);
-                    }
-                }
-            }         
-            else
-            {
-                this._logger.info("[parseContents] No Manifests Found.");
-            }
-            
-            
+            this.addConfigsFromSource(source, configs, manifests);
         }
         else if (extension === '.json')
         {
@@ -254,16 +237,14 @@ export class ManifestLoader
             {
                 source.reportError(reason.message ?? 'Error parsing JSON');
             }
-            if (configs)
-            {
-                const manifest = this.addManifest(source, configs);
-                if (manifest) {
-                    manifests.push(manifest);
-                }
-            }
+
+            this.addConfigsFromSource(source, configs, manifests);
         } else {
             source.reportError('Unknown extension. Should be one of: .yaml, .yml or .json');
         }
+
+        this._logger.info("[parseContents] Manifest Count: %s", manifests.length);
+        this._logger.silly("[parseContents] Manifests: ", manifests);
 
         if (source.success)
         {
@@ -278,6 +259,44 @@ export class ManifestLoader
         }
 
         return manifests;
+    }
+
+    private addConfigsFromSource(source: ManifestSource, configs : any[] | null, outManifests: K8sManifest[])
+    {
+        if (!configs) {
+            return;   
+        }
+
+        if (_.isArray(configs))
+        {
+            if (configs.length === 0) {
+                this._logger.info("[parseContents] No Manifests Found.");
+                return;
+            }
+
+            for(const config of configs)
+            {
+                this.addConfigsFromSource(source, config, outManifests);
+            }
+        }
+        else
+        {
+            const config = (configs as any) as K8sObject; 
+            if (config.apiVersion === 'v1' && config.kind === 'List')
+            {
+                this.addConfigsFromSource(source, config.items, outManifests);
+                return;
+            }
+            else
+            {
+                const manifest = this.addManifest(source, config);
+                if (manifest) {
+                    outManifests.push(manifest);
+                }
+            }
+        }
+
+        
     }
 
     public addManifest(source : ManifestSource, config: any) : K8sManifest | null

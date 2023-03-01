@@ -71,10 +71,13 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     }
 
     const k8sApiSchemaFetcher = new K8sApiSchemaFetcher(logger);
-    if (options.liveK8s) {
-        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote(k8sConnector);
-    } else {
+    if (options.k8sVersion || !options.liveK8s)
+    {
         k8sSchemaInfo = await k8sApiSchemaFetcher.fetchLocal(options.k8sVersion);
+    }
+    else
+    {
+        k8sSchemaInfo = await k8sApiSchemaFetcher.fetchRemote(k8sConnector);
     }
 
     if (!k8sSchemaInfo.success) {

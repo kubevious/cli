@@ -76,7 +76,7 @@ export class K8sApiSchemaFetcher
             })
     }
 
-    async fetchLocal(targetVersion? : string) : Promise<K8sApiSchemaFetcherResult>
+    async fetchLocal(targetVersion? : string | null) : Promise<K8sApiSchemaFetcherResult>
     {
         const spinner = spinOperation('Loading K8s API Schema...');
 
