@@ -28,7 +28,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `Deployment-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.template?.spec
+                spec: item.config.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );
 
@@ -46,7 +47,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `StatefulSet-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.template?.spec
+                spec: item.config.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );
 
@@ -64,7 +66,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `DaemonSet-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.template?.spec
+                spec: item.config.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );
 
@@ -89,7 +92,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `Job-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.template?.spec
+                spec: item.config.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );
     
@@ -107,7 +111,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `CronJob-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.jobTemplate?.spec?.template?.spec
+                spec: item.config.spec?.jobTemplate?.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );
 
@@ -125,7 +130,8 @@ export function setup(executor: ShortcutQueryExecutor)
                     name: `ArgoRollout-${item.name}`,
                     namespace: item.namespace
                 },
-                spec: item.config.spec?.template?.spec
+                spec: item.config.spec?.template?.spec,
+                controllerConfig: item.config
             }))
         );        
 
@@ -160,7 +166,8 @@ export function setup(executor: ShortcutQueryExecutor)
                         },
                         spec: cont,
                         isInitContainer: false,
-                        podSpec: item?.config.spec
+                        podSpec: item?.config.spec,
+                        controllerConfig: item.config.controllerConfig
                     });
                 }
                 for(const cont of item?.config.spec?.initContainers ?? [])
@@ -176,7 +183,8 @@ export function setup(executor: ShortcutQueryExecutor)
                         },
                         spec: cont,
                         isInitContainer: true,
-                        podSpec: item?.config.spec
+                        podSpec: item?.config.spec,
+                        controllerConfig: item.config.controllerConfig
                     });
                 }
                 return results;
