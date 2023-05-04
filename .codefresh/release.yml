@@ -32,9 +32,9 @@ steps:
       - export HOMEBREW_TAP_REPO_NAME=homebrew-cli
       - cf_export HOMEBREW_TAP_REPO_NAME=${HOMEBREW_TAP_REPO_NAME}
       - cf_export HOMEBREW_TAP_REPO_PATH=/codefresh/volume/${HOMEBREW_TAP_REPO_NAME}.git    
-      - export CLI_RELEASES_REPO_NAME=cli-releases
-      - cf_export CLI_RELEASES_REPO_NAME=${CLI_RELEASES_REPO_NAME}
-      - cf_export CLI_RELEASES_REPO_PATH=/codefresh/volume/${CLI_RELEASES_REPO_NAME}.git
+      # - export CLI_RELEASES_REPO_NAME=cli-releases
+      # - cf_export CLI_RELEASES_REPO_NAME=${CLI_RELEASES_REPO_NAME}
+      # - cf_export CLI_RELEASES_REPO_PATH=/codefresh/volume/${CLI_RELEASES_REPO_NAME}.git
       - cf_export CF_REPO_OWNER=kubevious
       - export PRODUCT_NAME=cli
       - export IMAGE_NAME=kubevious/${PRODUCT_NAME}
@@ -98,19 +98,19 @@ steps:
       - cd ${{DEMOS_REPO_PATH}}
       - ls -la
 
-  clone_cli_releases:
-    title: Clone CLI Releases Repo
-    stage: clone
-    image: 'alpine/git:latest'
-    working_directory: "/codefresh/volume"
-    commands:
-      - pwd
-      - ls -la
-      - rm -rf ${{CLI_RELEASES_REPO_PATH}}
-      - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CLI_RELEASES_REPO_NAME}}.git ${{CLI_RELEASES_REPO_PATH}}'
-      - ls -la
-      - cd ${{CLI_RELEASES_REPO_PATH}}
-      - ls -la
+  # clone_cli_releases:
+  #   title: Clone CLI Releases Repo
+  #   stage: clone
+  #   image: 'alpine/git:latest'
+  #   working_directory: "/codefresh/volume"
+  #   commands:
+  #     - pwd
+  #     - ls -la
+  #     - rm -rf ${{CLI_RELEASES_REPO_PATH}}
+  #     - 'git clone https://${{CF_REPO_OWNER}}:${{GITHUB_TOKEN}}@github.com/${{CF_REPO_OWNER}}/${{CLI_RELEASES_REPO_NAME}}.git ${{CLI_RELEASES_REPO_PATH}}'
+  #     - ls -la
+  #     - cd ${{CLI_RELEASES_REPO_PATH}}
+  #     - ls -la
 
   clone_homebrew_tap:
     title: Clone Homebrew Tap Repo
@@ -330,13 +330,13 @@ steps:
       - ls -la
       - ls -la binary/
 
-  commit_cli_binaries_repo:
-    title: Commit CLI Binaries Repo
-    stage: release
-    image: codefresh/cli
-    working_directory: "${{CICD_REPO_PATH}}"
-    commands:
-      - ./cli/tasks/collect-and-commit-files.sh
+  # commit_cli_binaries_repo:
+  #   title: Commit CLI Binaries Repo
+  #   stage: release
+  #   image: codefresh/cli
+  #   working_directory: "${{CICD_REPO_PATH}}"
+  #   commands:
+  #     - ./cli/tasks/collect-and-commit-files.sh
 
   push_dockerhub:
     title: Pushing Kubevious CLI to DockerHub
