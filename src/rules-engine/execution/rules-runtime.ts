@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { Promise as MyPromise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { ApplicatorRule, ClusterRule, CommonRule, NamespaceRule, RuleApplicationScope, RuleKind } from '../registry/types';
 import { RuleRegistry } from '../registry/rule-registry';
@@ -82,7 +82,7 @@ export class RulesRuntime
 
     init()
     {
-        return MyPromise.resolve()
+        return Promise.resolve()
             .then(() => this._checkDependencies())
             .then(() => this._initClusterRules())
             .then(() => this._initNamespaceRules())
@@ -189,7 +189,7 @@ export class RulesRuntime
     private _initClusterRules()
     {
         return MyPromise.serial(this._ruleRegistry.clusterRules, x => {
-            return MyPromise.resolve(this._initClusterRule(x));
+            return this._initClusterRule(x);
         });
     }
 

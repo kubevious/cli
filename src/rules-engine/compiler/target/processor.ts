@@ -1,5 +1,4 @@
 import _ from 'the-lodash'
-import { Promise } from 'the-promise'
 import { Compiler, CompilerScopeDict } from '@kubevious/kubik/dist/processors/compiler';
 import { RootScopeBuilder } from '../../scope-builders'
 import { ScriptItem } from '../../script-item'

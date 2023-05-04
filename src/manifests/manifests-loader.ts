@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { Promise as MyPromise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import axios from 'axios';
 import * as fs from 'fs';
 import * as Path from 'path';
@@ -67,7 +67,7 @@ export class ManifestLoader
         }
 
         const sources = this._inputSourceExtractor.sources;
-        await MyPromise.serial(sources, x => MyPromise.resolve(this.loadSingle(x)));
+        await MyPromise.serial(sources, x => Promise.resolve(this.loadSingle(x)));
 
         spinner.complete('Manifests loaded.');
     }

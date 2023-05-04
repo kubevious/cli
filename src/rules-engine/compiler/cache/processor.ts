@@ -1,5 +1,5 @@
 import _ from 'the-lodash'
-import { Promise, Resolvable } from 'the-promise'
+import { Resolvable } from 'the-promise'
 import { CompilerScopeDict, Compiler } from '@kubevious/kubik/dist/processors/compiler';
 import { ExecutionContext } from '../../execution/execution-context'
 import { ILogger } from 'the-logger/dist';
@@ -8,6 +8,11 @@ import { TARGET_QUERY_BUILDER_DICT } from '../../query-spec/scope-builder';
 import { RULE_HELPERS } from '../../helpers/rule-helpers';
 import { BaseTargetQuery, QueryScopeLimiter } from '../../query-spec/base';
 import { QueryExecutorScope } from '../../query/query-executor-scope';
+
+export interface CacheProcessorPrepareResult {
+    success: boolean,
+    messages: string[]
+}
 
 export interface CacheProcessorResult {
     success: boolean,
@@ -30,8 +35,9 @@ export class CacheProcessor
         this._runnable = null;
     }
 
-    prepare() {
-        const result = {
+    prepare() : Promise<CacheProcessorPrepareResult>
+    {
+        const result : CacheProcessorPrepareResult = {
             success: false,
             messages: [],
         }
@@ -55,27 +61,25 @@ export class CacheProcessor
     }
 
     private _loadModule() {
-        return Promise.resolve().then(() => {
-            const compilerValues: CompilerScopeDict = {
-                _: _,
-                namespace: null,
-                cache: null,
-                values: null,
-                helpers: null,
-            }
+        const compilerValues: CompilerScopeDict = {
+            _: _,
+            namespace: null,
+            cache: null,
+            values: null,
+            helpers: null,
+        }
 
-            for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
-            {
-                compilerValues[x] = null;
-            }
+        for(const x of _.keys(TARGET_QUERY_BUILDER_DICT))
+        {
+            compilerValues[x] = null;
+        }
 
-            const compiler = new Compiler(
-                this._src,
-                'RULE_CACHE',
-                compilerValues
-            )
-            return compiler.compile()
-        })
+        const compiler = new Compiler(
+            this._src,
+            'RULE_CACHE',
+            compilerValues
+        )
+        return compiler.compile();
     }
 
     private _validate() {}

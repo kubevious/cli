@@ -1,5 +1,4 @@
 import _ from 'the-lodash';
-import { Promise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { RuleObject } from '../registry/types';
 import { TargetProcessor } from './target/processor';

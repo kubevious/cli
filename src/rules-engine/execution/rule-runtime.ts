@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { Promise as MyPromise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { CommonRule, NamespaceRule, RuleApplicationScope, RuleKind, RuleObject } from '../registry/types';
 import { RuleCompiler } from '../compiler/rule-compiler';

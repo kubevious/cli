@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from "the-logger";
-import { Promise as MyPromise } from "the-promise";
+import { MyPromise } from "the-promise";
 
 import { exec } from 'child_process';
 import Path from "path";
@@ -213,7 +213,7 @@ export class PreProcessorExecutor
             absolute: true
         });
         return await MyPromise.serial(files, (x) => {
-            return MyPromise.resolve(fs.promises.readFile(x, { encoding: 'utf-8' }));
+            return fs.promises.readFile(x, { encoding: 'utf-8' });
         })
     }
 

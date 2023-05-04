@@ -1,4 +1,4 @@
-import { Promise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import { spinOperation } from '../screen/spinner';
 
 export function readFromInputStream()
@@ -17,7 +17,7 @@ export function readFromInputStream()
         clearTimeout(timer);
     }
 
-    return Promise.construct<string>((resolve, reject) =>
+    return MyPromise.construct<string>((resolve, reject) =>
     {
         let data = '';
         stream.on('readable', () => {

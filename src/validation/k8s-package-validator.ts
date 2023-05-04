@@ -1,5 +1,5 @@
 import _ from 'the-lodash';
-import { Promise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import { ILogger } from 'the-logger';
 import { CustomResourceDefinition, JSONSchemaProps } from 'kubernetes-types/apiextensions/v1'
 
@@ -12,7 +12,7 @@ import { getJsonSchemaResourceKey, isCRD } from '../utils/k8s';
 import { K8sOpenApiResource } from 'k8s-super-client';
 import { CrdSchemaToJsonSchemaConverter } from '../api-schema/crd-schema-to-json-schema-converter';
 import { K8sManifest } from '../manifests/k8s-manifest';
-import { SchemaObject } from 'ajv';
+// import { SchemaObject } from 'ajv';
 
 export interface K8sPackageValidatorParams
 {
@@ -58,7 +58,7 @@ export class K8sPackageValidator
             .then(() => {
                 this._logger.info("[validate] Running Manifest Validation...")
 
-                return Promise.serial(this._manifestPackage.manifests, x => this._validateManifest(x))
+                return MyPromise.serial(this._manifestPackage.manifests, x => this._validateManifest(x))
                     .then(() => {
                         this._spinner!.complete('Lint complete.')
                     });
@@ -71,7 +71,7 @@ export class K8sPackageValidator
     {
         const crds = this._manifestPackage.manifests.filter(x => isCRD(x.id));
 
-        return Promise.serial(crds, x => this._applyCRD(x))
+        return MyPromise.serial(crds, x => this._applyCRD(x))
     }
 
     private _applyCRD(crdManifest : K8sManifest)

@@ -1,6 +1,6 @@
 import _ from 'the-lodash';
 import { ILogger } from 'the-logger';
-import { Promise as MyPromise } from 'the-promise';
+import { MyPromise } from 'the-promise';
 import * as fs from 'fs';
 
 import { OriginalSource } from '../input/original-source';
@@ -65,7 +65,7 @@ export class InputSourceExtractor {
 
     public async extractSources()
     {
-        await MyPromise.serial(this.originalSources, (x) => MyPromise.resolve(x.extractInputSources()));
+        await MyPromise.serial(this.originalSources, (x) => Promise.resolve(x.extractInputSources()));
     }
 
     public reconcile() {
