@@ -1,6 +1,5 @@
 import _ from 'the-lodash';
-// TODO: Temporarily Disabled Due To Compilation Issue
-// import chalk from 'chalk';
+import chalk from 'chalk';
 import emoji from 'node-emoji';
 import { ResultObjectSeverity } from '../types/result';
 
@@ -64,15 +63,13 @@ export function printWarnings(lines?: string[], indent?: number)
 export function printSectionTitle(title: string, indent? : number)
 {
     title = `-= ${title.toUpperCase()} =-`;
-    // TODO: Temporarily Disabled Due To Compilation Issue
-    // title = chalk.underline(title);
+    title = chalk.underline(title);
     print(title, indent);
 }
 
 export function printSubTitle(title: string, indent? : number)
 {
-    // TODO: Temporarily Disabled Due To Compilation Issue
-    // title = chalk.underline(title);
+    title = chalk.underline(title);
     print(title, indent);
 }
 

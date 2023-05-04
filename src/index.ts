@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import _ from 'the-lodash';
 import { logger } from './logger';
 
