@@ -1,11 +1,11 @@
 import _ from 'the-lodash';
 import { ILogger } from "the-logger";
 import { MyPromise } from "the-promise";
+import { promises as fs, existsSync, statSync } from 'fs';
 
 import { exec } from 'child_process';
 import Path from "path";
 import YAML from "yaml";
-import fs from 'fs';
 import * as tmp from 'tmp';
 import FastGlob from 'fast-glob';
 
@@ -43,6 +43,12 @@ export class PreProcessorExecutor
 
     private async _kustomize(inputSource: InputSource, source: ManifestSource)
     {
+        this._logger.info("[_kustomize] inputSource: %s", inputSource.path);
+
+        const kustomizationContents = (await fs.readFile(inputSource.path)).toString();
+        const kustomization = YAML.parseDocument(kustomizationContents).toJSON();
+        // this._logger.info("[_kustomize] kustomization: ", kustomization);
+
         const dirName = Path.dirname(inputSource.path);
 
         source = source.getSource("kustomize", dirName, source.originalSource);
@@ -51,9 +57,12 @@ export class PreProcessorExecutor
         try
         {
             tmpKustomizeFile = tmp.fileSync();
-            const command = `kustomize build ${dirName} -o ${tmpKustomizeFile.name}`;
+            let command = `kustomize build ${dirName} -o ${tmpKustomizeFile.name}`;
+            if (kustomization['helmCharts']) {
+                command = `${command} --enable-helm`;
+            }
             await this.executeCommand(command);
-            const contents = await fs.promises.readFile(tmpKustomizeFile.name, { encoding: 'utf8' });
+            const contents = await fs.readFile(tmpKustomizeFile.name, { encoding: 'utf8' });
             if (!contents) {
                 source.reportError(`Could not extract manifest contents from ${inputSource.preprocessor}`);
             } else {
@@ -80,7 +89,7 @@ export class PreProcessorExecutor
         let helmChartName = "";
         let helmChartPath = inputSource.path;
 
-        const isLocalChart = fs.existsSync(helmChartPath);
+        const isLocalChart = existsSync(helmChartPath);
         this._logger.info("[_helm] isLocalChart: %s", isLocalChart);
 
         if (isLocalChart)
@@ -213,7 +222,7 @@ export class PreProcessorExecutor
             absolute: true
         });
         return await MyPromise.serial(files, (x) => {
-            return fs.promises.readFile(x, { encoding: 'utf-8' });
+            return fs.readFile(x, { encoding: 'utf-8' });
         })
     }
 
@@ -297,6 +306,6 @@ export class PreProcessorExecutor
 
 function isDir(path: string)
 {
-    const stats = fs.statSync(path);
+    const stats = statSync(path);
     return stats.isDirectory();
 }
