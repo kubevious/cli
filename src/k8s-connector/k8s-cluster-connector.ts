@@ -1,6 +1,7 @@
 import { ILogger } from 'the-logger';
 import { connectDefaultRemoteCluster, connectRemoteCluster, KubernetesClient } from 'k8s-super-client';
 import { spinOperation } from '../screen/spinner';
+import { ClusterConnectParams } from 'k8s-super-client/dist/connector-types';
 
 export class K8sClusterConnector
 {
@@ -26,7 +27,7 @@ export class K8sClusterConnector
         return this._client;
     }
 
-    async setup(connect: boolean, kubeconfigpath? : string)
+    async setup(connect: boolean, kubeconfigpath? : string, k8sSkipTlsVerify?: boolean)
     {
         if (!connect) {
             return Promise.resolve();
@@ -40,11 +41,17 @@ export class K8sClusterConnector
 
         return Promise.resolve()
             .then(() => {
+                const connectParams : ClusterConnectParams = {
+                    skipAPIFetch: skipAPIFetch,
+                    skipTLSVerify: k8sSkipTlsVerify
+                }
+
+                const k8sLogger = this._logger.sublogger('k8s');
                 if (kubeconfigpath) {
                     this._logger.info("[fetchRemote] path: %s", kubeconfigpath);
-                    return connectRemoteCluster(this._logger.sublogger('k8s'), kubeconfigpath, undefined, { skipAPIFetch: skipAPIFetch })
+                    return connectRemoteCluster(k8sLogger, kubeconfigpath, undefined, connectParams)
                 } else {
-                    return connectDefaultRemoteCluster(this._logger.sublogger('k8s'), { skipAPIFetch: skipAPIFetch })
+                    return connectDefaultRemoteCluster(k8sLogger, connectParams)
                 }
             })
             .then(client => {

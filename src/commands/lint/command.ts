@@ -62,7 +62,7 @@ export async function command(paths: string[], options: LintCommandOptions) : Pr
     let k8sSchemaInfo : K8sApiSchemaFetcherResult | null = null;
 
     const k8sConnector = new K8sClusterConnector(logger);
-    await k8sConnector.setup(options.liveK8s, options.kubeconfig);
+    await k8sConnector.setup(options.liveK8s, options.kubeconfig, options.k8sSkipTlsVerify);
     if (k8sConnector.isUsed) {
         if (!k8sConnector.isConnected) {
             console.log('Could not connect to Kubernetes cluster.');
@@ -140,6 +140,7 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
     
         liveK8s: options.liveK8s ?? false,
         kubeconfig: options.kubeconfig,
+        k8sSkipTlsVerify: options.k8sSkipTlsVerify ?? false,
         gitignore : options.gitignore,
         ignorePatterns: options.ignorePatterns ?? []
     }

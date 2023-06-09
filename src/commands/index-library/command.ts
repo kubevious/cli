@@ -22,6 +22,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         stream: false,
         skipApplyCrds: false,
         liveK8s: false,
+        k8sSkipTlsVerify: false,
 
         includeRemoteTargets: false,
         skipLocalRules: false,
