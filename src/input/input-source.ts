@@ -22,14 +22,14 @@ export class InputSource {
     private _isLoaded = false;
     private _preprocessor : string | null = null;
 
-    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string, suffixes: UserPathSuffixes)
+    constructor(originalSource: OriginalSource, kind: InputSourceKind, path: string)
     {
         logger.info("[construct] kind: %s. path: %s. orig: %s", kind, path, originalSource.originalPath);
 
         this._originalSource = originalSource;
         this._kind = kind;
         this._path = path;
-        this._suffixes = suffixes;
+        this._suffixes = originalSource.suffixes;
 
         this._key = _.stableStringify([this._kind, this._path]);
 
@@ -121,7 +121,7 @@ export class InputSource {
             kind = InputSourceKind.web;
         }
 
-        return new InputSource(originalSource, kind, path, []);
+        return new InputSource(originalSource, kind, path);
     }
 }
 

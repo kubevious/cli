@@ -97,6 +97,12 @@ export class ManifestPackage extends BaseObject
                 source.originalSource.path);
         }
 
+        if (_.keys(source.originalSource?.suffixes).length > 0) {
+            this._logger.info("[ManifestPackage] %s     suffixes: %s", 
+                " ".repeat(indent * 2),
+                JSON.stringify(source.originalSource?.suffixes));
+        }
+
         if (source.selfErrors.length > 0) {
             this._logger.info("[ManifestPackage] %s     Errors: %s",
                 " ".repeat(indent * 2),

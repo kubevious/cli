@@ -83,7 +83,7 @@ export class OriginalSource
         }
         else if (this.kind === 'helm')
         {
-            new InputSource(this, InputSourceKind.helm, this.path, this.suffixes);
+            new InputSource(this, InputSourceKind.helm, this.path);
         }
     }
     

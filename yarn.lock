@@ -120,10 +120,10 @@
     the-logger "^2.1.1"
     the-promise "^2.1.3"
 
-"@kubevious/state-registry@^1.0.18":
-  version "1.0.18"
-  resolved "https://registry.yarnpkg.com/@kubevious/state-registry/-/state-registry-1.0.18.tgz#6a445e127af8c03abcd23800bb98e22a08fbd655"
-  integrity sha512-utnAOTmHd3B6XwdFh9PqW0qFeq8gw054ooKyfyPTlJ5pT/LGwLKqyjSntFoqmFGkvyMS5rYM9lCzj7szpaQvqQ==
+"@kubevious/state-registry@^1.0.18", "@kubevious/state-registry@^1.0.19":
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/@kubevious/state-registry/-/state-registry-1.0.19.tgz#b7ec1fd8673b95708b4b86552b63dedade3c84cd"
+  integrity sha512-z+a9GtOXuWynlx2Rq2Fz4ET54s5Ubu304GhHdRrEht+Z5xkFJbXLeuMXIS5au22LMJ1isD5I4uTgpN1vxrQWFA==
   dependencies:
     "@kubevious/entity-meta" "^1.0.81"
     the-lodash "^2.1.2"
