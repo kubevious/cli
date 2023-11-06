@@ -343,22 +343,13 @@ steps:
     stage: release
     type: build
     image_name: "${{IMAGE_NAME}}"
-    tag: "${{DOCKER_TAG}}"
+    tags:
+      - "${{DOCKER_TAG}}"
+      - "latest"
     registry: "dockerhub"
     platform: linux/amd64,linux/arm64
     buildx: true
     working_directory: "${{MAIN_REPO_PATH}}"
-
-  # push_dockerhub:
-  #   title: Pushing Kubevious CLI to DockerHub
-  #   stage: release
-  #   type: push
-  #   image_name: "${{IMAGE_NAME}}"
-  #   registry: "dockerhub"
-  #   candidate: "${{docker_build}}"
-  #   tags:
-  #     - "${{DOCKER_TAG}}"
-  #     - "latest"
 
   commit_main_repo:
     title: Commit Version Changes
