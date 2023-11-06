@@ -5,6 +5,7 @@ stages:
   - "build"
   - "package"
   - "test"
+  - "multiplatform"
 
 steps:
 
@@ -146,8 +147,6 @@ steps:
     stage: package
     type: build
     image_name: "${{IMAGE_NAME}}"
-    platform: linux/amd64,linux/arm64
-    buildx: true
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
 
@@ -166,6 +165,7 @@ steps:
       - kubevious guard 02-voter-app/voter-chart/templates
       - echo "Guarding Hipster Shop Helm Chart..."
       - kubevious guard 01-hipster-shop/hipster-chart
+    
 
   # TESTS
   parallel_tests:
@@ -261,3 +261,14 @@ steps:
         working_directory: ${{DEMOS_REPO_PATH}}/guard/02-voter-app
         commands:
           - kubevious guard voter-chart
+
+
+  docker_build_multi_platform:
+    title: Building Multiplatform Kubevious CLI Image
+    stage: multiplatform
+    type: build
+    image_name: "${{IMAGE_NAME}}"
+    platform: linux/amd64,linux/arm64
+    buildx: true
+    working_directory: "${{MAIN_REPO_PATH}}"
+    disable_push: true  

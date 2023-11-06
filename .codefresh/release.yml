@@ -340,16 +340,26 @@ steps:
   #   commands:
   #     - ./cli/tasks/collect-and-commit-files.sh
 
-  push_dockerhub:
-    title: Pushing Kubevious CLI to DockerHub
+  docker_build_and_push_multi_platform:
+    title: Building Kubevious CLI Image
     stage: release
-    type: push
+    type: build
     image_name: "${{IMAGE_NAME}}"
-    registry: "dockerhub"
-    candidate: "${{docker_build}}"
-    tags:
-      - "${{DOCKER_TAG}}"
-      - "latest"
+    tag: "${{DOCKER_TAG}}"
+    platform: linux/amd64,linux/arm64
+    buildx: true
+    working_directory: "${{MAIN_REPO_PATH}}"
+
+  # push_dockerhub:
+  #   title: Pushing Kubevious CLI to DockerHub
+  #   stage: release
+  #   type: push
+  #   image_name: "${{IMAGE_NAME}}"
+  #   registry: "dockerhub"
+  #   candidate: "${{docker_build}}"
+  #   tags:
+  #     - "${{DOCKER_TAG}}"
+  #     - "latest"
 
   commit_main_repo:
     title: Commit Version Changes

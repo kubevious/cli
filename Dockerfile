@@ -45,7 +45,7 @@ RUN chmod +x install_helm.sh
 RUN bash install_helm.sh
 RUN rm install_helm.sh
 # KUSTOMIZE
-ENV KUSTOMIZE_VER 4.5.7
+ENV KUSTOMIZE_VER 5.2.1
 WORKDIR /tmp
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VER}/kustomize_v${KUSTOMIZE_VER}_linux_amd64.tar.gz -o kustomize.tar.gz
 RUN tar -xvf kustomize.tar.gz
