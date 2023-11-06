@@ -205,8 +205,6 @@ steps:
     type: build
     image_name: "${{IMAGE_NAME}}"
     tag: "${{DOCKER_TAG}}"
-    platform: linux/amd64,linux/arm64
-    buildx: true
     working_directory: "${{MAIN_REPO_PATH}}"
     disable_push: true
 
