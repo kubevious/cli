@@ -200,14 +200,19 @@ export class K8sManifestValidator
                     const propNode = (node as any)[propName];
                     if (_.isString(propNode) && (propNode.length === 0))
                     {
-                        if (_.isNullOrUndefined(propSchema.default))
-                        {
-                            delete (node as any)[propName];
-                        }
-                        else
+                        if (!_.isNullOrUndefined(propSchema.default))
                         {
                             (node as any)[propName] = propSchema.default;
+                            
                         }
+
+                        // Before we used to delete the node. This behavior causes
+                        // a false possitive when an empty required string fails validation.
+                        // https://github.com/kubevious/cli/issues/20
+                        // In future should try to set the value of undefined values as default value
+                        // of the schema. That would also help with guard functionality with validation
+                        // that depends on default values.
+                        // Old Code: delete (node as any)[propName];
                     }
                 }
             }
