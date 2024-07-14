@@ -1418,10 +1418,10 @@ jsprim@^1.2.2:
     json-schema "0.4.0"
     verror "1.10.0"
 
-k8s-super-client@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.1.4.tgz#d20bb360b8135013184914c5fc885868ca74e2e8"
-  integrity sha512-7CHgi+bq9Z+R510phNTcmnXShXCjBcPxCsAOUK/3P7Rj+7gRSjQVrv1wpNfGQkb65l3Y1nMWZg2bknPdcxuFhA==
+k8s-super-client@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/k8s-super-client/-/k8s-super-client-2.1.5.tgz#d5e600fb82f6329fd67c97d74461b124d49ec3cb"
+  integrity sha512-71Tq7BQYb5BPNivVMA1h19pGK+n69fEaDuoY54IeWERMFrFb7ITNJLREh9Os4YfWeUebNQ2ScXxoOsJiv3EyJQ==
   dependencies:
     "@kubernetes/client-node" "^0.18.1"
     "@types/ndjson" "^2.0.0"
