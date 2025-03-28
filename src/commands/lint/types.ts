@@ -12,6 +12,7 @@ export interface LintCommandOptions {
     ignoreNonK8s: boolean;
     stream: boolean;
     skipApplyCrds: boolean;
+    allowDuplicates: boolean;
 
     liveK8s: boolean;
     kubeconfig?: string;

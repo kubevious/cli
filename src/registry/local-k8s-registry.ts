@@ -20,6 +20,10 @@ export class LocalK8sRegistry implements RegistryQueryExecutor
         this._logger = logger.sublogger('LocalK8sRegistry');
     }
 
+    get objectKeys() {
+        return _.keys(this._dict)
+    }
+
     loadManifest(manifest: K8sManifest)
     {
         const globalKey = makeK8sKeyStr(manifest.config);

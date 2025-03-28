@@ -34,7 +34,10 @@ export async function command(path: string[], options: GuardCommandOptions) : Pr
 
     const registryPopulator = new LocalRegistryPopulator(logger,
                                                          lintCommandData.k8sSchemaInfo.k8sJsonSchema!,
-                                                         manifestPackage);
+                                                         manifestPackage,
+                                                        {
+                                                            allowDuplicates: options.allowDuplicates
+                                                        });
     registryPopulator.process();
 
     const localK8sRegistry = registryPopulator.localK8sRegistry;

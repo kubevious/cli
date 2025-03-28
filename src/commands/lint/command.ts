@@ -137,6 +137,7 @@ export function massageLintOptions(options: Partial<LintCommandOptions>) : LintC
         ignoreNonK8s: options.ignoreNonK8s ?? false,
         stream: options.stream ?? false,
         skipApplyCrds: options.skipApplyCrds ?? false,
+        allowDuplicates: options.allowDuplicates ?? false,
     
         liveK8s: options.liveK8s ?? false,
         kubeconfig: options.kubeconfig,

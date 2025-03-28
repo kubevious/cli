@@ -27,7 +27,7 @@ export class ManifestPackage extends BaseObject
     }
 
     get manifests() {
-        return this._manifests;
+        return _.filter(this._manifests, x => !x.isSkipped);
     }
 
     get namespaces() {

@@ -33,6 +33,7 @@ export async function command(dir: string, options: IndexLibraryCommandOptions) 
         skipClusterScope: false,
         skipCommunityRules: true,
         skipRuleLibraries: true,
+        allowDuplicates: false,
 
         ignorePatterns: [],
 

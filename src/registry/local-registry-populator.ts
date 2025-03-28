@@ -8,20 +8,30 @@ import { LocalK8sRegistry } from './local-k8s-registry';
 import { LocalSourceRegistry } from './local-source-registry';
 import { K8sManifest } from '../manifests/k8s-manifest';
 
+interface LocalRegistryPopulatorParams
+{
+    allowDuplicates: boolean;
+}
+
 export class LocalRegistryPopulator
 {
     private _logger: ILogger;
     private _k8sJsonSchema : K8sApiJsonSchema;
     private _manifestPackage: ManifestPackage;
+    private _options: LocalRegistryPopulatorParams;
 
     private _localSourceRegistry: LocalSourceRegistry;
     private _localK8sRegistry : LocalK8sRegistry;
 
-    constructor(logger: ILogger, k8sJsonSchema : K8sApiJsonSchema, manifestPackage: ManifestPackage)
+    constructor(logger: ILogger,
+                k8sJsonSchema: K8sApiJsonSchema,
+                manifestPackage: ManifestPackage,
+                options: LocalRegistryPopulatorParams)
     {
         this._logger = logger.sublogger('LocalRegistryPopulator');
         this._k8sJsonSchema = k8sJsonSchema;
         this._manifestPackage = manifestPackage;
+        this._options = options;
 
         this._localSourceRegistry = new LocalSourceRegistry(logger, manifestPackage);
         this._localK8sRegistry = new LocalK8sRegistry(logger);
@@ -35,14 +45,22 @@ export class LocalRegistryPopulator
     {
         for(const manifest of this._manifestPackage.manifests)
         {
-            this._localK8sRegistry.loadManifest(manifest);
+            this._processManifest(manifest);
+        }
+
+        if (this._options.allowDuplicates)
+        {
+            this._localSourceRegistry.cleanupDuplicates();
+        }
+        else
+        {
+            this._localSourceRegistry.enforceDuplicateCheck();
         }
 
         for(const manifest of this._manifestPackage.manifests)
         {
-            this._processManifest(manifest);
+            this._localK8sRegistry.loadManifest(manifest);
         }
-        this._localSourceRegistry.validateDuplicates();
     }
 
     private _processManifest(manifest: K8sManifest)

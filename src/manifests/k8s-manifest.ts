@@ -20,6 +20,7 @@ export class K8sManifest extends BaseObject
     private _config: K8sObject;
     private _source: ManifestSource;
 
+    private _isSkipped = false;
     private _isLinted = false;
     private _rules: K8sManifestRuleResult = {};
     private _errorsWithRule?: boolean | undefined;
@@ -54,8 +55,16 @@ export class K8sManifest extends BaseObject
         return this._isLinted;
     }
 
-    public set isLinted(value) {
+    public set isLinted(value: boolean) {
         this._isLinted = value;
+    }
+
+    public get isSkipped() {
+        return this._isSkipped;
+    }
+
+    public set isSkipped(value : boolean) {
+        this._isSkipped = value;
     }
 
     public get errorsWithRule(): boolean | undefined {

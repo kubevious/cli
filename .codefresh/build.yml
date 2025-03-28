@@ -81,7 +81,7 @@ steps:
   prepare:
     title: Prepare Dependencies
     stage: build
-    image: 'kubevious/node-builder:18'
+    image: 'kubevious/node-builder:22'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - yarn install --frozen-lockfile
@@ -89,7 +89,7 @@ steps:
   compile:
     title: Compile
     stage: build
-    image: 'kubevious/node-builder:18'
+    image: 'kubevious/node-builder:22'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - ./scripts/prepare-package.sh
@@ -98,7 +98,7 @@ steps:
   run_unit_test:
     title: Run Unit Tests
     stage: build
-    image: 'kubevious/node-builder:18'
+    image: 'kubevious/node-builder:22'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - pwd
@@ -108,7 +108,7 @@ steps:
   package_npm:
     title: Package NPM
     stage: package
-    image: 'kubevious/node-builder:18'
+    image: 'kubevious/node-builder:22'
     working_directory: "${{MAIN_REPO_PATH}}"
     commands:
       - npm pack

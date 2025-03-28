@@ -22,3 +22,4 @@ export const OPTION_IGNORE_FILE = 'Path to .gitignore file to filter out input p
 export const OPTION_IGNORE_PATTERNS = 'File patters to ignore.';
 export const OPTION_DETAILED = 'Detailed output.';
 export const OPTION_JSON = 'Output command result in JSON.';
+export const OPTION_ALLOW_DUPLICATES = 'Allow duplicate manifests.';

@@ -30,20 +30,49 @@ export class LocalSourceRegistry
         this._multiFlatDict[key].push(manifest);
     }
 
-    validateDuplicates()
+    extractDuplicateGroups() : K8sManifest[][]
     {
+        const duplicateGroups : K8sManifest[][] = []
         for(const key of _.keys(this._multiFlatDict))
         {
             const manifests = this._multiFlatDict[key];
             if (manifests.length > 1)
             {
-                for(const manifest of manifests)
-                {
-                    const message = 'Manifest is defined in multiple sources.';
-                    manifest.reportError(message);
-                }
+                duplicateGroups.push(manifests);
+            }
+        }
+        return duplicateGroups;
+    }
+
+    enforceDuplicateCheck()
+    {
+        const duplicateGroups = this.extractDuplicateGroups();
+        for(const manifests of duplicateGroups)
+        {
+            for(const manifest of manifests)
+            {
+                const message = 'Manifest is defined in multiple sources.';
+                manifest.reportError(message);
             }
         }
     }
 
+    cleanupDuplicates()
+    {
+        const duplicateGroups = this.extractDuplicateGroups();
+        for(const manifests of duplicateGroups)
+        {
+            for(const manifest of _.dropRight(manifests, 1))
+            {
+                const message = 'Manifest is duplicate and is skipped.';
+                manifest.reportWarning(message);
+                // manifest.isSkipped = true;
+            }
+
+            {
+                const message = 'Duplicate manifests found.';
+                _.last(manifests)!.reportWarning(message);
+            }
+        }
+    }
 }
