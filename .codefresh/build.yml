@@ -117,7 +117,7 @@ steps:
   npm_package_sample_tests:
     title: NPM Package Sample Tests
     stage: package
-    image: 'kubevious/node-with-tools:v14.1'
+    image: 'kubevious/node-with-tools:v22'
     working_directory: "${{DEMOS_REPO_PATH}}/guard"
     commands:
       - source ${{MAIN_REPO_PATH}}/version.sh
