@@ -107,7 +107,7 @@ export function setup(executor: ShortcutQueryExecutor)
                 apiVersion: 'v1',
                 kind: 'PodSpec',
                 metadata: {
-                    ...item.config.spec?.template?.metadata ?? {},
+                    ...item.config.spec?.jobTemplate?.metadata ?? {},
                     name: `CronJob-${item.name}`,
                     namespace: item.namespace
                 },
