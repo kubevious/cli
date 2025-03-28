@@ -283,7 +283,7 @@ steps:
         commands:
           - ls -la
           - echo "Validating Istio Classic..."
-          - kubevious guard bookinfo.yaml istio-classic/bookinfo-gateway.yaml istio-classic/destination-rule-all.yaml https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml 
+          - kubevious guard bookinfo.yaml istio-classic/bookinfo-gateway.yaml istio-classic/destination-rule-all.yaml https://raw.githubusercontent.com/istio/istio/refs/heads/master/manifests/charts/base/files/crd-all.gen.yaml 
           - echo "Validating Istio Gateway API..."
           - kubevious guard bookinfo.yaml gateway-api/mock-gateway-class.yaml gateway-api/bookinfo-gateway.yaml gateway-api/bookinfo-versions.yaml ${{DEMOS_REPO_PATH}}/mocks/istio/secret-gateway-api-admission.yaml ${{DEMOS_REPO_PATH}}/crds/gateway-api/standard.yaml
 
@@ -309,7 +309,7 @@ steps:
         image: "${{docker_build}}"
         working_directory: ${{DEMOS_REPO_PATH}}/guard/01-hipster-shop
         commands:
-          - kubevious guard hipster-chart istio-chart https://raw.githubusercontent.com/istio/istio/master/manifests/charts/base/crds/crd-all.gen.yaml
+          - kubevious guard hipster-chart istio-chart https://raw.githubusercontent.com/istio/istio/refs/heads/master/manifests/charts/base/files/crd-all.gen.yaml
 
       validate_voter:
         title: Validate Voter App
