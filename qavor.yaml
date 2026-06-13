@@ -1,0 +1,3 @@
+kind: service
+name: cli
+description: Kubevious CLI
